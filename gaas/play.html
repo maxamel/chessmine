@@ -28,25 +28,29 @@
         <!--================Header Menu Area =================-->
         <div id="gameBox" class="gameBox row">
             <div id="leftPane" class="pane">
-                <div id="myBoard" class="board"></div>
+                <div id="boardHolder" class="boardHolder">
+                    <div id="myBoard" class="board"></div>
+                </div>
             </div>
             <div id="rightPane" class="pane">
-                <div id="boxA" class="playerBox">
-                    <div id="clockdivA" class="clock">
-                      <div>
-                        <span class="minutes"></span> :
-                        <span class="seconds"></span> .
-                        <span class="millis"></span>
-                      </div>
+                <div id="clockHolder" class="clockHolder">
+                    <div id="boxA" class="playerBox">
+                        <div id="clockdivA" class="clock">
+                          <div>
+                            <span class="minutes"></span> :
+                            <span class="seconds"></span> .
+                            <span class="millis"></span>
+                          </div>
+                        </div>
                     </div>
-                </div>
-                <div id="boxB" class="playerBox">
-                    <div id="clockdivB" class="clock">
-                      <div>
-                        <span class="minutes"></span> :
-                        <span class="seconds"></span> .
-                        <span class="millis"></span>
-                      </div>
+                    <div id="boxB" class="playerBox vbottom">
+                        <div id="clockdivB" class="clock">
+                          <div>
+                            <span class="minutes"></span> :
+                            <span class="seconds"></span> .
+                            <span class="millis"></span>
+                          </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -129,7 +133,6 @@
         
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
         <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js')}}"></script>
         <script src="{{ url_for('static', filename='js/popper.js')}}"></script>
         <script src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>

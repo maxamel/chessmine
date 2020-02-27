@@ -1406,9 +1406,49 @@ button:focus {
   height: 420px;
   margin-bottom: 80px; }
 
-.board {
+.gameBox {
+  background: #fcf8ff;
+  background-size: cover;
+  height: 800px;
+}
+
+.playerBox {
   margin: auto;
   max-width: 400px;
+  height: 100px;
+  border-radius: 25px;
+  background: #ffffff;
+}
+
+.board {
+  margin: auto;
+  max-width: 500px;
+  position: relative;
+  padding-top: 25px;
+}
+
+.clockHolder {
+  margin: auto;
+  margin-left:5px;
+  background: #83CD80;
+  border-radius: 25px;
+  border: 3px solid #8252fa;
+  max-width: 400px;
+  height: 550px;
+}
+
+.boardHolder {
+  margin: auto;
+  margin-right:5px;
+  background: #83CD80;
+  border-radius: 25px;
+  border: 3px solid #8252fa;
+  max-width: 550px;
+  height: 550px;
+}
+
+.vbottom{
+	margin-top: 343px;
 }
 
 .pane {
@@ -1417,10 +1457,9 @@ button:focus {
 
 .clock {
   margin: auto;
-  text-align: center;
   font-size: 20px;
   font-family: "Rajdhani", sans-serif;
-  max-width: 100px;
+  max-width: 98px;
   border: 2px solid #8252fa;
   border-radius: 5px;
   background: #fcf8ff;
@@ -1437,20 +1476,6 @@ button:focus {
   background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
   background-origin: border-box;
   background-clip: content-box, border-box; }
-
-.gameBox {
-  background: #fcf8ff;
-  background-size: cover;
-  height: 600px;
-}
-
-.playerBox {
-  margin: auto;
-  max-width: 400px;
-  height: 100px;
-  border-radius: 25px;
-  background: #ffffff;
-}
 
 .contact_info .info_item {
   position: relative;

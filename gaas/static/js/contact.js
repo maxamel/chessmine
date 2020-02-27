@@ -77,93 +77,92 @@ $(document).ready(function(){
 
     var data = localStorage.getItem("chessjazz")
     var socket = io('http://localhost:5000/connect');
-    if (data == null) {
-        socket.on('connection_id', function (ans) {
-            player_id = ans.id
-            localStorage.setItem("chessjazz", player_id)
-        });
-        socket.on('game_over', function (ans) {
-            alert(JSON.stringify(ans))
+
+    socket.on('connection_id', function (ans) {
+        user = ans.user
+        player_id = user.sid
+        localStorage.setItem("chessjazz", player_id)
+    });
+    socket.on('game_over', function (ans) {
+        alert(JSON.stringify(ans))
+        clearInterval(timeintervalA)
+        clearInterval(timeintervalB)
+    });
+    socket.on('game', function (ans) {
+        the_game = JSON.stringify(ans.color)
+        the_game = the_game.replace(/\\"/g, '"');
+        var config = {
+              pieceTheme: 'static/img/chesspieces/chess24/{piece}.png',
+              draggable: true,
+              position: 'start',
+              orientation: JSON.parse(the_game),
+              onDragStart: onDragStart,
+              onDrop: onDrop,
+              //onMoveEnd: onMoveEnd,
+              onMouseoutSquare: onMouseoutSquare,
+              onMouseoverSquare: onMouseoverSquare,
+              onSnapEnd: onSnapEnd
+        }
+        board = Chessboard('myBoard', config)
+    });
+    socket.on('move', function (ans) {
+        ans = JSON.parse(ans)
+        the_move = ans.move
+        game.move(the_move.san)
+        // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
+        if (the_move.san == "O-O-O" ||
+            the_move.san == "O-O" ||
+            the_move.san.indexOf("=")>-1 ||
+            (the_move.san.indexOf("x")>-1 && the_move.flags == "e")
+        )
+            board.position(game.fen(), useAnimation=true)
+        else
+            board.move(the_move.from + "-" + the_move.to)
+
+        if (ans.remaining) {
+            other_remaining = ans.other_remaining
+            initializeClock('clockdivB', ans.remaining);
             clearInterval(timeintervalA)
-            clearInterval(timeintervalB)
-        });
-        socket.on('game', function (ans) {
-            the_game = JSON.stringify(ans.color)
-            the_game = the_game.replace(/\\"/g, '"');
-            var config = {
-                  pieceTheme: 'static/img/chesspieces/chess24/{piece}.png',
-                  draggable: true,
-                  position: 'start',
-                  orientation: JSON.parse(the_game),
-                  onDragStart: onDragStart,
-                  onDrop: onDrop,
-                  //onMoveEnd: onMoveEnd,
-                  onMouseoutSquare: onMouseoutSquare,
-                  onMouseoverSquare: onMouseoverSquare,
-                  onSnapEnd: onSnapEnd
-            }
-            board = Chessboard('myBoard', config)
-        });
-        socket.on('move', function (ans) {
-            ans = JSON.parse(ans)
-            the_move = ans.move
-            game.move(the_move.san)
-            // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
-            if (the_move.san == "O-O-O" ||
-                the_move.san == "O-O" ||
-                the_move.san.indexOf("=")>-1 ||
-                (the_move.san.indexOf("x")>-1 && the_move.flags == "e")
-            )
-                board.position(game.fen(), useAnimation=true)
-            else
-                board.move(the_move.from + "-" + the_move.to)
+            setTime('clockdivA', ans.other_remaining)
+        }
 
-            if (ans.remaining) {
-                other_remaining = ans.other_remaining
-                initializeClock('clockdivB', ans.remaining);
-                clearInterval(timeintervalA)
-                setTime('clockdivA', ans.other_remaining)
+        if (futureMoveData != null) {
+            var move = game.move({
+                from: futureMoveData.from,
+                to: futureMoveData.to,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            })
+            var json = {
+                "sid": player_id,
+                "move": move
             }
-
-            if (futureMoveData != null) {
-                var move = game.move({
-                    from: futureMoveData.from,
-                    to: futureMoveData.to,
-                    promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            if (move != null) {
+                socket.emit('update', json, function(ret){
+                    ret = JSON.parse(ret)
+                    if (ret.remaining) {
+                        clearInterval(timeintervalB)
+                        console.log("LINCOLN " + ret["other_remaining"] + " " + ret["remaining"])
+                        setTime('clockdivB', ret["other_remaining"])
+                        initializeClock('clockdivA', ret["remaining"])
+                    }
                 })
-                var json = {
-                    "id": player_id,
-                    "move": move
-                }
-                if (move != null) {
-                    socket.emit('update', json, function(ret){
-                        ret = JSON.parse(ret)
-                        if (ret.remaining) {
-                            clearInterval(timeintervalB)
-                            console.log("LINCOLN " + ret["other_remaining"] + " " + ret["remaining"])
-                            setTime('clockdivB', ret["other_remaining"])
-                            initializeClock('clockdivA', ret["remaining"])
-                        }
-                    })
-                    if (move.san == "O-O-O" ||
-                        move.san == "O-O" ||
-                        move.san.indexOf("=")>-1 ||
-                        (move.san.indexOf("x")>-1 && move.flags == "e")
-                    )
-                        board.position(game.fen(), useAnimation=true)
-                    else
-                        board.move(move.from + "-" + move.to)
-                }
-                removeHighlights('yellow')
-                futureMoveData = null
+                if (move.san == "O-O-O" ||
+                    move.san == "O-O" ||
+                    move.san.indexOf("=")>-1 ||
+                    (move.san.indexOf("x")>-1 && move.flags == "e")
+                )
+                    board.position(game.fen(), useAnimation=true)
+                else
+                    board.move(move.from + "-" + move.to)
             }
-        });
-        res = socket.emit('connection', function(ans) {
+            removeHighlights('yellow')
+            futureMoveData = null
+        }
+    });
+    res = socket.emit('connection', {"sid": data}, function(ans) {
             //alert(JSON.stringify(ans))
-        })
-    } else {
-        player_id = data
-    }
+    })
+
 
     function removeGreySquares () {
       $('#myBoard .square-55d63').css('background', '')
@@ -205,6 +204,7 @@ $(document).ready(function(){
         to: target,
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
       })
+      alert(JSON.stringify(move))
         removeHighlights('yellow')
       if (futureMove == true && source != target) {
           $board.find('.square-' + source).addClass('highlight-yellow')
@@ -216,7 +216,7 @@ $(document).ready(function(){
       // illegal move
         updateStatus()
         var json = {
-            "id": player_id,
+            "sid": player_id,
             "move": move
         }
         if (move != null) {
