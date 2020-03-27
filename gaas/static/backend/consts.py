@@ -1,0 +1,16 @@
+
+
+OPPONENT = 0
+COLOR = 1
+REMAINING_TIME = 2
+TURN_START_TIME = 3
+GAME = 4
+
+FEN = 0
+TURN = 1
+
+BLACK = 'black'
+WHITE = 'white'
+
+NAME = 0
+RATING = 1

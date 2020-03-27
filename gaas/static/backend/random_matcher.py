@@ -1,8 +1,8 @@
-import time, requests, uuid
+import time, requests
 
 from threading import Thread
 
-from player import Player
+from static.backend.player import Player
 from static.backend.matcher import Matcher
 from static.backend.redis_plug import RedisPlug
 
@@ -33,8 +33,7 @@ class RandomMatcher(Matcher):
                         # Someone beat us to the rival
                         time.sleep(1)
                         continue
-                # return this match
-                requests.get("http://localhost:5000/match/"+player_sid+"/"+rival_sid)
-                game_id = uuid.uuid4().hex
-                self.redis_plug.set_game(game_id, player_sid, rival_sid)
+                # transmit this match
+                requests.get(url="http://localhost:5000/match/"+player_sid+"/"+rival_sid,
+                             json={'time_control': 300000})
             time.sleep(1)
