@@ -17,7 +17,7 @@ $(document).ready(function(){
           };
     }
 
-    function setTime(id, endtime, word) {
+    function setTime(id, endtime) {
         var clock = document.getElementById(id);
         var minutesSpan = clock.querySelector('.minutes');
         var secondsSpan = clock.querySelector('.seconds');
@@ -90,7 +90,6 @@ $(document).ready(function(){
         the_game = ans.game
         my_time = JSON.stringify(the_game.white_remaining)
         rival_time = JSON.stringify(the_game.black_remaining)
-        alert(my_time)
         me = the_game.white
         rival = the_game.black
         my_color = my_color.slice(1, -1);
@@ -134,6 +133,19 @@ $(document).ready(function(){
               onSnapEnd: onSnapEnd
         }
         board = Chessboard('myBoard', config)
+
+        isStart = the_game_fen === 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+        if (!isStart) {
+            game = new Chess(the_game_fen)
+            turn = game.turn()
+            mine = my_color.charAt(0)
+            if (turn === mine) {
+                initializeClock('clockdivB', my_time);
+            } else {
+                initializeClock('clockdivA', rival_time);
+            }
+        }
+
         function myFunction(x) {
           if (x.matches) { // If media query matches
             board.resize()
@@ -183,7 +195,6 @@ $(document).ready(function(){
                     ret = JSON.parse(ret)
                     if (ret.remaining) {
                         clearInterval(timeintervalB)
-                        console.log("LINCOLN " + ret["other_remaining"] + " " + ret["remaining"])
                         setTime('clockdivB', ret["other_remaining"])
                         initializeClock('clockdivA', ret["remaining"])
                     }

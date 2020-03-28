@@ -1,5 +1,5 @@
 import json, time, threading, chess, uuid, requests
-from static.backend.player import Player, PlayerMapping
+from static.backend.player import Player, PlayerMapping, Game
 from static.backend.random_matcher import RandomMatcher
 from static.backend.redis_plug import RedisPlug
 from static.backend.consts import *
@@ -62,7 +62,59 @@ class GameServer:
             self.timer.cancel()
         requests.get("http://localhost:5000/game_over/" + winner)
 
+    def connect(self, payload):
+        '''
+        :param payload:
+        :return:
+        '''
+        cookie = payload["data"]
+        player = self.get_player_from_cookie(cookie)
+        mapping = self.get_player_mapping(player.sid)
+        if mapping is not None:
+            curr_time = current_milli_time()
+            rival = self.get_player_session(mapping.opponent)
+            rival_mapping = self.get_player_mapping(rival.sid)
+            fen = self.get_game_fen_by_player_sid(rival.sid)
+            white = player
+            black = rival
+            white_time = mapping.time_remaining
+            white_turn_start_time = mapping.turn_start_time
+            black_time = rival_mapping.time_remaining
+            black_turn_start_time = rival_mapping.turn_start_time
+            turn = mapping.color
+            # who's turn is? Based on who's got the lower turn start time
+            if mapping.turn_start_time < rival_mapping.turn_start_time:
+                turn = rival_mapping.color
+
+            if mapping.color == BLACK:
+                white, black = black, white
+                white_time, black_time = black_time, white_time
+                white_turn_start_time, black_turn_start_time = black_turn_start_time, white_turn_start_time
+            # player connecting in middle of turn. Adjust his remaining time to reflect how much time he's got
+            # left starting now
+            if turn == BLACK:
+                elapsed = curr_time - black_turn_start_time
+                black_time -= elapsed
+            else:
+                elapsed = curr_time - white_turn_start_time
+                white_time -= elapsed
+            game = Game(game_id=mapping.game_id,
+                        position=fen,
+                        white_remaining=white_time,
+                        black_remaining=black_time,
+                        white=white,
+                        black=black)
+            return player.sid, {'color': mapping.color, 'game': game.to_dict()}
+        else:
+            self.set_player_session(player=player)
+            self.find_match(player=player)
+            return player.sid, {'user': player.to_dict()}
+
     def move(self, payload):
+        '''
+        :param payload:
+        :return:
+        '''
         if self.timer is not None:
             self.timer.cancel()
         print(payload)
