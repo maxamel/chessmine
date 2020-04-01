@@ -125,28 +125,28 @@ button:focus {
 /* Start Gradient Area css
 ============================================================================================ */
 .gradient-bg, .header_area .navbar .nav .nav-item.submenu ul .nav-item:hover .nav-link, .blog_right_sidebar .widget_title, .blog_right_sidebar .newsletter_widget .bbtns, .blog_right_sidebar .tag_cloud_widget ul li a:hover, .blog-pagination .page-item.active .page-link, .blog-pagination .page-link:hover, .comments-area .btn-reply:hover, .recent_update_inner .nav.nav-tabs li a.active, .recent_update_inner .nav.nav-tabs li a:hover, .common_style .line:after, .price_item:hover .price_head, .price_item:hover .price_footer, .testimonial_area .active_testimonial .owl-dots, .news_widget .input-group .sub-btn {
-  background: -webkit-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: -moz-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: -o-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: linear-gradient(90deg, #8252fa 0%, #eca2f1 100%); }
+  background: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: linear-gradient(90deg, #008000 0%, #66ff66 100%); }
 
 .border-gradient {
-  border-image: -webkit-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  border-image: -moz-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  border-image: -o-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  border-image: linear-gradient(90deg, #8252fa 0%, #eca2f1 100%); }
+  border-image: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  border-image: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  border-image: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  border-image: linear-gradient(90deg, #008000 0%, #66ff66 100%); }
 
 .gradient-bg2 {
-  background: -webkit-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: -moz-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: -o-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: linear-gradient(90deg, #8252fa 0%, #eca2f1 100%); }
+  background: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: linear-gradient(90deg, #008000 0%, #66ff66 100%); }
 
 .gradient-color, .contact_info .info_item i, .recent_update_inner .nav.nav-tabs li a span.lnr {
-  background: -webkit-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: -moz-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: -o-linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
-  background: linear-gradient(90deg, #8252fa 0%, #eca2f1 100%);
+  background: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: linear-gradient(90deg, #008000 0%, #66ff66 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent; }
 
@@ -166,21 +166,21 @@ button:focus {
   text-transform: uppercase;
   border: double 2px transparent;
   border-radius: 5px;
-  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
   background-origin: border-box;
   background-clip: content-box, border-box; }
   .primary_btn span {
     padding: 0 35px; }
   .primary_btn:hover {
-    background-image: linear-gradient(to right, #8252fa 0%, #eca2f1 100%), radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -webkit-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -moz-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -ms-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -o-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+    background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
     color: #fff;
     box-shadow: 0px 10px 30px rgba(130, 82, 250, 0.2);
     border: 2px solid transparent; }
@@ -334,7 +334,7 @@ button:focus {
         .header_area .navbar .nav .nav-item .nav-link:after {
           display: none; }
       .header_area .navbar .nav .nav-item:hover .nav-link, .header_area .navbar .nav .nav-item.active .nav-link {
-        color: #8252fa; }
+        color: #008000; }
       .header_area .navbar .nav .nav-item.submenu {
         position: relative; }
         .header_area .navbar .nav .nav-item.submenu ul {
@@ -433,20 +433,20 @@ button:focus {
     color: #222222; }
   .header_area .navbar-right .primary_btn {
     min-width: 145px;
-    background-image: linear-gradient(to right, #8252fa 0%, #eca2f1 100%), radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -webkit-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -moz-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -ms-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -o-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+    background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
     color: #fff; }
     .header_area .navbar-right .primary_btn:hover {
       background: transparent;
       color: #222222;
-      background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-      background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-      background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-      background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-      background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+      background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
+      background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+      background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+      background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+      background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
       background-origin: border-box;
       background-clip: content-box, border-box; }
 
@@ -599,8 +599,8 @@ button:focus {
   line-height: 34px;
   display: inline-block; }
   .blog_btn:hover {
-    background: #8252fa;
-    border-color: #8252fa;
+    background: #008000;
+    border-color: #008000;
     color: #fff; }
 
 .white_bg_btn {
@@ -619,7 +619,7 @@ button:focus {
   transition: all 0.4s ease 0s;
   border: none; }
   .white_bg_btn:hover {
-    background: #8252fa;
+    background: #008000;
     color: #fff; }
 
 /* Causes Area css
@@ -636,7 +636,7 @@ button:focus {
     .causes_slider .owl-dots .owl-dot:last-child {
       margin-right: 0px; }
     .causes_slider .owl-dots .owl-dot.active {
-      background: #8252fa; }
+      background: #008000; }
 
 .causes_item {
   background: #fff; }
@@ -652,7 +652,7 @@ button:focus {
       .causes_item .causes_img .c_parcent span {
         width: 70%;
         height: 3px;
-        background: #8252fa;
+        background: #008000;
         position: absolute;
         left: 0px;
         bottom: 0px; }
@@ -661,7 +661,7 @@ button:focus {
           position: absolute;
           right: -10px;
           bottom: 0px;
-          background: #8252fa;
+          background: #008000;
           color: #fff;
           padding: 0px 5px; }
   .causes_item .causes_text {
@@ -674,7 +674,7 @@ button:focus {
       margin-bottom: 15px;
       cursor: pointer; }
       .causes_item .causes_text h4:hover {
-        color: #8252fa; }
+        color: #008000; }
     .causes_item .causes_text p {
       font-size: 14px;
       line-height: 24px;
@@ -683,11 +683,11 @@ button:focus {
       margin-bottom: 0px; }
   .causes_item .causes_bottom a {
     width: 50%;
-    border: 1px solid #8252fa;
+    border: 1px solid #008000;
     text-align: center;
     float: left;
     line-height: 50px;
-    background: #8252fa;
+    background: #008000;
     color: #fff;
     font-family: "Roboto", sans-serif;
     font-size: 14px;
@@ -732,7 +732,7 @@ button:focus {
   text-align: center;
   color: #222222; }
   .tags .tag_btn:before {
-    background: #8252fa; }
+    background: #008000; }
   .tags .tag_btn + .tag_btn {
     margin-left: 2px; }
 
@@ -783,7 +783,7 @@ button:focus {
   .categories_post:hover .categories_details {
     background: rgba(252, 248, 255, 0.85); }
   .categories_post:hover h5 {
-    color: #8252fa; }
+    color: #008000; }
   .categories_post:hover p {
     color: #777777; }
   .categories_post:hover .border_line {
@@ -803,7 +803,7 @@ button:focus {
       .blog_info .post_tag a:hover {
         color: #777777; }
       .blog_info .post_tag a.active {
-        color: #8252fa; }
+        color: #008000; }
   .blog_info .blog_meta li a {
     font: 300 14px/20px "Roboto", sans-serif;
     color: #777777;
@@ -818,7 +818,7 @@ button:focus {
       line-height: 20px;
       vertical-align: middle; }
     .blog_info .blog_meta li a:hover {
-      color: #8252fa; }
+      color: #008000; }
 
 .blog_post img {
   max-width: 100%; }
@@ -834,7 +834,7 @@ button:focus {
     font-weight: 600;
     transition: all 0.3s linear; }
     .blog_details h2:hover {
-      color: #8252fa; }
+      color: #008000; }
   .blog_details p {
     margin-bottom: 26px; }
 
@@ -869,11 +869,11 @@ button:focus {
     border-radius: 45px;
     z-index: 0;
     border: double 2px transparent;
-    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
     background-origin: border-box;
     background-clip: content-box, border-box;
     padding: 0;
@@ -932,7 +932,7 @@ button:focus {
         .blog_right_sidebar .author_widget .social_icon a + a {
           margin-left: 20px; }
         .blog_right_sidebar .author_widget .social_icon a:hover {
-          color: #8252fa; }
+          color: #008000; }
   .blog_right_sidebar .popular_post_widget .post_item .media-body {
     justify-content: center;
     align-self: center;
@@ -944,7 +944,7 @@ button:focus {
       margin-bottom: 4px;
       transition: all 0.3s linear; }
       .blog_right_sidebar .popular_post_widget .post_item .media-body h3:hover {
-        color: #8252fa; }
+        color: #008000; }
     .blog_right_sidebar .popular_post_widget .post_item .media-body p {
       font-size: 12px;
       line-height: 21px;
@@ -964,9 +964,9 @@ button:focus {
     .blog_right_sidebar .post_category_widget .cat-list li + li {
       padding-top: 15px; }
     .blog_right_sidebar .post_category_widget .cat-list li:hover a {
-      color: #8252fa; }
+      color: #008000; }
     .blog_right_sidebar .post_category_widget .cat-list li:hover {
-      border-color: #8252fa; }
+      border-color: #008000; }
   .blog_right_sidebar .newsletter_widget {
     text-align: center; }
     .blog_right_sidebar .newsletter_widget .form-group {
@@ -1078,7 +1078,7 @@ button:focus {
       font-size: 14px;
       transition: all 0.2s linear; }
       .single-post-area .social-links li a:hover {
-        color: #8252fa; }
+        color: #008000; }
 .single-post-area .blog_details {
   padding-top: 26px; }
   .single-post-area .blog_details p {
@@ -1426,7 +1426,7 @@ button:focus {
 .bar {
   opacity: 1;
   data-type: "stroke";
-  data-stroke: #8252fa;
+  data-stroke: #008000;
   position: absolute;
   z-index: 10;
   width: 100%;
@@ -1438,7 +1438,7 @@ button:focus {
 
 .bar path.mainline {
     stroke-width: 2;
-    stroke: #8252fa;
+    stroke: #008000;
     stroke-linecap: round;
   }
 
@@ -1528,7 +1528,7 @@ button:focus {
   margin-left:5px;
   background: #E1ECE0;
   #border-radius: 25px;
-  border: 1px hidden #8252fa;
+  border: 1px hidden #008000;
   max-width: 400px;
   height: 550px;
   box-shadow: inset 0px 0px 10px 5px #c2d0c1, 0px 0px 5px 5px #c2d0c1;
@@ -1539,7 +1539,7 @@ button:focus {
   margin-right:5px;
   background: #45ab35;
   box-shadow: inset 0px 0px 4px 4px #ed8f13, 0px 0px 4px 4px #ed8f13;
-  border: 1px hidden #8252fa;
+  border: 1px hidden #008000;
   width: 550px;
   height: 550px;
 }
@@ -1613,7 +1613,7 @@ button:focus {
   font-family: "Roman";
   font-weight: bold;
   max-width: 140px;
-  border: 0px solid #8252fa;
+  border: 0px solid #008000;
   background: black;
   position: center;
   -webkit-transition: all 0.4s ease 0s;
@@ -1621,11 +1621,11 @@ button:focus {
   -o-transition: all 0.4s ease 0s;
   transition: all 0.4s ease 0s;
   border-radius: 5px;
-  #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-  #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
+  #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+  #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+  #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+  #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
   background-origin: border-box;
   background-clip: content-box, border-box; }
 
@@ -1682,11 +1682,11 @@ button:focus {
   margin-top: 20px;
   cursor: pointer;
   border: none;
-  background-image: linear-gradient(to right, #8252fa 0%, #eca2f1 100%), radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -webkit-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -moz-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -ms-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -o-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
   color: #fff;
   box-shadow: 0px 10px 30px rgba(130, 82, 250, 0.2);
   border: 2px solid transparent;
@@ -1698,11 +1698,11 @@ button:focus {
   .contact_form .primary_btn:hover {
     border: double 2px transparent;
     border-radius: 5px;
-    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
     background-origin: border-box;
     background-clip: content-box, border-box;
     color: #222222; }
@@ -1734,7 +1734,7 @@ button:focus {
     .modal-message .modal-dialog .modal-content .modal-header h2 {
       display: block;
       text-align: center;
-      color: #8252fa;
+      color: #008000;
       padding-bottom: 10px;
       font-family: "Roboto", sans-serif; }
     .modal-message .modal-dialog .modal-content .modal-header p {
@@ -1759,20 +1759,20 @@ button:focus {
     line-height: 26px; }
     .sample-text-area p b {
       font-weight: bold;
-      color: #8252fa; }
+      color: #008000; }
     .sample-text-area p i {
-      color: #8252fa;
+      color: #008000;
       font-style: italic; }
     .sample-text-area p sup {
-      color: #8252fa;
+      color: #008000;
       font-style: italic; }
     .sample-text-area p sub {
-      color: #8252fa;
+      color: #008000;
       font-style: italic; }
     .sample-text-area p del {
-      color: #8252fa; }
+      color: #008000; }
     .sample-text-area p u {
-      color: #8252fa; }
+      color: #008000; }
 
 /*============== End Elements Area css ================*/
 /*==============Elements Button Area css ================*/
@@ -1866,10 +1866,10 @@ button:focus {
 
 .link-border {
   background: transparent;
-  border: 1px solid #8252fa;
-  color: #8252fa; }
+  border: 1px solid #008000;
+  color: #008000; }
   .link-border:before {
-    background: #8252fa; }
+    background: #008000; }
 
 .radius {
   border-radius: 3px; }
@@ -3172,11 +3172,11 @@ h6 {
     background: #fcf8ff;
     border: double 2px transparent;
     border-radius: 5px;
-    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
     background-origin: border-box;
     background-clip: content-box, border-box; }
     .price_item:hover .price_head {
@@ -3193,11 +3193,11 @@ h6 {
         .price_item:hover .price_footer h3 .month {
           color: #fff; }
       .price_item:hover .price_footer .primary_btn {
-        background-image: linear-gradient(to right, #8252fa 0%, #eca2f1 100%), radial-gradient(circle at top left, #8252fa, #eca2f1);
-        background-image: -webkit-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-        background-image: -moz-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-        background-image: -ms-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-        background-image: -o-linear-gradient(to right, #8252fa 0%, #eca2f1 100%), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+        background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
+        background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
+        background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
+        background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
+        background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
         background: #fff;
         color: #222222; }
 
@@ -3840,7 +3840,7 @@ h6 {
   color: #777777;
   margin-bottom: 30px; }
   .ab_widget p a {
-    color: #8252fa; }
+    color: #008000; }
   .ab_widget p + p {
     margin-bottom: 0px; }
 
@@ -3919,13 +3919,13 @@ h6 {
   .social_widget .list li:last-child {
     margin-right: 0px; }
   .social_widget .list li:hover a {
-    color: #8252fa; }
+    color: #008000; }
 
 .copy_right_text {
   text-align: center;
   margin-top: 60px; }
   .copy_right_text p a {
-    color: #8252fa; }
+    color: #008000; }
 
 /* End Footer Area css
 ============================================================================================ */

@@ -98,11 +98,21 @@ class RedisPlug:
 
     def map_game(self, game_id, white_sid, black_sid, board=chess.Board().fen()):
         key = self.game + game_id
-        self.r.hmset(key, {FEN: board, "white_sid": white_sid, "black_sid": black_sid})
+        self.r.hmset(key, {FEN: board, WHITE: white_sid, BLACK: black_sid})
 
     def get_game(self, game_id):
         key = self.game + game_id
         return self.r.hgetall(key)
+
+    def remove_player_mapping(self, player):
+        key = self.player + player
+        self.r.delete(key)
+
+    def remove_game_info(self, game):
+        mapping = self.game + game
+        moves = self.game_moves + game
+        self.r.delete(mapping)
+        self.r.delete(moves)
 
     def get_redis(self):
         return self.r

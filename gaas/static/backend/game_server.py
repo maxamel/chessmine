@@ -39,12 +39,21 @@ class GameServer:
                         print(game)
                         fen = game[FEN]
                         turn = get_turn_from_fen(fen)
-                        winner = "BLACK"#game["white_sid"]
+                        winner = BLACK
                         if turn == BLACK:
-                            winner = "WHITE"#game["black_sid"]
+                            winner = WHITE
                         requests.get("http://localhost:5000/game_over/" + winner)
+                        self.cleanup(game_id=game_id)
         except Exception as e:
             print(e)
+
+    def cleanup(self, game_id: str):
+        game = self.redis.get_game(game_id=game_id)
+        white = game[WHITE]
+        black = game[BLACK]
+        self.redis.remove_game_info(game_id)
+        self.redis.remove_player_mapping(white)
+        self.redis.remove_player_mapping(black)
 
     def map_rivals(self, player1, player2, time_control):
         game_id = uuid.uuid4().hex
