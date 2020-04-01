@@ -2,7 +2,7 @@ import chess
 import redis
 
 from static.backend.consts import *
-from static.backend.player import Player, Game, PlayerMapping
+from static.backend.player import Player, PlayerMapping
 
 
 class RedisPlug:
@@ -13,7 +13,9 @@ class RedisPlug:
         self.search_pool = "search_pool"
         self.player_info = "player_session_"
         self.player = "player_mapping_"
-        self.game = "game_"
+        self.game = "game_mapping_"
+        self.game_moves = "game_moves_"
+        self.game_expire = "game_expirations"
         self.r = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, decode_responses=True)
 
     def add_player_to_search_pool(self, player_sid):
@@ -26,17 +28,20 @@ class RedisPlug:
         return self.r.srandmember(self.search_pool)
 
     def remove_players_from_search_pool(self, *player_sids):
+        '''
+        :param player_sids: the players to remove from search pool
+        :return: True if succeeded
+        '''
         return self.r.srem(self.search_pool, *player_sids)
 
     def is_player_in_search_pool(self, player_sid):
         return self.r.sismember(self.search_pool, player_sid)
 
-    def get_game_fen_by_player_sid(self, player) -> Game:
-        key = self.player + player
+    def get_game_fen(self, game_id) -> str:
+        key = self.game + game_id
         if not self.r.exists(key):
             return None
-        game_id = self.r.lindex(key, GAME)
-        return self.r.lindex(self.game + game_id, FEN)
+        return self.r.hget(self.game + game_id, FEN)
 
     # Should be set when user first connects to store his info and cleared when heartbeats are unanswered
     def set_player_session(self, player: Player):
@@ -50,29 +55,54 @@ class RedisPlug:
         session = self.r.lrange(key, 0, 1)
         return Player.from_list(sid, session)
 
-    def set_game_fen_by_player_sid(self, player, fen):
-        key = self.player + player
-        game_id = self.r.lindex(key, GAME)
-        return self.r.lset(self.game + game_id, FEN, fen)
+    def add_move_to_game(self, game_id, move):
+        key = self.game_moves + game_id
+        self.r.rpush(key, move)
+
+    def get_game_moves(self, game_id) -> list:
+        key = self.game_moves + game_id
+        return self.r.lrange(key, 0, -1)
+
+    def set_game_fen(self, game_id, fen) -> str:
+        key = self.game + game_id
+        self.r.hset(key, FEN, fen)
 
     def map_player(self, player, opponent, color, game_id, time_control=None, turn_start=None):
         key = self.player + player
-        self.r.rpush(key, opponent, color, time_control, turn_start, game_id)
+        pm = PlayerMapping(sid=player, opponent=opponent, color=color, game_id=game_id,
+                           time_remaining=time_control, turn_start_time=turn_start)
+        self.r.hmset(key, pm.to_dict())
 
     def set_player_value(self, player, index, val):
         key = self.player + player
-        self.r.lset(key, index, val)
+        self.r.hset(key, index, val)
 
     def get_player_mapping(self, player) -> PlayerMapping:
         key = self.player + player
         if not self.r.exists(key):
             return None
-        mapping = self.r.lrange(key, 0, GAME)
-        return PlayerMapping.from_list(player, mapping)
+        mapping = self.r.hgetall(key)
+        return PlayerMapping.from_dict(mapping)
 
-    def map_game(self, game_id, board=chess.Board().fen()):
+    def set_game_timeout(self, game_id, timeout):
+        key = self.game_expire
+        self.r.zadd(key, game_id, timeout)
+
+    def peek_game_timeout(self):
+        key = self.game_expire
+        return self.r.zrange(key, 0, 1, withscores=True)
+
+    def cancel_game_timeout(self, game_id):
+        key = self.game_expire
+        return self.r.zrem(key, game_id)
+
+    def map_game(self, game_id, white_sid, black_sid, board=chess.Board().fen()):
         key = self.game + game_id
-        self.r.lpush(key, GAME, board)
+        self.r.hmset(key, {FEN: board, "white_sid": white_sid, "black_sid": black_sid})
+
+    def get_game(self, game_id):
+        key = self.game + game_id
+        return self.r.hgetall(key)
 
     def get_redis(self):
         return self.r

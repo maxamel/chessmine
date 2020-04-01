@@ -1408,7 +1408,7 @@ button:focus {
 
 .gameContainer {
   position: relative;
-  height: 800px;
+  height: 600px;
   width: 100%;
   margin: 20px
 }
@@ -1417,7 +1417,7 @@ button:focus {
   opacity: 0.9;
   background: #fcf8ff;
   background-size: cover;
-  height: 800px;
+  height: 100%;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -1469,13 +1469,13 @@ button:focus {
   width: 70%;
   font-weight: bolder;
   font-size: 16px;
-  font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+  #font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
 }
 
 .labelRating {
   font-weight: bolder;
   font-size: 20px;
-  font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+  #font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
 }
 
 .dottop {
@@ -1508,10 +1508,12 @@ button:focus {
   margin: auto;
   max-width: 400px;
   height: 80px;
+  color: cornsilk;
   #border-radius: 25px;
-  background: #ffffff;
   position: relative;
   bottom: 0;
+  background: #45ab35;
+  box-shadow: inset 0px 0px 4px 4px #ed8f13, 0px 0px 4px 4px #ed8f13
 }
 
 .board {
@@ -1529,15 +1531,14 @@ button:focus {
   border: 1px hidden #8252fa;
   max-width: 400px;
   height: 550px;
-  box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+  box-shadow: inset 0px 0px 10px 5px #c2d0c1, 0px 0px 5px 5px #c2d0c1;
 }
 
 .boardHolder {
   margin: auto;
   margin-right:5px;
-  background: #E1ECE0;
-  #border-radius: 25px;
-  box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+  background: #45ab35;
+  box-shadow: inset 0px 0px 4px 4px #ed8f13, 0px 0px 4px 4px #ed8f13;
   border: 1px hidden #8252fa;
   width: 550px;
   height: 550px;
@@ -1613,18 +1614,18 @@ button:focus {
   font-weight: bold;
   max-width: 140px;
   border: 0px solid #8252fa;
-  background: #c2d0c1;
+  background: black;
   position: center;
   -webkit-transition: all 0.4s ease 0s;
   -moz-transition: all 0.4s ease 0s;
   -o-transition: all 0.4s ease 0s;
   transition: all 0.4s ease 0s;
   border-radius: 5px;
-  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
-  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #8252fa, #eca2f1);
+  #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #8252fa, #eca2f1);
+  #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #8252fa, #eca2f1);
   background-origin: border-box;
   background-clip: content-box, border-box; }
 

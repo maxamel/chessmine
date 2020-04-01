@@ -115,7 +115,7 @@ $(document).ready(function(){
             pane.style.opacity = 1
         }
         document.getElementById("gameBox").style.opacity = 1
-        document.getElementById("ldbar").style.opacity = 0
+        //document.getElementById("ldbar").style.opacity = 0
         setTime('clockdivA', rival_time)
         setTime('clockdivB', my_time)
 
@@ -214,7 +214,7 @@ $(document).ready(function(){
     });
     res = socket.emit('connection', {"data": data}, function(ans) {
             var progress = 0
-            var bar = new ldBar("#ldbar");
+            /*var bar = new ldBar("#ldbar");
             // repeat with the interval of 2 seconds
             let timerId = setInterval(function() {
                     bar.set(progress + 2);
@@ -225,6 +225,7 @@ $(document).ready(function(){
             setTimeout(() => {
                 clearInterval(timerId);
             }, 8000);
+            */
     })
 
 

@@ -39,15 +39,15 @@ class PlayerMapping:
         }
 
     @staticmethod
-    def from_list(sid, L):
-        tst = L[TURN_START_TIME]
-        if L[TURN_START_TIME] != 'None':
-            tst = int(L[TURN_START_TIME])
-        tr = L[REMAINING_TIME]
-        if L[REMAINING_TIME] != 'None':
-            tr = int(L[REMAINING_TIME])
-        return PlayerMapping(sid=sid, opponent=L[OPPONENT], color=L[COLOR], time_remaining=tr,
-                             turn_start_time=tst, game_id=L[GAME])
+    def from_dict(pd: dict):
+        rem_time = pd[REMAINING_TIME]
+        if rem_time != 'None':
+            rem_time = int(rem_time)
+        tst = pd[TURN_START_TIME]
+        if tst != 'None':
+            tst = int(tst)
+        return PlayerMapping(sid=pd[SID], opponent=pd[OPPONENT], color=pd[COLOR], time_remaining=rem_time,
+                             turn_start_time=tst, game_id=pd[GAME])
 
 
 class Game:

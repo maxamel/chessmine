@@ -3,6 +3,7 @@ from static.backend.player import Player, PlayerMapping, Game
 from static.backend.random_matcher import RandomMatcher
 from static.backend.redis_plug import RedisPlug
 from static.backend.consts import *
+from static.backend.util import get_turn_from_fen
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -10,27 +11,50 @@ current_milli_time = lambda: int(round(time.time() * 1000))
 class GameServer:
 
     def __init__(self):
-        '''
-        self.clients = {}
-        self.games = []
-        self.mapping_rival = {}
-        self.mapping_time = {}
-        self.mapping_remaining = {}
-        self.board = chess.Board()
-        '''
-        self.timer = None
         self.redis = RedisPlug()
         self.matcher = RandomMatcher()
+        self.th = threading.Thread(target=self.work)
+        self.th.start()
+
+    def work(self):
+        try:
+            while True:
+                time.sleep(1)
+                res = self.redis.peek_game_timeout()
+                if not res:
+                    pass
+                else:
+                    game_id = res[0][0]
+                    end_time = res[0][1]
+                    if current_milli_time() >= int(end_time):
+                        # game over
+                        canceled = self.redis.cancel_game_timeout(game_id)
+                        if canceled != 1:
+                            # A move has been made just in time and we weren't fast enough to handle this timeout.
+                            # The move function should check that it's been made past the time and quit the game
+                            print("A move has been made and we weren't fast enough to complete the removal operation.")
+                            continue
+                        print("Ending game " + game_id)
+                        game = self.redis.get_game(game_id)
+                        print(game)
+                        fen = game[FEN]
+                        turn = get_turn_from_fen(fen)
+                        winner = "BLACK"#game["white_sid"]
+                        if turn == BLACK:
+                            winner = "WHITE"#game["black_sid"]
+                        requests.get("http://localhost:5000/game_over/" + winner)
+        except Exception as e:
+            print(e)
 
     def map_rivals(self, player1, player2, time_control):
         game_id = uuid.uuid4().hex
         self.redis.map_player(player=player1, opponent=player2, game_id=game_id, color=WHITE, time_control=time_control)
         self.redis.map_player(player=player2, opponent=player1, game_id=game_id, color=BLACK, time_control=time_control)
-        self.redis.map_game(game_id=game_id)
+        self.redis.map_game(game_id=game_id, white_sid=player1, black_sid=player2)
         return game_id
 
-    def get_game_fen_by_player_sid(self, sid):
-        return self.redis.get_game_fen_by_player_sid(player=sid)
+    def get_game_fen(self, game_id):
+        return self.redis.get_game_fen(game_id=game_id)
 
     def get_player_mapping(self, sid) -> PlayerMapping:
         return self.redis.get_player_mapping(sid)
@@ -57,15 +81,10 @@ class GameServer:
     def find_match(self, player):
         return self.matcher.match(player)
 
-    def game_over(self, winner, msg):
-        if self.timer is not None:
-            self.timer.cancel()
-        requests.get("http://localhost:5000/game_over/" + winner)
-
     def connect(self, payload):
         '''
-        :param payload:
-        :return:
+        :param payload: the cookie as sent by player
+        :return: sid of recepient player and the data to send
         '''
         cookie = payload["data"]
         player = self.get_player_from_cookie(cookie)
@@ -74,7 +93,7 @@ class GameServer:
             curr_time = current_milli_time()
             rival = self.get_player_session(mapping.opponent)
             rival_mapping = self.get_player_mapping(rival.sid)
-            fen = self.get_game_fen_by_player_sid(rival.sid)
+            fen = self.get_game_fen(mapping.game_id)
             white = player
             black = rival
             white_time = mapping.time_remaining
@@ -82,7 +101,7 @@ class GameServer:
             black_time = rival_mapping.time_remaining
             black_turn_start_time = rival_mapping.turn_start_time
             turn = mapping.color
-            # who's turn is? Based on who's got the lower turn start time
+            # who's turn is it? Based on who's got the lower turn start time
             if mapping.turn_start_time < rival_mapping.turn_start_time:
                 turn = rival_mapping.color
 
@@ -112,17 +131,44 @@ class GameServer:
 
     def move(self, payload):
         '''
-        :param payload:
-        :return:
+        :param payload: the move as recorded by user
+        :return: sid of the player to send this move to and the move data slightly changed
         '''
-        if self.timer is not None:
-            self.timer.cancel()
         print(payload)
         sid = payload["sid"]
+        player_info = self.redis.get_player_mapping(sid)
+        game_id = player_info.game_id
+        canceled = self.redis.cancel_game_timeout(game_id=game_id)
+        if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
+            # we're in the process of timeouting the game. Just quit now and let it timeout gracefully
+            print("We're in the process of terminating game. No move recorded. Quitting.")
+            return None, None
+        rival = player_info.opponent
+        rival_info = self.redis.get_player_mapping(rival)
+        # Handle timing updates
         curr_time = current_milli_time()
+        if player_info.turn_start_time != 'None':
+            last_time = int(player_info.turn_start_time)
+            elapsed = curr_time - last_time if last_time > 0 else 0
+            payload["remaining"] = int(rival_info.time_remaining)
+            payload["other_remaining"] = int(player_info.time_remaining) - elapsed
+            if payload["other_remaining"] <= 0:
+                # This move was too late. Timeout function was late in picking it up.
+                # But this move is illegal and we're stopping this game right now!
+                self.redis.set_game_timeout(game_id=game_id, timeout=curr_time)
+                print("Move recorded too late. Ordering game termination. Quitting.")
+                return None, None
+            expire_in_future = curr_time + payload["remaining"]
+            self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
+            self.redis.set_player_value(sid, REMAINING_TIME, payload["other_remaining"])
+            self.redis.set_player_value(rival, TURN_START_TIME, curr_time)
+        else:
+            self.redis.set_player_value(sid, TURN_START_TIME, 0)
+            self.redis.set_player_value(rival, TURN_START_TIME, 0)
+        # Handle the move itself, board update, etc.
         move = payload["move"]
         the_move = chess.Move.from_uci(move["from"] + move["to"])
-        game_fen = self.redis.get_game_fen_by_player_sid(sid)
+        game_fen = self.redis.get_game_fen(player_info.game_id)
         if game_fen is None:
             board = chess.Board()
         else:
@@ -131,28 +177,15 @@ class GameServer:
             print(the_move)
             raise ValueError("Illegal move captured!")
         board.push(the_move)
-        self.redis.set_game_fen_by_player_sid(sid, board.fen())
         print(board)
-        player_info = self.redis.get_player_mapping(sid)
-        rival = player_info.opponent
-        rival_info = self.redis.get_player_mapping(rival)
+        self.redis.set_game_fen(game_id, board.fen())
+        self.redis.add_move_to_game(player_info.game_id, the_move)
         if board.is_game_over():
-            thread = threading.Thread(target=self.game_over, args=(rival, "Game Over",))
-            thread.start()
-        if player_info.turn_start_time != 'None':
-            last_time = int(player_info.turn_start_time)
-            elapsed = curr_time - last_time if last_time > 0 else 0
-            payload["remaining"] = int(rival_info.time_remaining)
-            payload["other_remaining"] = int(player_info.time_remaining) - elapsed
-            self.timer = threading.Timer(payload["remaining"] / 1000, self.game_over, [rival, "Lost on time"])
-            self.timer.start()
-            self.redis.set_player_value(sid, REMAINING_TIME, payload["other_remaining"])
-            self.redis.set_player_value(rival, TURN_START_TIME, curr_time)
-        else:
-            self.redis.set_player_value(sid, TURN_START_TIME, 0)
-            self.redis.set_player_value(rival, TURN_START_TIME, 0)
-            self.redis.set_player_value(sid, REMAINING_TIME, 300000)
-            self.redis.set_player_value(rival, REMAINING_TIME, 300000)
+            # reset previous timeout settings due to turn switching
+            self.redis.cancel_game_timeout(game_id=game_id)
+            self.redis.set_game_timeout(game_id=game_id, timeout=curr_time)
+            print("Game over. Player checkmated. Quitting.")
+            return None, None
         update = json.dumps(payload)
         print(update)
         return rival, update

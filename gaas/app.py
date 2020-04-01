@@ -50,41 +50,21 @@ def play():
 
 @socketio.on('connection', namespace='/connect')
 def connect(cookie):
-    cookie = cookie["data"]
-    player = game_server.get_player_from_cookie(cookie)
-    mapping = game_server.get_player_mapping(player.sid)
-    if mapping is not None:
-        rival = game_server.get_player_session(player.sid)
-        rival_mapping = game_server.get_player_mapping(rival.sid)
-        fen = game_server.get_game_fen_by_player_sid(rival.sid)
-        white = player
-        black = rival
-        white_time = mapping.time_remaining
-        black_time = rival_mapping.time_remaining
-        if mapping.color == BLACK:
-            white, black = black, white
-            white_time, black_time = black_time, white_time
-        game = Game(game_id=mapping.game_id,
-                    position=fen,
-                    white_remaining=white_time,
-                    black_remaining=black_time,
-                    white=white,
-                    black=black)
-        socketio.emit("game", {'color': mapping.color, 'game': game.to_dict()},
-                      namespace='/connect',
-                      room=player.sid)
-    else:
-        join_room(player.sid)
-        game_server.set_player_session(player=player)
-        socketio.emit("connection_id", {"user": player.to_dict()}, namespace='/connect', room=player.sid)
-        game_server.find_match(player=player)
+    send_to, data = game_server.connect(cookie)
+    join_room(send_to)
+    connection = "game"
+    if 'user' in data:
+        connection = "connection_id"
+    socketio.emit(connection, data, namespace='/connect', room=send_to)
 
 
 @socketio.on('update', namespace='/connect')
 def move(payload):
-    send_to, update = game_server.move(payload)
-    socketio.emit("move", update, namespace='/connect', room=send_to)
-    return update
+    send_to, data = game_server.move(payload)
+    if send_to is None:     # quitting due to game over
+        return
+    socketio.emit("move", data, namespace='/connect', room=send_to)
+    return data
 
 
 if __name__ == '__main__':
