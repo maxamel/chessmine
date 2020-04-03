@@ -119,11 +119,11 @@ class GameServer:
                 white_time, black_time = black_time, white_time
                 white_turn_start_time, black_turn_start_time = black_turn_start_time, white_turn_start_time
             # player connecting in middle of turn. Adjust his remaining time to reflect how much time he's got
-            # left starting now
-            if turn == BLACK:
+            # left starting now (check we're in middle of turn)
+            if turn == BLACK and black_turn_start_time != 'None' and black_turn_start_time > 0:
                 elapsed = curr_time - black_turn_start_time
                 black_time -= elapsed
-            else:
+            elif white_turn_start_time != 'None' and white_turn_start_time > 0:
                 elapsed = curr_time - white_turn_start_time
                 white_time -= elapsed
             game = Game(game_id=mapping.game_id,

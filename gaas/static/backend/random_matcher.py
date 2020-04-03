@@ -35,5 +35,5 @@ class RandomMatcher(Matcher):
                         continue
                 # transmit this match
                 requests.get(url="http://localhost:5000/match/"+player_sid+"/"+rival_sid,
-                             json={'time_control': 10000})
+                             json={'time_control': 60000})
             time.sleep(1)

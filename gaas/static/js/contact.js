@@ -72,6 +72,7 @@ $(document).ready(function(){
     var futureMoveData = null
     var player_id = null
     var other_remaining = 300000
+    var my_color = null
 
     var data = localStorage.getItem("chess_info")
     var socket = io('http://localhost:5000/connect');
@@ -134,9 +135,9 @@ $(document).ready(function(){
         }
         board = Chessboard('myBoard', config)
 
-        isStart = the_game_fen === 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+        game = new Chess(the_game_fen)
+        isStart = my_time === rival_time
         if (!isStart) {
-            game = new Chess(the_game_fen)
             turn = game.turn()
             mine = my_color.charAt(0)
             if (turn === mine) {
@@ -162,6 +163,9 @@ $(document).ready(function(){
     socket.on('move', function (ans) {
         ans = JSON.parse(ans)
         the_move = ans.move
+        if (game.turn() != the_move.color) {
+            return      // Get my own move back
+        }
         game.move(the_move.san)
         // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
         if (the_move.san == "O-O-O" ||
@@ -174,10 +178,19 @@ $(document).ready(function(){
             board.move(the_move.from + "-" + the_move.to)
 
         if (ans.remaining) {
-            other_remaining = ans.other_remaining
-            initializeClock('clockdivB', ans.remaining);
-            clearInterval(timeintervalA)
-            setTime('clockdivA', ans.other_remaining)
+            if (my_color.charAt(0) == the_move.color) {
+                console.log("Got my own move back")
+                other_remaining = ans.remaining
+                initializeClock('clockdivA', ans.remaining);
+                clearInterval(timeintervalB)
+                setTime('clockdivB', ans.other_remaining)
+            }
+            else {
+                other_remaining = ans.other_remaining
+                initializeClock('clockdivB', ans.remaining);
+                clearInterval(timeintervalA)
+                setTime('clockdivA', ans.other_remaining)
+            }
         }
 
         if (futureMoveData != null) {
@@ -263,6 +276,7 @@ $(document).ready(function(){
 
     function onDrop (source, target) {
       // see if the move is legal
+      console.log("MILLIS " + game.turn())
       var move = game.move({
         from: source,
         to: target,
@@ -286,6 +300,7 @@ $(document).ready(function(){
             "sid": player_id,
             "move": move
         }
+        console.log("Gello " + move)
         if (move != null) {
             socket.emit('update', json, function(ret){
                 ret = JSON.parse(ret)

@@ -20,6 +20,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/chessboard-1.0.0.min.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/loading-bar.css')}}">
+        <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
         <!--link rel="stylesheet" href="{{ url_for('static', filename='css/clock.css')}}"-->
     </head>
         
@@ -31,52 +32,61 @@
             <!--div id="ldbar" class="bar" data-preset="circle" data-value="0"></div-->
             <div id="gameBox" class="gameBox row">
                 <div id="leftPane" class="leftpane">
-                    <div id="boardHolder" class="boardHolder">
-                        <div id="upperClock" class="smallClock">
-                             <div id="playerInfoASmall" class="playerInfoSmall row">
-                                <div id="connectIconTopSmall" class="dottop"></div>
-                                <div id="labelTitleASmall" class="label"></div>
-                                <div id="labelRatingASmall" class="labelRating"></div>
+                    <span id="boardandclock" class="boardandclock">
+                        <div id="clockdivA" class="clock">
+                          <span class="clockspan">
+                            <span class="minutes"></span> :
+                            <span class="seconds"></span> .
+                            <span class="millis"></span>
+                          </span>
+                        </div>
+                        <div id="boardHolder" class="boardHolder">
+                            <div id="upperClock" class="smallClock">
+                                 <div id="playerInfoASmall" class="playerInfoSmall row">
+                                    <div id="connectIconTopSmall" class="dottop"></div>
+                                    <div id="labelTitleASmall" class="label"></div>
+                                    <div id="labelRatingASmall" class="labelRating"></div>
+                                </div>
+                            </div>
+                            <div id="myBoard" class="board"></div>
+                            <div id="bottomClock" class="smallClock">
+                                 <div id="playerInfoBSmall" class="playerInfoSmall row">
+                                    <div id="connectIconBottomSmall" class="dotbottom"></div>
+                                    <div id="labelTitleBSmall" class="label"></div>
+                                    <div id="labelRatingBSmall" class="labelRating"></div>
+                                </div>
                             </div>
                         </div>
-                        <div id="myBoard" class="board"></div>
-                        <div id="bottomClock" class="smallClock">
-                             <div id="playerInfoBSmall" class="playerInfoSmall row">
-                                <div id="connectIconBottomSmall" class="dotbottom"></div>
-                                <div id="labelTitleBSmall" class="label"></div>
-                                <div id="labelRatingBSmall" class="labelRating"></div>
-                            </div>
+                        <div id="clockdivB" class="clock">
+                          <span class="clockspan">
+                            <span class="minutes"></span> :
+                            <span class="seconds"></span> .
+                            <span class="millis"></span>
+                          </span>
                         </div>
-                    </div>
+                    </span>
                 </div>
                 <div id="rightPane" class="rightpane">
-                    <div id="clockHolder" class="clockHolder">
+                    <div id="boxesHolder" class="boxesHolder">
                         <div id="boxA" class="playerBox">
-                            <div id="clockdivA" class="clock">
-                              <div>
-                                <span class="minutes"></span> :
-                                <span class="seconds"></span> .
-                                <span class="millis"></span>
-                              </div>
-                            </div>
                             <div id="playerInfoA" class="playerInfoA row">
                                 <div id="connectIconTop" class="dottop"></div>
                                 <div id="labelTitleA" class="label"></div>
                                 <div id="labelRatingA" class="labelRating"></div>
                             </div>
                         </div>
+                        <div id="boxZ" class="infoBox"></div>
+                        <table id="moveTable" class="moveTable">
+                          <tr>
+                            <th>White</th>
+                            <th>Black</th>
+                          </tr>
+                        </table>
                         <div id="boxB" class="playerBox vbottom">
                             <div id="playerInfoB" class="playerInfoB row">
                                 <div id="connectIconBottom" class="dotbottom"></div>
                                 <div id="labelTitleB" class="label"></div>
                                 <div id="labelRatingB" class="labelRating"></div>
-                            </div>
-                            <div id="clockdivB" class="clock vbottomclock">
-                              <div>
-                                <span class="minutes"></span> :
-                                <span class="seconds"></span> .
-                                <span class="millis"></span>
-                              </div>
                             </div>
                         </div>
                     </div>

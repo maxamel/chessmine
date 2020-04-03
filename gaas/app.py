@@ -64,6 +64,8 @@ def move(payload):
     if send_to is None:     # quitting due to game over
         return
     socketio.emit("move", data, namespace='/connect', room=send_to)
+    # send back to sender in case he has more than one page open
+    socketio.emit("move", data, namespace='/connect', room=payload["sid"])
     return data
 
 
