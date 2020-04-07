@@ -65,6 +65,9 @@ class GameServer:
     def get_game_fen(self, game_id):
         return self.redis.get_game_fen(game_id=game_id)
 
+    def get_game_moves(self, game_id):
+        return self.redis.get_game_moves(game_id=game_id)
+
     def get_player_mapping(self, sid) -> PlayerMapping:
         return self.redis.get_player_mapping(sid)
 
@@ -103,8 +106,10 @@ class GameServer:
             rival = self.get_player_session(mapping.opponent)
             rival_mapping = self.get_player_mapping(rival.sid)
             fen = self.get_game_fen(mapping.game_id)
+            moves = self.get_game_moves(mapping.game_id)
             white = player
             black = rival
+            move_ttl = mapping.ttl_start_time if mapping.ttl_start_time != 'None' else rival_mapping.ttl_start_time
             white_time = mapping.time_remaining
             white_turn_start_time = mapping.turn_start_time
             black_time = rival_mapping.time_remaining
@@ -113,7 +118,10 @@ class GameServer:
             # who's turn is it? Based on who's got the lower turn start time
             if mapping.turn_start_time < rival_mapping.turn_start_time:
                 turn = rival_mapping.color
-
+            if move_ttl != 'None':
+                move_ttl = 30000 - (curr_time - move_ttl)
+            else:
+                move_ttl = None
             if mapping.color == BLACK:
                 white, black = black, white
                 white_time, black_time = black_time, white_time
@@ -128,10 +136,12 @@ class GameServer:
                 white_time -= elapsed
             game = Game(game_id=mapping.game_id,
                         position=fen,
+                        moves=moves,
                         white_remaining=white_time,
                         black_remaining=black_time,
                         white=white,
-                        black=black)
+                        black=black,
+                        move_ttl=move_ttl)
             return player.sid, {'color': mapping.color, 'game': game.to_dict()}
         else:
             self.set_player_session(player=player)
@@ -148,6 +158,8 @@ class GameServer:
         player_info = self.redis.get_player_mapping(sid)
         game_id = player_info.game_id
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
+        if player_info.ttl_start_time != 'None':
+            self.redis.set_player_value(player_info.sid, TTL_START_TIME, None)
         if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
             # we're in the process of timeouting the game. Just quit now and let it timeout gracefully
             print("We're in the process of terminating game. No move recorded. Quitting.")
@@ -182,19 +194,23 @@ class GameServer:
             board = chess.Board()
         else:
             board = chess.Board(game_fen)
+        if board.starting_fen == board.fen():       # first move
+            self.redis.set_player_value(rival_info.sid, TTL_START_TIME, curr_time)
+            expire_in_future = curr_time + 30000        # 30 seconds from now
+            self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
         if not board.is_legal(the_move):
-            print(the_move)
-            raise ValueError("Illegal move captured!")
+            print("ILLEGAL MOVE DETECTED: " + the_move)
+            #raise ValueError("Illegal move captured!")
         board.push(the_move)
         print(board)
         self.redis.set_game_fen(game_id, board.fen())
-        self.redis.add_move_to_game(player_info.game_id, the_move)
+        self.redis.add_move_to_game(player_info.game_id, move["san"])
         if board.is_game_over():
             # reset previous timeout settings due to turn switching
             self.redis.cancel_game_timeout(game_id=game_id)
             self.redis.set_game_timeout(game_id=game_id, timeout=curr_time)
-            print("Game over. Player checkmated. Quitting.")
-            return None, None
+            print(f"Game over. {get_turn_from_fen(board.fen())} checkmated.")
+            #return None, None
         update = json.dumps(payload)
         print(update)
         return rival, update

@@ -125,28 +125,28 @@ button:focus {
 /* Start Gradient Area css
 ============================================================================================ */
 .gradient-bg, .header_area .navbar .nav .nav-item.submenu ul .nav-item:hover .nav-link, .blog_right_sidebar .widget_title, .blog_right_sidebar .newsletter_widget .bbtns, .blog_right_sidebar .tag_cloud_widget ul li a:hover, .blog-pagination .page-item.active .page-link, .blog-pagination .page-link:hover, .comments-area .btn-reply:hover, .recent_update_inner .nav.nav-tabs li a.active, .recent_update_inner .nav.nav-tabs li a:hover, .common_style .line:after, .price_item:hover .price_head, .price_item:hover .price_footer, .testimonial_area .active_testimonial .owl-dots, .news_widget .input-group .sub-btn {
-  background: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: linear-gradient(90deg, #008000 0%, #66ff66 100%); }
+  background: -webkit-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: -moz-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: -o-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: linear-gradient(90deg, #008000 0%, #1bdf33 100%); }
 
 .border-gradient {
-  border-image: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  border-image: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  border-image: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  border-image: linear-gradient(90deg, #008000 0%, #66ff66 100%); }
+  border-image: -webkit-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  border-image: -moz-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  border-image: -o-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  border-image: linear-gradient(90deg, #008000 0%, #1bdf33 100%); }
 
 .gradient-bg2 {
-  background: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: linear-gradient(90deg, #008000 0%, #66ff66 100%); }
+  background: -webkit-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: -moz-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: -o-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: linear-gradient(90deg, #008000 0%, #1bdf33 100%); }
 
 .gradient-color, .contact_info .info_item i, .recent_update_inner .nav.nav-tabs li a span.lnr {
-  background: -webkit-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: -moz-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: -o-linear-gradient(90deg, #008000 0%, #66ff66 100%);
-  background: linear-gradient(90deg, #008000 0%, #66ff66 100%);
+  background: -webkit-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: -moz-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: -o-linear-gradient(90deg, #008000 0%, #1bdf33 100%);
+  background: linear-gradient(90deg, #008000 0%, #1bdf33 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent; }
 
@@ -166,21 +166,21 @@ button:focus {
   text-transform: uppercase;
   border: double 2px transparent;
   border-radius: 5px;
-  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
   background-origin: border-box;
   background-clip: content-box, border-box; }
   .primary_btn span {
     padding: 0 35px; }
   .primary_btn:hover {
-    background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: linear-gradient(to right, #008000 0%, #1bdf33 100%), radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -webkit-linear-gradient(to right, #008000 0%, #1bdf33 100%), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -moz-linear-gradient(to right, #008000 0%, #1bdf33 100%), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -ms-linear-gradient(to right, #008000 0%, #1bdf33 100%), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -o-linear-gradient(to right, #008000 0%, #1bdf33 100%), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     color: #fff;
     box-shadow: 0px 10px 30px rgba(130, 82, 250, 0.2);
     border: 2px solid transparent; }
@@ -433,20 +433,20 @@ button:focus {
     color: #222222; }
   .header_area .navbar-right .primary_btn {
     min-width: 145px;
-    background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: linear-gradient(to right, #008000 0%, #1bdf33 100%), radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -webkit-linear-gradient(to right, #008000 0%, #1bdf33 100%), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -moz-linear-gradient(to right, #008000 0%, #1bdf33 100%), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -ms-linear-gradient(to right, #008000 0%, #1bdf33 100%), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -o-linear-gradient(to right, #008000 0%, #1bdf33 100%), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     color: #fff; }
     .header_area .navbar-right .primary_btn:hover {
       background: transparent;
       color: #222222;
-      background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-      background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-      background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-      background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-      background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+      background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+      background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+      background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+      background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+      background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
       background-origin: border-box;
       background-clip: content-box, border-box; }
 
@@ -869,11 +869,11 @@ button:focus {
     border-radius: 45px;
     z-index: 0;
     border: double 2px transparent;
-    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     background-origin: border-box;
     background-clip: content-box, border-box;
     padding: 0;
@@ -1466,7 +1466,7 @@ button:focus {
 .label {
   width: 70%;
   font-weight: bolder;
-  font-size: 16px;
+  font-size: 20px;
   #font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
 }
 
@@ -1503,7 +1503,7 @@ button:focus {
 }
 
 .clockspan {
-    padding: 5px;
+    padding: 7px;
     background: #E1ECE0;
     box-shadow: inset 0px 0px 10px 5px #c2d0c1;
 }
@@ -1511,6 +1511,7 @@ button:focus {
 .playerBox {
   margin: auto;
   max-width: 400px;
+  width: 100%;
   height: 80px;
   color: black;
   #border-radius: 25px;
@@ -1523,20 +1524,21 @@ button:focus {
 
 .board {
   margin: auto;
-  width: 500px;
-  height: 500px;
+  width: 450px;
+  height: 450px;
   position: relative;
 }
 
 .boxesHolder {
   margin: auto;
+  position: relative;
   margin-left: 5px;
   margin-top: 44px;
   background: #fcf8ff;
   #border-radius: 25px;
   border: 1px hidden #008000;
   max-width: 400px;
-  height: 550px;
+  height: 500px;
   box-shadow: inset 0px 0px 10px 5px #c2d0c1;
 }
 
@@ -1546,12 +1548,12 @@ button:focus {
   background: #E1ECE0;
   box-shadow: inset 0px 0px 10px 5px #c2d0c1;
   border: 1px hidden #008000;
-  width: 550px;
-  height: 550px;
+  width: 500px;
+  height: 500px;
 }
 
 .vbottom{
-	margin-top: 390px;
+	position: absolute;
 }
 
 .vbottomclock {
@@ -1568,14 +1570,74 @@ button:focus {
   width: 50%;
 }
 
-th, td {
-  padding: 15px;
+.timeCell {
+  padding: 5px;
+  width: 45%;
   text-align: center;
-  border: 1px solid black;
+  border: 1px solid lavender;
+  font-size: 20px;
+  font-weight: bolder;
+  font-family: 'ProFontWindows';
+  box-shadow: inset 0px 0px 1px 1px #c2d0c1;
+}
+
+th, td {
+  padding: 5px;
+  width: 45%;
+  text-align: center;
+  border: 1px solid lavender;
+  font-size: 15px;
+  font-family: 'Montserat';
+  box-shadow: inset 0px 0px 1px 1px #c2d0c1;
+}
+
+.regularCell {
+  padding: 5px;
+  width: 45%;
+  text-align: center;
+  border: 1px solid lavender;
+  font-size: 15px;
+  font-family: "Montserat";
+  box-shadow: inset 0px 0px 1px 1px #c2d0c1;
+}
+
+.regularCell:hover {
+  #background-color: #c2d0c1;
+  color: white;
+  font-weight: bolder;
+  background-image: linear-gradient(to right, #008000 0%, #1bdf33 100%), radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -webkit-linear-gradient(to right, #008000 0%, #1bdf33 100%), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -moz-linear-gradient(to right, #008000 0%, #1bdf33 100%), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -ms-linear-gradient(to right, #008000 0%, #1bdf33 100%), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -o-linear-gradient(to right, #008000 0%, #1bdf33 100%), -o-radial-gradient(circle at top left, #008000, #1bdf33);
+}
+
+.moveBox {
+  height: 390px;
+}
+
+.tableWrapper {
+  overflow-y: scroll;
+  height: 90%;
+}
+
+.edgeCell {
+  width: 5.5%;
+}
+
+.whiteCell {
+  background-color: white;
+}
+.blackCell {
+  background-color: black;
+}
+
+.moveTableHeader {
+  width: 100%;
 }
 .moveTable {
   width: 100%;
-  border: 1px solid black;
+  position: relative;
 }
 
 @media screen and (max-width: 1105px){
@@ -1614,7 +1676,7 @@ th, td {
     padding: 5px;
     opacity: 0;
     font-size: 20px;
-    font-family: 'Orbitron';
+    font-family: 'ProFontWindows';
     font-weight: bold;
     border: 0px solid #008000;
     color: black;
@@ -1625,11 +1687,11 @@ th, td {
     -o-transition: all 0.4s ease 0s;
     transition: all 0.4s ease 0s;
     border-radius: 5px;
-    #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     background-origin: border-box;
     background-clip: content-box, border-box; }
 }
@@ -1648,7 +1710,7 @@ th, td {
     padding: 10px;
     opacity: 0;
     font-size: 30px;
-    font-family: 'Orbitron';
+    font-family: 'ProFontWindows';
     font-weight: bold;
     border: 0px solid #008000;
     color: black;
@@ -1659,11 +1721,11 @@ th, td {
     -o-transition: all 0.4s ease 0s;
     transition: all 0.4s ease 0s;
     border-radius: 5px;
-    #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    #background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     background-origin: border-box;
     background-clip: content-box, border-box; }
 }
@@ -1735,11 +1797,11 @@ th, td {
   margin-top: 20px;
   cursor: pointer;
   border: none;
-  background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-  background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
+  background-image: linear-gradient(to right, #008000 0%, #1bdf33 100%), radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -webkit-linear-gradient(to right, #008000 0%, #1bdf33 100%), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -moz-linear-gradient(to right, #008000 0%, #1bdf33 100%), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -ms-linear-gradient(to right, #008000 0%, #1bdf33 100%), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+  background-image: -o-linear-gradient(to right, #008000 0%, #1bdf33 100%), -o-radial-gradient(circle at top left, #008000, #1bdf33);
   color: #fff;
   box-shadow: 0px 10px 30px rgba(130, 82, 250, 0.2);
   border: 2px solid transparent;
@@ -1751,11 +1813,11 @@ th, td {
   .contact_form .primary_btn:hover {
     border: double 2px transparent;
     border-radius: 5px;
-    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     background-origin: border-box;
     background-clip: content-box, border-box;
     color: #222222; }
@@ -3225,11 +3287,11 @@ h6 {
     background: #fcf8ff;
     border: double 2px transparent;
     border-radius: 5px;
-    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #66ff66);
+    background-image: linear-gradient(white, white), radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+    background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #008000, #1bdf33);
     background-origin: border-box;
     background-clip: content-box, border-box; }
     .price_item:hover .price_head {
@@ -3246,11 +3308,11 @@ h6 {
         .price_item:hover .price_footer h3 .month {
           color: #fff; }
       .price_item:hover .price_footer .primary_btn {
-        background-image: linear-gradient(to right, #008000 0%, #66ff66 100%), radial-gradient(circle at top left, #008000, #66ff66);
-        background-image: -webkit-linear-gradient(to right, #008000 0%, #66ff66 100%), -webkit-radial-gradient(circle at top left, #008000, #66ff66);
-        background-image: -moz-linear-gradient(to right, #008000 0%, #66ff66 100%), -moz-radial-gradient(circle at top left, #008000, #66ff66);
-        background-image: -ms-linear-gradient(to right, #008000 0%, #66ff66 100%), -ms-radial-gradient(circle at top left, #008000, #66ff66);
-        background-image: -o-linear-gradient(to right, #008000 0%, #66ff66 100%), -o-radial-gradient(circle at top left, #008000, #66ff66);
+        background-image: linear-gradient(to right, #008000 0%, #1bdf33 100%), radial-gradient(circle at top left, #008000, #1bdf33);
+        background-image: -webkit-linear-gradient(to right, #008000 0%, #1bdf33 100%), -webkit-radial-gradient(circle at top left, #008000, #1bdf33);
+        background-image: -moz-linear-gradient(to right, #008000 0%, #1bdf33 100%), -moz-radial-gradient(circle at top left, #008000, #1bdf33);
+        background-image: -ms-linear-gradient(to right, #008000 0%, #1bdf33 100%), -ms-radial-gradient(circle at top left, #008000, #1bdf33);
+        background-image: -o-linear-gradient(to right, #008000 0%, #1bdf33 100%), -o-radial-gradient(circle at top left, #008000, #1bdf33);
         background: #fff;
         color: #222222; }
 

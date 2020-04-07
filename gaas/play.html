@@ -34,11 +34,11 @@
                 <div id="leftPane" class="leftpane">
                     <span id="boardandclock" class="boardandclock">
                         <div id="clockdivA" class="clock">
-                          <span class="clockspan">
-                            <span class="minutes"></span> :
-                            <span class="seconds"></span> .
-                            <span class="millis"></span>
-                          </span>
+                              <span class="clockspan">
+                                <span class="minutes"></span> :
+                                <span class="seconds"></span> .
+                                <span class="millis"></span>
+                              </span>
                         </div>
                         <div id="boardHolder" class="boardHolder">
                             <div id="upperClock" class="smallClock">
@@ -75,13 +75,21 @@
                                 <div id="labelRatingA" class="labelRating"></div>
                             </div>
                         </div>
-                        <div id="boxZ" class="infoBox"></div>
-                        <table id="moveTable" class="moveTable">
-                          <tr>
-                            <th>White</th>
-                            <th>Black</th>
-                          </tr>
-                        </table>
+                        <div id="boxZ" class="moveBox">
+                            <table id="moveTableHeader" class="moveTableHeader">
+                                <thead>
+                                  <tr>
+                                    <th class="edgeCell whiteCell"></th>
+                                    <th>White</th>
+                                    <th>Black</th>
+                                    <th class="edgeCell blackCell"></th>
+                                  </tr>
+                                </thead>
+                            </table>
+                            <div id="tableWrapper" class="tableWrapper">
+                                <table id="moveTable" class="moveTable"></table>
+                            </div>
+                        </div>
                         <div id="boxB" class="playerBox vbottom">
                             <div id="playerInfoB" class="playerInfoB row">
                                 <div id="connectIconBottom" class="dotbottom"></div>

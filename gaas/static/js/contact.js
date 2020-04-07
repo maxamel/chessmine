@@ -1,8 +1,11 @@
+
+
 $(document).ready(function(){
 
 
     var timeintervalA = null
     var timeintervalB = null
+    var moveInterval = null
     ///// CLOCK
     function getTimeRemaining(endtime) {
           var t = endtime// - new Date().getTime();
@@ -91,6 +94,7 @@ $(document).ready(function(){
         the_game = ans.game
         my_time = JSON.stringify(the_game.white_remaining)
         rival_time = JSON.stringify(the_game.black_remaining)
+        ttl_time = JSON.stringify(the_game.move_ttl)
         me = the_game.white
         rival = the_game.black
         my_color = my_color.slice(1, -1);
@@ -99,6 +103,7 @@ $(document).ready(function(){
             me = [rival, rival=me][0]
         }
         the_game_fen = the_game.position
+        the_game_moves = JSON.parse(the_game.moves)
         obj = JSON.parse(data)
         player_id = obj.sid
         document.getElementById("labelTitleA").innerText = rival["name"]
@@ -136,7 +141,8 @@ $(document).ready(function(){
         board = Chessboard('myBoard', config)
 
         game = new Chess(the_game_fen)
-        isStart = my_time === rival_time
+        insertBulkMoves(the_game_moves, ttl_time)
+        isStart = my_time === rival_time && my_time % 1000 == 0
         if (!isStart) {
             turn = game.turn()
             mine = my_color.charAt(0)
@@ -164,7 +170,7 @@ $(document).ready(function(){
         ans = JSON.parse(ans)
         the_move = ans.move
         if (game.turn() != the_move.color) {
-            return      // Get my own move back
+            return      // Got my own move back
         }
         game.move(the_move.san)
         // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
@@ -177,9 +183,10 @@ $(document).ready(function(){
         else
             board.move(the_move.from + "-" + the_move.to)
 
+        insertMove(the_move)
         if (ans.remaining) {
             if (my_color.charAt(0) == the_move.color) {
-                console.log("Got my own move back")
+                console.log("Got my own move from another window")
                 other_remaining = ans.remaining
                 initializeClock('clockdivA', ans.remaining);
                 clearInterval(timeintervalB)
@@ -206,6 +213,7 @@ $(document).ready(function(){
             if (move != null) {
                 socket.emit('update', json, function(ret){
                     ret = JSON.parse(ret)
+                    insertMove(move)
                     if (ret.remaining) {
                         clearInterval(timeintervalB)
                         setTime('clockdivB', ret["other_remaining"])
@@ -241,6 +249,70 @@ $(document).ready(function(){
             */
     })
 
+    function insertMove(move) {
+        index = 0
+        if (game.turn() === 'b') {
+            document.getElementById("moveTable").insertRow(-1)
+        } else {
+            index = 2;
+        }
+        handle_move(move.san, index, 30000, true)
+    }
+
+    function insertBulkMoves(moves, ttl) {
+        var table = document.getElementById('moveTable');
+        var rowCount = table.rows.length;
+        for  (var i=0; i<rowCount; i++) {
+            table.deleteRow(-1);
+        }
+        let index = 0;
+        //let d = 0
+        console.log(moves)
+        for (var i=0; i<moves.length; i++) {
+            if (i % 2 == 0) {
+                index = 0;
+                document.getElementById("moveTable").insertRow(-1)
+            }
+            else {
+                index = 2;
+            }
+            handle_move(moves[i], index, ttl, moves.length == 1)
+        }
+    }
+
+    function handle_move(move, index, ttl, isFirstMove) {
+        num_rows = document.getElementById("moveTable").rows.length
+        if (index == 0) {
+            cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index)
+            cell.innerHTML = num_rows
+            cell.setAttribute("class", "edgeCell");
+            index++;
+        }
+        row = document.getElementById("moveTable").rows[num_rows - 1]
+        if (row.cells.length == 3) {
+            clearInterval(moveInterval)
+            document.getElementById("moveTable").rows[num_rows - 1].deleteCell(-1)
+        }
+        cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index)
+        cell.innerHTML = move
+        cell.setAttribute("class", "regularCell")
+        if (num_rows == 1 && index == 1 && isFirstMove) {
+            index++
+            cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index)
+            cell.innerHTML = Math.floor(ttl/1000)
+            cell.setAttribute("class", "timeCell")
+            clearInterval(moveInterval)
+            moveInterval = setInterval(function () {
+                cell.innerHTML = cell.innerHTML - 1;
+                if (cell.innerHTML == 0) {
+                    alert("No move was made on time. Game abandoned.");
+                    clearInterval(moveInterval);
+                }
+            }, 1000);
+        }
+        d = document.getElementById("tableWrapper")
+        d.scrollTo(0, d.scrollHeight)
+    }
 
     function removeGreySquares () {
       $('#myBoard .square-55d63').css('background', '')
@@ -276,7 +348,6 @@ $(document).ready(function(){
 
     function onDrop (source, target) {
       // see if the move is legal
-      console.log("MILLIS " + game.turn())
       var move = game.move({
         from: source,
         to: target,
@@ -300,7 +371,6 @@ $(document).ready(function(){
             "sid": player_id,
             "move": move
         }
-        console.log("Gello " + move)
         if (move != null) {
             socket.emit('update', json, function(ret){
                 ret = JSON.parse(ret)
@@ -309,6 +379,7 @@ $(document).ready(function(){
                     setTime('clockdivB', ret["other_remaining"])
                     initializeClock('clockdivA', ret["remaining"])
                 }
+                insertMove(move)
             })
         }
     }

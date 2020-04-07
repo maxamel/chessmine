@@ -19,7 +19,7 @@ def match(sid1, sid2):
     p1 = game_server.get_player_session(sid1)
     p2 = game_server.get_player_session(sid2)
     game_id = game_server.map_rivals(sid1, sid2, time_control=tc)
-    game = Game(game_id=game_id, position=chess.Board().fen(), white_remaining=tc,
+    game = Game(game_id=game_id, position=chess.Board().fen(), moves=[], white_remaining=tc,
                 black_remaining=tc, white=p1, black=p2)
     print(tc)
     socketio.emit("game", {'color': WHITE, 'game': game.to_dict()},
