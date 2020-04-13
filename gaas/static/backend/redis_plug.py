@@ -43,6 +43,12 @@ class RedisPlug:
             return None
         return self.r.hget(self.game + game_id, FEN)
 
+    def get_game_pgn(self, game_id) -> str:
+        key = self.game + game_id
+        if not self.r.exists(key):
+            return None
+        return self.r.hget(self.game + game_id, PGN)
+
     # Should be set when user first connects to store his info and cleared when heartbeats are unanswered
     def set_player_session(self, player: Player):
         key = self.player_info + player.sid
@@ -66,6 +72,10 @@ class RedisPlug:
     def set_game_fen(self, game_id, fen) -> str:
         key = self.game + game_id
         self.r.hset(key, FEN, fen)
+
+    def set_game_pgn(self, game_id, pgn) -> str:
+        key = self.game + game_id
+        self.r.hset(key, FEN, pgn)
 
     def map_player(self, player, opponent, color, game_id, time_control=None, turn_start=None):
         key = self.player + player

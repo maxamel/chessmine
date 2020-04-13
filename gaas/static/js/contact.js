@@ -2,6 +2,7 @@
 
 $(document).ready(function(){
 
+    fillThemes()
 
     var timeintervalA = null
     var timeintervalB = null
@@ -66,11 +67,14 @@ $(document).ready(function(){
     var board = null
     var $board = $('#myBoard')
     var game = new Chess()
+    var moveList = []
     var $status = $('#status')
     var $fen = $('#fen')
     var $pgn = $('#pgn')
     var whiteSquareGrey = '#a9a9a9'
     var blackSquareGrey = '#696969'
+    var whiteSquare = '#9e7863'
+    var blacksquare = '#633526'
     var futureMove = false
     var futureMoveData = null
     var player_id = null
@@ -125,9 +129,13 @@ $(document).ready(function(){
         setTime('clockdivA', rival_time)
         setTime('clockdivB', my_time)
 
+        chosenTheme = dilena_board_theme
+        whiteSquare = chosenTheme[0]
+        blacksquare = chosenTheme[1]
         fenobj = Chessboard.fenToObj(the_game_fen)
         var config = {
               pieceTheme: 'static/img/chesspieces/chess24/{piece}.png',
+              boardTheme: chosenTheme,
               draggable: true,
               position: the_game_fen,
               orientation: my_color,
@@ -256,6 +264,7 @@ $(document).ready(function(){
         } else {
             index = 2;
         }
+        moveList.push(move.san)
         handle_move(move.san, index, 30000, true)
     }
 
@@ -268,6 +277,7 @@ $(document).ready(function(){
         let index = 0;
         //let d = 0
         console.log(moves)
+        moveList = moves
         for (var i=0; i<moves.length; i++) {
             if (i % 2 == 0) {
                 index = 0;
@@ -296,6 +306,7 @@ $(document).ready(function(){
         cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index)
         cell.innerHTML = move
         cell.setAttribute("class", "regularCell")
+        cell.addEventListener("click", clickedCell, false);
         if (num_rows == 1 && index == 1 && isFirstMove) {
             index++
             cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index)
@@ -314,8 +325,91 @@ $(document).ready(function(){
         d.scrollTo(0, d.scrollHeight)
     }
 
+    function clickedCell(cell) {
+        row = cell.srcElement.parentElement.rowIndex
+        normalized_row = row+1
+        pgn = game.pgn()
+        ind = pgn.indexOf(normalized_row+".")
+        console.log("PGN ", pgn)
+        console.log("IND ", ind)
+    }
+
+    function clickedTheme(theme) {
+        if (e.target !== this)
+        return;
+        theme.stopPropagation()
+        console.log(theme)
+        theme.srcElement.parentElement.parentElement.style.backgroundColor = 'red';
+    }
+
+    function fillThemes() {
+        board_themes = [
+            leipzig_board_theme,
+            chess24_board_theme,
+            wikipedia_board_theme,
+            dilena_board_theme,
+            uscf_board_theme,
+            metro_board_theme,
+            symbol_board_theme
+        ]
+        piece_themes = [
+            leipzig_piece_theme,
+            chess24_piece_theme,
+            wikipedia_piece_theme,
+            dilena_piece_theme,
+            uscf_piece_theme,
+            metro_piece_theme,
+            symbol_piece_theme,
+            alpha_piece_theme,
+        ]
+        themes = document.getElementsByClassName("themeTable")
+        for (var t = 0; t < themes.length; t++) {
+            theme = themes.item(t);
+            board_theme = board_themes[t]
+            for (var j = 0; j < 2; j++) {
+                // table row creation
+                var row = document.createElement("tr");
+                for (var i = 0; i < 2; i++) {
+                    var cell = document.createElement("td");
+                    if (j == 0) cell.style.backgroundColor = board_theme[i]
+                    else cell.style.backgroundColor = board_theme[1-i]
+                    row.appendChild(cell);
+                }
+                //row added to end of table body
+                theme.appendChild(row);
+            }
+        }
+        themes = document.getElementsByClassName("pieceHolder")
+        for (var t = 0; t < themes.length; t++) {
+            theme = themes.item(t);
+            piece_theme = piece_themes[t]
+            var img = document.createElement("IMG");
+            img.src = piece_theme("wQ");
+            img.style.maxHeight = "100%";
+            img.style.maxWidth = "100%";
+            theme.appendChild(img);
+        }
+
+        conts = document.getElementsByClassName("themeContainer")
+        for (var c = 0; c < conts.length; c++) {
+            conts[c].addEventListener("click", function(event) {
+                var elem = event.srcElement
+                while (elem.className != "themeContainer") {
+                    elem = elem.parentElement
+                }
+                if (elem.parentElement.id === 'settingItemBoard')
+                    $('#settingItemBoard .themeContainer').css('backgroundColor', '')
+                if (elem.parentElement.id === 'settingItemPiece')
+                    $('#settingItemPiece .themeContainer').css('backgroundColor', '')
+                elem.style.backgroundColor = "#bdcad8";
+            }, false)
+        }
+
+    }
+
     function removeGreySquares () {
-      $('#myBoard .square-55d63').css('background', '')
+        $('#myBoard .white-1e1d7').css('background', whiteSquare)
+        $('#myBoard .black-3c85d').css('background', blacksquare)
     }
 
     function removeHighlights (color) {
@@ -324,7 +418,6 @@ $(document).ready(function(){
 
     function greySquare (square) {
       var $square = $('#myBoard .square-' + square)
-
       var background = whiteSquareGrey
       if ($square.hasClass('black-3c85d')) {
         background = blackSquareGrey
@@ -407,7 +500,7 @@ $(document).ready(function(){
     }
 
     function onMouseoutSquare (square, piece) {
-      removeGreySquares()
+        removeGreySquares()
     }
     // update the board position after the piece snap
     // for castling, en passant, pawn promotion

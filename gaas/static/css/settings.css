@@ -1,0 +1,118 @@
+
+.settingsBox {
+  opacity: 1;
+  padding: 30px;
+  display: block;
+  background: #364f6b;
+  background-size: cover;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.themeContainer {
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+}
+
+.themeTable {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.themeContainer:hover {
+    background-color: #0f2f53;
+    outline: none;
+}
+
+.themeContainer:focus {
+    outline: none;
+}
+
+.pieceHolder {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.settingsWrapper {
+  border: 2px solid #bdcad8;
+  box-shadow: inset 0px 0px 1px 1px #fc5185;
+  padding: 4px;
+  width: 100%;
+  height: 90%;
+  margin: auto;
+}
+
+.themeBox {
+  width: 85%;
+}
+
+.settingSelector{
+  margin: 40px;
+  width: 100%;
+}
+.settingItem {
+  padding: 20px;
+  color: white;
+  font-family: "Baloo Paaji 2";
+  font-weight: normal;
+  font-size: 15px;
+  margin: auto;
+}
+.boardSetting {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.boardChoice {
+  width: 100px;
+  height: 100px;
+  border: 1px solid crimson;
+}
+
+.settingPoint {
+  padding: 10px;
+  color: white;
+  font-family: "Baloo Paaji 2";
+  font-weight: lighter;
+  font-size: 20px;
+  width: 15%;
+  margin: auto;
+  margin-left: 0;
+}
+
+.settingsContainer {
+  opacity: 1;
+  background: #364f6b;
+  border: 2px solid #bdcad8;
+  box-shadow: inset 0px 0px 1px 1px #fc5185;
+  @border-spacing: 10px;
+  #outline: 2px solid yellowgreen;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+.borderText {
+  overflow: hidden;
+  padding: 0 10px;
+  height: 40px;
+  width: 255px;
+  background: #364f6b;
+  z-index: 1000;
+  position: relative;
+  color: #bdcad8;
+  font-family: "Baloo Paaji 2 SemiBold";
+  text-shadow: 1px 1px #fc5185;
+  text-decoration: underline;
+  left: 20%;
+  top: 6%;
+}

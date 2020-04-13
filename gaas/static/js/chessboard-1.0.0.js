@@ -578,6 +578,11 @@
         (!isString(config.pieceTheme) && !isFunction(config.pieceTheme))) {
       config.pieceTheme = 'img/chesspieces/wikipedia/{piece}.png'
     }
+	
+	// default color board theme
+	if (!config.hasOwnProperty('boardTheme') || config.boardTheme.length != 2 ){
+	    config.boardTheme = ["#f0d9b5", "#b58863"];
+	}
 
     // animation speeds
     if (!validAnimationSpeed(config.appearSpeed)) config.appearSpeed = DEFAULT_APPEAR_SPEED
@@ -1118,10 +1123,24 @@
         $('#' + squareElsIds[i]).append(buildPieceHTML(currentPosition[i]))
       }
     }
+	
+	function addBoardTheme() {
+	  var wcol = config.boardTheme[0];
+	  var bcol = config.boardTheme[1];
+
+	  $container.find(".white-1e1d7").css("background-color", wcol)
+	  $container.find(".white-1e1d7").css("color", bcol)
+
+	  $container.find(".black-3c85d").css("background-color", bcol)
+	  $container.find(".black-3c85d").css("color", wcol)
+
+
+	}
 
     function drawBoard () {
       $board.html(buildBoardHTML(currentOrientation, squareSize, config.showNotation))
       drawPositionInstant()
+	  addBoardTheme();
 
       if (config.sparePieces) {
         if (currentOrientation === 'white') {

@@ -190,6 +190,7 @@ class GameServer:
         move = payload["move"]
         the_move = chess.Move.from_uci(move["from"] + move["to"])
         game_fen = self.redis.get_game_fen(player_info.game_id)
+        game_pgn = self.redis.get_game_pgn(player_info.game_id)
         if game_fen is None:
             board = chess.Board()
         else:
@@ -204,6 +205,7 @@ class GameServer:
         board.push(the_move)
         print(board)
         self.redis.set_game_fen(game_id, board.fen())
+        self.redis.set_game_pgn(game_id, board.pg)
         self.redis.add_move_to_game(player_info.game_id, move["san"])
         if board.is_game_over():
             # reset previous timeout settings due to turn switching

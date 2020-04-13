@@ -10,6 +10,7 @@ TTL_START_TIME = "ttl_start_time"
 GAME = "game_id"
 
 FEN = "fen"
+PGN = "pgn"
 TURN = "turn"
 EXPIRE = "expire"
 
