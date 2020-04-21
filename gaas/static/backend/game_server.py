@@ -78,22 +78,24 @@ class GameServer:
         return self.redis.get_player_session(sid)
 
     def get_player_from_cookie(self, cookie):
-        if not cookie:
+        if "sid" not in cookie:
             sid = uuid.uuid4().hex
-            player = Player(sid=sid)
+            cookie = json.loads(cookie)
+            player = Player(sid=sid, preferences=cookie["preferences"])
         else:
             cookie = json.loads(cookie)
             sid = cookie["sid"]
             name = cookie["name"]
             rating = cookie["rating"]
-            player = Player(sid=sid, name=name, rating=rating)
+            preferences = cookie["preferences"]
+            player = Player(sid=sid, name=name, rating=rating, preferences=preferences)
 
         return player
 
     def find_match(self, player):
         return self.matcher.match(player)
 
-    def connect(self, payload):
+    def play(self, payload):
         '''
         :param payload: the cookie as sent by player
         :return: sid of recepient player and the data to send
@@ -144,7 +146,8 @@ class GameServer:
                         move_ttl=move_ttl)
             return player.sid, {'color': mapping.color, 'game': game.to_dict()}
         else:
-            self.set_player_session(player=player)
+            if not self.get_player_session(sid=player.sid):
+                self.set_player_session(player=player)
             self.find_match(player=player)
             return player.sid, {'user': player.to_dict()}
 
@@ -205,7 +208,7 @@ class GameServer:
         board.push(the_move)
         print(board)
         self.redis.set_game_fen(game_id, board.fen())
-        self.redis.set_game_pgn(game_id, board.pg)
+        #self.redis.set_game_pgn(game_id, board.pg)
         self.redis.add_move_to_game(player_info.game_id, move["san"])
         if board.is_game_over():
             # reset previous timeout settings due to turn switching
@@ -216,3 +219,58 @@ class GameServer:
         update = json.dumps(payload)
         print(update)
         return rival, update
+
+    def heartbeat(self, payload):
+        '''
+        :param payload: the cookie as sent by player
+        :return: sid of recepient player and the data to send if game is in progress, otherwise None
+        '''
+        cookie = payload["data"]
+        if not cookie or cookie == 'null':
+            return None, None
+        player = self.get_player_from_cookie(cookie)
+        mapping = self.get_player_mapping(player.sid)
+        if mapping is not None:
+            curr_time = current_milli_time()
+            rival = self.get_player_session(mapping.opponent)
+            rival_mapping = self.get_player_mapping(rival.sid)
+            fen = self.get_game_fen(mapping.game_id)
+            moves = self.get_game_moves(mapping.game_id)
+            white = player
+            black = rival
+            move_ttl = mapping.ttl_start_time if mapping.ttl_start_time != 'None' else rival_mapping.ttl_start_time
+            white_time = mapping.time_remaining
+            white_turn_start_time = mapping.turn_start_time
+            black_time = rival_mapping.time_remaining
+            black_turn_start_time = rival_mapping.turn_start_time
+            turn = mapping.color
+            # who's turn is it? Based on who's got the lower turn start time
+            if mapping.turn_start_time < rival_mapping.turn_start_time:
+                turn = rival_mapping.color
+            if move_ttl != 'None':
+                move_ttl = 30000 - (curr_time - move_ttl)
+            else:
+                move_ttl = None
+            if mapping.color == BLACK:
+                white, black = black, white
+                white_time, black_time = black_time, white_time
+                white_turn_start_time, black_turn_start_time = black_turn_start_time, white_turn_start_time
+            # player connecting in middle of turn. Adjust his remaining time to reflect how much time he's got
+            # left starting now (check we're in middle of turn)
+            if turn == BLACK and black_turn_start_time != 'None' and black_turn_start_time > 0:
+                elapsed = curr_time - black_turn_start_time
+                black_time -= elapsed
+            elif white_turn_start_time != 'None' and white_turn_start_time > 0:
+                elapsed = curr_time - white_turn_start_time
+                white_time -= elapsed
+            game = Game(game_id=mapping.game_id,
+                        position=fen,
+                        moves=moves,
+                        white_remaining=white_time,
+                        black_remaining=black_time,
+                        white=white,
+                        black=black,
+                        move_ttl=move_ttl)
+            return player.sid, {'color': mapping.color, 'game': game.to_dict()}
+        else:
+            return None, None

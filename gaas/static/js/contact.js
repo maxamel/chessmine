@@ -1,9 +1,7 @@
 
 
 $(document).ready(function(){
-
-    fillThemes()
-
+    $(".fullpage").fadeOut("slow");
     var timeintervalA = null
     var timeintervalB = null
     var moveInterval = null
@@ -80,20 +78,28 @@ $(document).ready(function(){
     var player_id = null
     var other_remaining = 300000
     var my_color = null
+    var boardTheme = "metro"
+    var pieceTheme = "metro"
+    var timeControl = "5+0"
+    var queenAutopromote = false
+    var highlightMoves = false
 
-    var data = localStorage.getItem("chess_info")
+    var cookie_data = localStorage.getItem("user_session")
     var socket = io('http://localhost:5000/connect');
 
     socket.on('connection_id', function (ans) {
-        localStorage.setItem("chess_info", JSON.stringify(ans.user))
-        data = localStorage.getItem("chess_info")
+        delete ans.user.preferences;
+        user_data = JSON.stringify(ans.user);
+        localStorage.setItem("user_session", user_data);
+        cookie_data = user_data;
     });
     socket.on('game_over', function (ans) {
-        alert(JSON.stringify(ans))
-        clearInterval(timeintervalA)
-        clearInterval(timeintervalB)
+        alert(JSON.stringify(ans));
+        clearInterval(timeintervalA);
+        clearInterval(timeintervalB);
     });
     socket.on('game', function (ans) {
+        load_cookies()
         my_color = JSON.stringify(ans.color)
         the_game = ans.game
         my_time = JSON.stringify(the_game.white_remaining)
@@ -108,16 +114,15 @@ $(document).ready(function(){
         }
         the_game_fen = the_game.position
         the_game_moves = JSON.parse(the_game.moves)
-        obj = JSON.parse(data)
-        player_id = obj.sid
+        player_id = cookie_data.sid
         document.getElementById("labelTitleA").innerText = rival["name"]
         document.getElementById("labelRatingA").innerText = rival["rating"]
         document.getElementById("labelTitleASmall").innerText = rival["name"]
         document.getElementById("labelRatingASmall").innerText = rival["rating"]
-        document.getElementById("labelTitleB").innerText = obj.name
-        document.getElementById("labelRatingB").innerText = obj.rating
-        document.getElementById("labelTitleBSmall").innerText = obj.name
-        document.getElementById("labelRatingBSmall").innerText = obj.rating
+        document.getElementById("labelTitleB").innerText = cookie_data.name
+        document.getElementById("labelRatingB").innerText = cookie_data.rating
+        document.getElementById("labelTitleBSmall").innerText = cookie_data.name
+        document.getElementById("labelRatingBSmall").innerText = cookie_data.rating
         document.getElementById("playerInfoA").style.visibility = "visible"
         document.getElementById("playerInfoB").style.visibility = "visible"
         var panes = document.getElementsByClassName("clock")
@@ -129,13 +134,12 @@ $(document).ready(function(){
         setTime('clockdivA', rival_time)
         setTime('clockdivB', my_time)
 
-        chosenTheme = dilena_board_theme
-        whiteSquare = chosenTheme[0]
-        blacksquare = chosenTheme[1]
+        whiteSquare = boardTheme[0]
+        blacksquare = boardTheme[1]
         fenobj = Chessboard.fenToObj(the_game_fen)
         var config = {
-              pieceTheme: 'static/img/chesspieces/chess24/{piece}.png',
-              boardTheme: chosenTheme,
+              pieceTheme: 'static/img/chesspieces/' + pieceTheme + '/{piece}.png',
+              boardTheme: getBoardColorsByName(boardTheme),
               draggable: true,
               position: the_game_fen,
               orientation: my_color,
@@ -173,6 +177,7 @@ $(document).ready(function(){
         var x = window.matchMedia("(max-width: 1105px)")
         //myFunction(x) // Call listener function at run time
         x.addEventListener("change", myFunction) // Attach listener function on state changes
+        $(".fullpage").fadeOut("slow");
         });
     socket.on('move', function (ans) {
         ans = JSON.parse(ans)
@@ -207,7 +212,15 @@ $(document).ready(function(){
                 setTime('clockdivA', ans.other_remaining)
             }
         }
-
+        if (game.in_checkmate()) {
+            array = get_piece_positions(game, { type: 'k', color: game.turn()})
+            source = array[0]
+            $board.find('.square-' + source).addClass('highlight-mate')
+        } else if (game.in_check()) {
+            array = get_piece_positions(game, { type: 'k', color: game.turn()})
+            source = array[0]
+            $board.find('.square-' + source).addClass('highlight-check')
+        }
         if (futureMoveData != null) {
             var move = game.move({
                 from: futureMoveData.from,
@@ -241,21 +254,18 @@ $(document).ready(function(){
             futureMoveData = null
         }
     });
-    res = socket.emit('connection', {"data": data}, function(ans) {
-            var progress = 0
-            /*var bar = new ldBar("#ldbar");
-            // repeat with the interval of 2 seconds
-            let timerId = setInterval(function() {
-                    bar.set(progress + 2);
-                    progress += 2;
-                }, 100
-            );
-            // after 10 seconds stop
-            setTimeout(() => {
-                clearInterval(timerId);
-            }, 8000);
-            */
-    })
+    checkIn()
+
+    function getBoardColorsByName(str) {
+        if (str === "urban") return urban_board_theme;
+        if (str === "standard") return standard_board_theme;
+        if (str === "wiki") return wiki_board_theme;
+        if (str === "wood") return wood_board_theme;
+        if (str === "american") return american_board_theme;
+        if (str === "metro") return metro_board_theme;
+        if (str === "classical") return classical_board_theme;
+        return ["#f0d9b5", "#b58863"]
+    }
 
     function insertMove(move) {
         index = 0
@@ -275,8 +285,6 @@ $(document).ready(function(){
             table.deleteRow(-1);
         }
         let index = 0;
-        //let d = 0
-        console.log(moves)
         moveList = moves
         for (var i=0; i<moves.length; i++) {
             if (i % 2 == 0) {
@@ -342,24 +350,53 @@ $(document).ready(function(){
         theme.srcElement.parentElement.parentElement.style.backgroundColor = 'red';
     }
 
-    function fillThemes() {
+    function checkIn() {
+            load_cookies()
+            socket.emit('heartbeat', {"data": JSON.stringify(cookie_data)}, function(ans) {
+                if (ans) {
+                    document.getElementById("settingsBox").style.display = "none";
+                    document.getElementById("gameBox").style.display = "flex";
+                } else {
+                    initSettings()
+                }
+            })
+    }
+
+    function load_cookies() {
+        cookie_data = localStorage.getItem("user_session")
+        cookie_data = JSON.parse(cookie_data)
+        prefs = localStorage.getItem("user_prefs")
+        obj_prefs = JSON.parse(prefs)
+        if (cookie_data != null)
+            cookie_data.preferences = obj_prefs
+        if (cookie_data && obj_prefs != null) {
+                boardTheme = obj_prefs.board_theme;
+                pieceTheme = obj_prefs.piece_theme;
+                timeControl = obj_prefs.time_control;
+                queenAutopromote = obj_prefs.queen_autopromote
+                highlightMoves = obj_prefs.highlight_moves
+        }
+    }
+
+    function initSettings() {
+        // prerequisite is load_cookies
         board_themes = [
-            leipzig_board_theme,
-            chess24_board_theme,
-            wikipedia_board_theme,
-            dilena_board_theme,
-            uscf_board_theme,
+            urban_board_theme,
+            standard_board_theme,
+            wiki_board_theme,
+            wood_board_theme,
+            american_board_theme,
             metro_board_theme,
-            symbol_board_theme
+            classical_board_theme
         ]
         piece_themes = [
-            leipzig_piece_theme,
-            chess24_piece_theme,
-            wikipedia_piece_theme,
-            dilena_piece_theme,
-            uscf_piece_theme,
+            urban_piece_theme,
+            standard_piece_theme,
+            wiki_piece_theme,
+            wood_piece_theme,
+            american_piece_theme,
             metro_piece_theme,
-            symbol_piece_theme,
+            classical_piece_theme,
             alpha_piece_theme,
         ]
         themes = document.getElementsByClassName("themeTable")
@@ -372,7 +409,7 @@ $(document).ready(function(){
                 for (var i = 0; i < 2; i++) {
                     var cell = document.createElement("td");
                     if (j == 0) cell.style.backgroundColor = board_theme[i]
-                    else cell.style.backgroundColor = board_theme[1-i]
+                    else cell.style.backgroundColor = board_theme[1 - i]
                     row.appendChild(cell);
                 }
                 //row added to end of table body
@@ -384,32 +421,103 @@ $(document).ready(function(){
             theme = themes.item(t);
             piece_theme = piece_themes[t]
             var img = document.createElement("IMG");
-            img.src = piece_theme("wQ");
+            img.src = piece_theme("wB");
             img.style.maxHeight = "100%";
             img.style.maxWidth = "100%";
             theme.appendChild(img);
         }
-
+        highlights = document.getElementsByClassName("highlightTable")
+        for (var t = 0; t < highlights.length; t++) {
+            theme = highlights.item(t);
+            board_theme = ['#f0d9b5', '#b58863']
+            for (var j = 0; j < 3; j++) {
+                // table row creation
+                var row = document.createElement("tr");
+                for (var i = 0; i < 3; i++) {
+                    var cell = document.createElement("td");
+                    if (j == i || Math.abs(i - j) == 2) cell.style.backgroundColor = board_theme[0]
+                    else cell.style.backgroundColor = board_theme[1]
+                    cell.style.width = 'auto';
+                    row.appendChild(cell);
+                }
+                //row added to end of table body
+                theme.appendChild(row);
+            }
+        }
         conts = document.getElementsByClassName("themeContainer")
         for (var c = 0; c < conts.length; c++) {
-            conts[c].addEventListener("click", function(event) {
+            conts[c].addEventListener("click", function (event) {
                 var elem = event.srcElement
                 while (elem.className != "themeContainer") {
                     elem = elem.parentElement
                 }
-                if (elem.parentElement.id === 'settingItemBoard')
+                if (elem.parentElement.id === 'settingItemBoard') {
+                    boardTheme = elem.children[1].id;
                     $('#settingItemBoard .themeContainer').css('backgroundColor', '')
-                if (elem.parentElement.id === 'settingItemPiece')
+                    $('#settingItemBoard .themeContainer').css('color', 'white')
+                    $('#settingItemBoard .themeContainer').css('fontWeight', '')
+                }
+                if (elem.parentElement.id === 'settingItemPiece') {
+                    pieceTheme = elem.children[0].innerHTML.toLowerCase();
+                    $('#settingItemPiece .themeContainer').css('color', 'white')
                     $('#settingItemPiece .themeContainer').css('backgroundColor', '')
+                    $('#settingItemPiece .themeContainer').css('fontWeight', '')
+                }
+                if (elem.parentElement.id === 'settingItemTimeControl') {
+                    timeControl = elem.children[0].innerHTML.toLowerCase();
+                    $('#settingItemTimeControl .themeContainer').css('color', 'white')
+                    $('#settingItemTimeControl .themeContainer').css('backgroundColor', '')
+                    $('#settingItemTimeControl .themeContainer').css('fontWeight', '')
+                    $('#settingItemTimeControl .timeLabel').css('border', '')
+                }
                 elem.style.backgroundColor = "#bdcad8";
+                elem.style.color = "black"
+                elem.style.fontWeight = "bold"
             }, false)
         }
+        if (cookie_data != null) {
+            checks = document.getElementsByClassName("checkContainer")
+            for (var ch = 0; ch < checks.length; ch++) {
+                box = checks[ch].children[0]
+                box.style.checked = ""
+                if (cookie_data.preferences != null) {
+                    if (box.id == "qa" && cookie_data.preferences.queen_autopromote)
+                        box.style.checked = "checked"
+                    if (box.id == "mh" && cookie_data.preferences.highlight_moves)
+                        box.style.checked = "checked"
+                }
+            }
+        }
+        else cookie_data = {}
 
+        goButton = document.getElementById("goButton");
+        goButton.addEventListener("click", function(event) {
+            $(".fullpage").fadeIn("fast");
+            qa = document.getElementById("settingItemQueenAutopromote")
+            qa_checked = qa.children[0].children[0].checked
+            mh = document.getElementById("settingItemMoveHighlight")
+            mh_checked = mh.children[0].children[0].checked
+            prefs = {
+                "board_theme": boardTheme,
+                "piece_theme": pieceTheme,
+                "time_control": timeControl,
+                "queen_autopromote": qa_checked,
+                "highlight_moves": mh_checked
+            }
+            cookie_data.preferences = prefs
+            localStorage.setItem("user_prefs", JSON.stringify(prefs))
+            res = socket.emit('play', {"data": JSON.stringify(cookie_data)}, function(ans) {
+                document.getElementById("settingsBox").style.display = "none";
+                document.getElementById("gameBox").style.display = "flex";
+            })
+        })
     }
 
     function removeGreySquares () {
-        $('#myBoard .white-1e1d7').css('background', whiteSquare)
-        $('#myBoard .black-3c85d').css('background', blacksquare)
+        //$('#myBoard .white-1e1d7').css('background', whiteSquare)
+        //$('#myBoard .black-3c85d').css('background', blacksquare)
+        $("svg").remove();
+        $("img").css("box-shadow", '');
     }
 
     function removeHighlights (color) {
@@ -417,13 +525,36 @@ $(document).ready(function(){
     }
 
     function greySquare (square) {
-      var $square = $('#myBoard .square-' + square)
-      var background = whiteSquareGrey
-      if ($square.hasClass('black-3c85d')) {
-        background = blackSquareGrey
-      }
+          var $square = $('#myBoard .square-' + square)
+          isPiece = false;
+          image = null;
+          if ($square.children().length > 0) {
+              for (var r = 0; r < $square.children().length; r++) {
+                    console.log($square.children()[r])
+                    if ($square.children()[r].tagName == 'IMG')
+                        isPiece = true;
+                    image = $square.children()[r]
+              }
+          }
+          if (isPiece) {
+              image.style.boxShadow = "inset 0 0 6px 3px #fc5185"
+          }
+          else {
+              var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+              svg.setAttribute("width", "50");
+              svg.setAttribute("height", "50");
+              var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+              circle.setAttributeNS(null, 'cx', 28)
+              circle.setAttributeNS(null, 'cy', 28)
+              circle.setAttributeNS(null, 'r', 5)
+              //circle.setAttributeNS(null, 'stroke', "red")
+              //circle.setAttributeNS(null, 'stroke-width', "3")
+              circle.setAttributeNS(null, 'fill', "#fc5185")
+              svg.appendChild(circle)
+              the_square = $square.get()[0]
+              the_square.appendChild(svg)
+          }
 
-      $square.css('background', background)
     }
 
     function onDragStart (source, piece, position, orientation) {
@@ -447,6 +578,7 @@ $(document).ready(function(){
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
       })
       removeHighlights('yellow')
+      removeHighlights('check')
       if (futureMove == true && source != target) {
           $board.find('.square-' + source).addClass('highlight-yellow')
           $board.find('.square-' + target).addClass('highlight-yellow')
@@ -475,6 +607,28 @@ $(document).ready(function(){
                 insertMove(move)
             })
         }
+        if (game.in_checkmate()) {
+            array = get_piece_positions(game, { type: 'k', color: game.turn()})
+            source = array[0]
+            $board.find('.square-' + source).addClass('highlight-mate')
+        } else if (game.in_check()) {
+            array = get_piece_positions(game, { type: 'k', color: game.turn()})
+            source = array[0]
+            $board.find('.square-' + source).addClass('highlight-check')
+        }
+
+    }
+
+    function get_piece_positions(game, piece) {
+      return [].concat(...game.board()).map((p, index) => {
+        if (p !== null && p.type === piece.type && p.color === piece.color) {
+          return index
+        }
+      }).filter(Number.isInteger).map((piece_index) => {
+        const row = 'abcdefgh'[piece_index % 8]
+        const column = Math.ceil((64 - piece_index) / 8)
+        return row + column
+      })
     }
 
     function onMouseoverSquare (square, piece, position, orientation) {
@@ -490,12 +644,11 @@ $(document).ready(function(){
       // exit if there are no moves available for this square
       if (moves.length === 0) return
 
-      // highlight the square they moused over
-      greySquare(square)
-
+      removeGreySquares()
       // highlight the possible squares for this piece
       for (var i = 0; i < moves.length; i++) {
-        greySquare(moves[i].to)
+            if (moves[i].to != "")
+                greySquare(moves[i].to)
       }
     }
 
@@ -540,88 +693,5 @@ $(document).ready(function(){
       $fen.html(game.fen())
       $pgn.html(game.pgn())
     }
-
-
-    (function($) {
-        "use strict";
-
-    
-    jQuery.validator.addMethod('answercheck', function (value, element) {
-        return this.optional(element) || /^\bcat\b$/.test(value)
-    }, "type the correct answer -_-");
-
-    // validate contactForm form
-    $(function() {
-        $('#contactForm').validate({
-            rules: {
-                name: {
-                    required: true,
-                    minlength: 2
-                },
-                subject: {
-                    required: true,
-                    minlength: 4
-                },
-                number: {
-                    required: true,
-                    minlength: 5
-                },
-                email: {
-                    required: true,
-                    email: true
-                },
-                message: {
-                    required: true,
-                    minlength: 20
-                }
-            },
-            messages: {
-                name: {
-                    required: "come on, you have a name, don't you?",
-                    minlength: "your name must consist of at least 2 characters"
-                },
-                subject: {
-                    required: "come on, you have a subject, don't you?",
-                    minlength: "your subject must consist of at least 4 characters"
-                },
-                number: {
-                    required: "come on, you have a number, don't you?",
-                    minlength: "your Number must consist of at least 5 characters"
-                },
-                email: {
-                    required: "no email, no message"
-                },
-                message: {
-                    required: "um...yea, you have to write something to send this form.",
-                    minlength: "thats all? really?"
-                }
-            },
-            submitHandler: function(form) {
-                $(form).ajaxSubmit({
-                    type:"POST",
-                    data: $(form).serialize(),
-                    url:"contact_process.php",
-                    success: function() {
-                        $('#contactForm :input').attr('disabled', 'disabled');
-                        $('#contactForm').fadeTo( "slow", 1, function() {
-                            $(this).find(':input').attr('disabled', 'disabled');
-                            $(this).find('label').css('cursor','default');
-                            $('#success').fadeIn()
-                            $('.modal').modal('hide');
-		                	$('#success').modal('show');
-                        })
-                    },
-                    error: function() {
-                        $('#contactForm').fadeTo( "slow", 1, function() {
-                            $('#error').fadeIn()
-                            $('.modal').modal('hide');
-		                	$('#error').modal('show');
-                        })
-                    }
-                })
-            }
-        })
-    })
-        
- })(jQuery)
+    (jQuery)
 })

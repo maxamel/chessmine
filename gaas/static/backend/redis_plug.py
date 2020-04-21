@@ -1,3 +1,5 @@
+import json
+
 import chess
 import redis
 
@@ -52,13 +54,14 @@ class RedisPlug:
     # Should be set when user first connects to store his info and cleared when heartbeats are unanswered
     def set_player_session(self, player: Player):
         key = self.player_info + player.sid
-        self.r.rpush(key, player.name, player.rating)
+        pref_dict = json.dumps(player.preferences)
+        self.r.rpush(key, player.name, player.rating, pref_dict)
 
     def get_player_session(self, sid):
         key = self.player_info + sid
         if not self.r.exists(key):
             return None
-        session = self.r.lrange(key, 0, 1)
+        session = self.r.lrange(key, 0, -1)
         return Player.from_list(sid, session)
 
     def add_move_to_game(self, game_id, move):

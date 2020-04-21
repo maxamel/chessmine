@@ -48,6 +48,7 @@ h6 {
   margin: 0px;
   padding: 0px; }
 
+
 a {
   text-decoration: none;
   transition: all 0.3s ease-in-out; }
@@ -310,10 +311,13 @@ button:focus {
 ============================================================================================ */
 /*---------------------------------------------------- */
 /*----------------------------------------------------*/
+.hider {
+    display: none;
+}
 .header_area {
   position: relative;
   width: 100%;
-  z-index: 9999;
+  z-index: 999;
   background: #0f2f53; }
   .header_area .navbar-brand {
     margin-right: 30px; }
@@ -1415,8 +1419,9 @@ button:focus {
 
 .gameContainer {
   position: relative;
-  height: 600px;
+  min-height: 800px;
   width: 100%;
+  #display: none;
   #margin: 20px
 }
 
@@ -1625,13 +1630,20 @@ th, td {
   background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
 }
 
+.highlight-check {
+  box-shadow: inset 0 0 15px 0 orange;
+}
+.highlight-mate {
+  box-shadow: inset 0 0 15px 0 red;
+}
+
 .moveBox {
   height: 390px;
 }
 
 .tableWrapper {
   overflow-y: scroll;
-  height: 90%;
+  height: 78%;
 }
 
 .edgeCell {

@@ -1,22 +1,26 @@
+import pickle
+
 from static.backend.consts import *
 import json
 
 class Player:
-    def __init__(self, sid, name="Guest", rating=1500):
+    def __init__(self, sid, name="Guest", rating=1500, preferences={}):
         self.sid = sid
         self.name = name
         self.rating = rating
+        self.preferences = preferences
 
     def to_dict(self):
         return {
             "sid": self.sid,
             "name": self.name,
-            "rating": self.rating
+            "rating": self.rating,
+            "preferences": self.preferences
         }
 
     @staticmethod
     def from_list(sid, L):
-        return Player(sid=sid, name=L[NAME], rating=L[RATING])
+        return Player(sid=sid, name=L[NAME], rating=L[RATING], preferences=json.loads(L[PREFERENCES]))
 
 
 class PlayerMapping:

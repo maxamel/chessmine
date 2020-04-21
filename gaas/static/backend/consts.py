@@ -20,3 +20,4 @@ WHITE = 'white'
 
 NAME = 0
 RATING = 1
+PREFERENCES = 2

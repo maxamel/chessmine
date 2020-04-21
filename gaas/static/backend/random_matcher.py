@@ -1,3 +1,4 @@
+import json
 import time, requests
 
 from threading import Thread
@@ -23,7 +24,6 @@ class RandomMatcher(Matcher):
                 print("Could not draw player out of pool")
             if rival_sid != player_sid:
                 ret = self.redis_plug.remove_players_from_search_pool(rival_sid, player_sid)
-                print("Player removal: " + str(ret))
                 if ret == 0:
                     if not self.redis_plug.is_player_in_search_pool(player_sid=player_sid):
                         # Someone already matched us
@@ -33,6 +33,12 @@ class RandomMatcher(Matcher):
                         # Someone beat us to the rival
                         time.sleep(1)
                         continue
+                player = self.redis_plug.get_player_session(player_sid)
+                rival = self.redis_plug.get_player_session(rival_sid)
+                if player.preferences["time_control"] != rival.preferences["time_control"]:
+                    # Need to figure out what to do here
+                    pass
+                prefs = player.preferences
                 # transmit this match
                 requests.get(url="http://localhost:5000/match/"+player_sid+"/"+rival_sid,
                              json={'time_control': 600000})

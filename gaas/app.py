@@ -48,15 +48,25 @@ def play():
     return render_template('play.html')
 
 
-@socketio.on('connection', namespace='/connect')
-def connect(cookie):
-    send_to, data = game_server.connect(cookie)
+@socketio.on('play', namespace='/connect')
+def play(cookie):
+    send_to, data = game_server.play(cookie)
     join_room(send_to)
     connection = "game"
     if 'user' in data:
         connection = "connection_id"
     socketio.emit(connection, data, namespace='/connect', room=send_to)
 
+
+@socketio.on('heartbeat', namespace='/connect')
+def heartbeat(cookie):
+    send_to, data = game_server.heartbeat(cookie)
+    if send_to is None:
+        return False         # ack heartbeat
+    join_room(send_to)
+    connection = "game"
+    socketio.emit(connection, data, namespace='/connect', room=send_to)
+    return True
 
 @socketio.on('update', namespace='/connect')
 def move(payload):
