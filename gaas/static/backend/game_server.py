@@ -47,6 +47,18 @@ class GameServer:
         except Exception as e:
             print(e)
 
+    def piece_symbol_to_obj(self, param):
+        if param == 'p':
+            return chess.PAWN
+        if param == 'n':
+            return chess.KNIGHT
+        if param == 'b':
+            return chess.BISHOP
+        if param == 'r':
+            return chess.ROOK
+        if param == 'q':
+            return chess.QUEEN
+
     def cleanup(self, game_id: str):
         game = self.redis.get_game(game_id=game_id)
         white = game[WHITE]
@@ -67,6 +79,9 @@ class GameServer:
 
     def get_game_moves(self, game_id):
         return self.redis.get_game_moves(game_id=game_id)
+
+    def get_game_fens(self, game_id):
+        return self.redis.get_game_fens(game_id=game_id)
 
     def get_player_mapping(self, sid) -> PlayerMapping:
         return self.redis.get_player_mapping(sid)
@@ -109,6 +124,7 @@ class GameServer:
             rival_mapping = self.get_player_mapping(rival.sid)
             fen = self.get_game_fen(mapping.game_id)
             moves = self.get_game_moves(mapping.game_id)
+            fens = self.get_game_fens(mapping.game_id)
             white = player
             black = rival
             move_ttl = mapping.ttl_start_time if mapping.ttl_start_time != 'None' else rival_mapping.ttl_start_time
@@ -139,6 +155,7 @@ class GameServer:
             game = Game(game_id=mapping.game_id,
                         position=fen,
                         moves=moves,
+                        fens=fens,
                         white_remaining=white_time,
                         black_remaining=black_time,
                         white=white,
@@ -160,6 +177,23 @@ class GameServer:
         sid = payload["sid"]
         player_info = self.redis.get_player_mapping(sid)
         game_id = player_info.game_id
+
+        move = payload["move"]
+        the_move = chess.Move.from_uci(move["from"] + move["to"])
+        if "promotion" in move:
+            piece = self.piece_symbol_to_obj(move["promotion"])
+            the_move.promotion = piece
+
+        game_fen = self.redis.get_game_fen(player_info.game_id)
+        if game_fen is None:
+            board = chess.Board()
+        else:
+            board = chess.Board(game_fen)
+        if not board.is_legal(the_move):
+            print("ILLEGAL MOVE DETECTED: " + move["san"])
+            return None, None
+        board.push(the_move)
+
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
         if player_info.ttl_start_time != 'None':
             self.redis.set_player_value(player_info.sid, TTL_START_TIME, None)
@@ -189,33 +223,20 @@ class GameServer:
         else:
             self.redis.set_player_value(sid, TURN_START_TIME, 0)
             self.redis.set_player_value(rival, TURN_START_TIME, 0)
+
         # Handle the move itself, board update, etc.
-        move = payload["move"]
-        the_move = chess.Move.from_uci(move["from"] + move["to"])
-        game_fen = self.redis.get_game_fen(player_info.game_id)
-        game_pgn = self.redis.get_game_pgn(player_info.game_id)
-        if game_fen is None:
-            board = chess.Board()
-        else:
-            board = chess.Board(game_fen)
         if board.starting_fen == board.fen():       # first move
             self.redis.set_player_value(rival_info.sid, TTL_START_TIME, curr_time)
             expire_in_future = curr_time + 30000        # 30 seconds from now
             self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
-        if not board.is_legal(the_move):
-            print("ILLEGAL MOVE DETECTED: " + the_move)
-            #raise ValueError("Illegal move captured!")
-        board.push(the_move)
-        print(board)
         self.redis.set_game_fen(game_id, board.fen())
-        #self.redis.set_game_pgn(game_id, board.pg)
+        self.redis.add_fen_to_game(game_id, board.fen())
         self.redis.add_move_to_game(player_info.game_id, move["san"])
         if board.is_game_over():
             # reset previous timeout settings due to turn switching
             self.redis.cancel_game_timeout(game_id=game_id)
             self.redis.set_game_timeout(game_id=game_id, timeout=curr_time)
             print(f"Game over. {get_turn_from_fen(board.fen())} checkmated.")
-            #return None, None
         update = json.dumps(payload)
         print(update)
         return rival, update
@@ -236,6 +257,7 @@ class GameServer:
             rival_mapping = self.get_player_mapping(rival.sid)
             fen = self.get_game_fen(mapping.game_id)
             moves = self.get_game_moves(mapping.game_id)
+            fens = self.get_game_fens(mapping.game_id)
             white = player
             black = rival
             move_ttl = mapping.ttl_start_time if mapping.ttl_start_time != 'None' else rival_mapping.ttl_start_time
@@ -266,6 +288,7 @@ class GameServer:
             game = Game(game_id=mapping.game_id,
                         position=fen,
                         moves=moves,
+                        fens=fens,
                         white_remaining=white_time,
                         black_remaining=black_time,
                         white=white,

@@ -17,6 +17,7 @@ class RedisPlug:
         self.player = "player_mapping_"
         self.game = "game_mapping_"
         self.game_moves = "game_moves_"
+        self.game_fens = "game_fens_"
         self.game_expire = "game_expirations"
         self.r = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, decode_responses=True)
 
@@ -68,17 +69,21 @@ class RedisPlug:
         key = self.game_moves + game_id
         self.r.rpush(key, move)
 
+    def add_fen_to_game(self, game_id, fen):
+        key = self.game_fens + game_id
+        self.r.rpush(key, fen)
+
     def get_game_moves(self, game_id) -> list:
         key = self.game_moves + game_id
+        return self.r.lrange(key, 0, -1)
+
+    def get_game_fens(self, game_id) -> list:
+        key = self.game_fens + game_id
         return self.r.lrange(key, 0, -1)
 
     def set_game_fen(self, game_id, fen) -> str:
         key = self.game + game_id
         self.r.hset(key, FEN, fen)
-
-    def set_game_pgn(self, game_id, pgn) -> str:
-        key = self.game + game_id
-        self.r.hset(key, FEN, pgn)
 
     def map_player(self, player, opponent, color, game_id, time_control=None, turn_start=None):
         key = self.player + player
@@ -124,8 +129,10 @@ class RedisPlug:
     def remove_game_info(self, game):
         mapping = self.game + game
         moves = self.game_moves + game
+        fens = self.game_fens + game
         self.r.delete(mapping)
         self.r.delete(moves)
+        self.r.delete(fens)
 
     def get_redis(self):
         return self.r

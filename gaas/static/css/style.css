@@ -1620,14 +1620,35 @@ th, td {
 }
 
 .regularCell:hover {
-  #background-color: #c2d0c1;
   color: white;
+  cursor: pointer;
   font-weight: bolder;
   background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
   background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
   background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
   background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
   background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+}
+.selectedCell {
+  color: white;
+  cursor: pointer;
+  font-weight: bolder;
+  background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+}
+
+.blinking{
+    animation:blinkingText 1.2s infinite;
+}
+@keyframes blinkingText{
+    0%{     color: #000;    }
+    49%{    color: #000; }
+    60%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #000;    }
 }
 
 .highlight-check {
@@ -1647,11 +1668,14 @@ th, td {
 }
 
 .edgeCell {
-  width: 5.5%;
+  width: 5%;
+  padding: 0px;
 }
 
 .whiteCell {
   background-color: white;
+  width: 5.25%;
+
 }
 .blackCell {
   background-color: black;
@@ -1754,7 +1778,6 @@ th, td {
     background-origin: border-box;
     background-clip: content-box, border-box; }
 }
-
 
 .playerInfoSmall {
   position: relative;
@@ -2946,6 +2969,7 @@ h6 {
   height: 100%;
   opacity: 0; }
 
+
 .disabled-radio input + label {
   position: absolute;
   left: 0;
@@ -3964,6 +3988,8 @@ h6 {
 .footer_area {
   #background-image: url(../img/footer-bg.png);
   background: #0f2f53;
+  width: 100%;
+  z-index: 999;
   background-size: cover;
   padding-top: 50px;
   #padding-bottom: 120px; }

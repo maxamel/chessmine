@@ -23,16 +23,17 @@
     width: 100px;
     margin: 15px;
     padding: 10px;
-    font-size: 30px;
-    color: black;
+    font-size: 14px;
+    color: white;
     text-align: center;
     font-family: "Baloo Paaji 2";
     float: right;
     border-radius: 20px;
-    background: white;
+    background: #fc5185;
 }
 .goButton:hover {
       color: white;
+      cursor: pointer;
       background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
       background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
       background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
@@ -87,13 +88,31 @@ td.settings {
 .themeContainer:hover {
     background-color: #364f6b;
     outline: none;
+    cursor: pointer;
 }
 
 .themeContainer:focus {
     outline: none;
 }
 
+#promotion {
+    display: none;
+    margin: auto;
+    width: 50%;
+    top: 50%;
+    position: sticky;
+    z-index: 1000;
+}
+
 .pieceHolder {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.promotionPieceHolder {
     height: 60px;
     width: 60px;
     border-radius: 10%;
@@ -121,7 +140,7 @@ td.settings {
     border-radius: 10px;
     padding-bottom: 15px;
     width: 5%;
-    margin: auto;
+    #margin: auto;
 }
 
 .settingSelector{
@@ -152,9 +171,10 @@ td.settings {
   color: lavender;
   font-family: "Baloo Paaji 2";
   font-weight: lighter;
-  font-size: 20px;
+  font-size: 15px;
   width: 15%;
-  margin: auto;
+  margin-top: auto;
+  margin-bottom: auto;
   margin-left: 0;
 }
 
@@ -220,7 +240,7 @@ td.settings {
 
 /* When the checkbox is checked, add a blue background */
 .checkContainer input:checked ~ .checkmark {
-  background-color: #2196F3;
+  background-color:  #fc5185;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
@@ -237,10 +257,10 @@ td.settings {
 
 /* Style the checkmark/indicator */
 .checkContainer .checkmark:after {
-  left: 9px;
-  top: 5px;
-  width: 5px;
-  height: 10px;
+  left: 10px;
+  top: -10px;
+  width: 15px;
+  height: 30px;
   border: solid white;
   border-width: 0 3px 3px 0;
   -webkit-transform: rotate(45deg);

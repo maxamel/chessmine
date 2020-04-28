@@ -61,10 +61,11 @@ class PlayerMapping:
 
 
 class Game:
-    def __init__(self, game_id: str, position: str, moves: list, white_remaining: int,
+    def __init__(self, game_id: str, position: str, moves: list, fens: list, white_remaining: int,
                  black_remaining: int, white: Player, black: Player, move_ttl: int = None):
         self.game_id = game_id
         self.position = position
+        self.fens = fens
         self.moves = moves
         self.white_remaining = white_remaining
         self.black_remaining = black_remaining
@@ -77,6 +78,7 @@ class Game:
             "game_id": self.game_id,
             "position": self.position,
             "moves": json.dumps(self.moves),
+            "fens": json.dumps(self.fens),
             "white_remaining": self.white_remaining,
             "black_remaining": self.black_remaining,
             "white": self.white.to_dict(),
