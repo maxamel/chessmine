@@ -6,6 +6,7 @@ from threading import Thread
 from static.backend.player import Player
 from static.backend.matcher import Matcher
 from static.backend.redis_plug import RedisPlug
+from static.backend.util import get_millis_for_time_control
 
 
 class RandomMatcher(Matcher):
@@ -13,7 +14,7 @@ class RandomMatcher(Matcher):
         self.redis_plug = RedisPlug()
 
     def match(self, player: Player):
-        self.redis_plug.add_player_to_search_pool(player_sid=player.sid)
+        self.redis_plug.add_players_to_search_pool(player.sid)
         thread = Thread(target=self.search, args=(player.sid,))
         thread.start()
 
@@ -22,7 +23,8 @@ class RandomMatcher(Matcher):
             rival_sid = self.redis_plug.draw_player_from_search_pool()
             if rival_sid is None:
                 print("Could not draw player out of pool")
-            if rival_sid != player_sid:
+                return None
+            elif rival_sid != player_sid:
                 ret = self.redis_plug.remove_players_from_search_pool(rival_sid, player_sid)
                 if ret == 0:
                     if not self.redis_plug.is_player_in_search_pool(player_sid=player_sid):
@@ -36,10 +38,11 @@ class RandomMatcher(Matcher):
                 player = self.redis_plug.get_player_session(player_sid)
                 rival = self.redis_plug.get_player_session(rival_sid)
                 if player.preferences["time_control"] != rival.preferences["time_control"]:
-                    # Need to figure out what to do here
-                    pass
-                prefs = player.preferences
+                    # This match isn't valid - keep searching
+                    self.redis_plug.add_players_to_search_pool(player_sid, rival_sid)
+                    print("Got invalid match by time control")
                 # transmit this match
-                requests.get(url="http://localhost:5000/match/"+player_sid+"/"+rival_sid,
-                             json={'time_control': 600000})
+                else:
+                    requests.get(url="http://localhost:5000/match/"+player_sid+"/"+rival_sid,
+                             json={'time_control': get_millis_for_time_control(player.preferences['time_control'])})
             time.sleep(1)

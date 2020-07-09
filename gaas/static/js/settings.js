@@ -2,9 +2,10 @@ $(document).ready(function () {
     $(".fullpage").fadeOut("slow");
     var timeintervalA = null;
     var timeintervalB = null;
-    var clockColorIntervalA = null
-    var clockColorIntervalB = null
+    var timecolorintervalA = null
+    var timecolorintervalB = null
     var moveInterval = null;
+    var clockStatus = false;
 
     ///// CLOCK
     function getTimeRemaining(endtime) {
@@ -33,16 +34,24 @@ $(document).ready(function () {
 
     function initializeClock(id, endtime) {
         var clock = document.getElementById(id);
+        var clockspan = clock.children.item(0);
         var minutesSpan = clock.querySelector(".minutes");
         var secondsSpan = clock.querySelector(".seconds");
         var millisSpan = clock.querySelector(".millis");
         var lastCall = new Date().getTime();
 
         function changeClockColor() {
-            if (clock.style.color == "red")
-                clock.style.color = "black"
-            else
-                clock.style.color = "red"
+            if (clockStatus) {
+                clockspan.style.backgroundColor = "#E1ECE0";
+                clockspan.style.color = "black";
+                clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
+                clockStatus = !clockStatus;
+            } else {
+                clockspan.style.backgroundColor = "black";
+                clockspan.style.boxShadow = "";
+                clockspan.style.color = "#E1ECE0";
+                clockStatus = !clockStatus;
+            }
         }
 
         function updateClock() {
@@ -50,19 +59,20 @@ $(document).ready(function () {
             endtime -= now - lastCall;
             lastCall = now;
             var t = getTimeRemaining(endtime);
-            if (t.total < 600000 && id == "clockdivA" && clockColorIntervalA == null) {
-                clockColorIntervalA = setInterval(function () {
-                    changeClockColor();
-                }, 500);
-            }
-            if (t.total < 600000 && id == "clockdivB" && clockColorIntervalB == null) {
-                clockColorIntervalB = setInterval(function () {
-                    changeClockColor();
-                }, 500);
+            if (clockGlow) {
+                if (t.total < 30000 && id == "clockdivA" && timecolorintervalA == null) {
+                    timecolorintervalA = setInterval(function () {
+                        changeClockColor();
+                    }, 500);
+                }
+                if (t.total < 30000 && id == "clockdivB" && timecolorintervalB == null) {
+                    timecolorintervalB = setInterval(function () {
+                        changeClockColor();
+                    }, 500);
+                }
             }
             if (t.total <= 0) {
-                clearInterval(timeintervalA);
-                clearInterval(timeintervalB);
+                discardTimeInterval('all');
 
                 millisSpan.innerHTML = ("00").slice(-2);
                 return;
@@ -74,12 +84,12 @@ $(document).ready(function () {
 
         updateClock();
         if (id == "clockdivA") {
-            clearInterval(timeintervalA);
+            discardTimeInterval('A');
             timeintervalA = setInterval(function () {
                 updateClock();
             }, 10);
         } else {
-            clearInterval(timeintervalB);
+            discardTimeInterval('B');
             timeintervalB = setInterval(function () {
                 updateClock();
             }, 10);
@@ -90,69 +100,86 @@ $(document).ready(function () {
     var board = null;
     var $board = $("#myBoard");
     var game = new Chess();
-    var moveList = [];
-    var $status = $("#status");
-    var $fen = $("#fen");
-    var $pgn = $("#pgn");
-    var whiteSquareGrey = "#a9a9a9";
-    var blackSquareGrey = "#696969";
-    var whiteSquare = "#9e7863";
-    var blacksquare = "#633526";
+    //var moveList = [];
+    //var $status = $("#status");
+    //var $fen = $("#fen");
+    //var $pgn = $("#pgn");
+    //var whiteSquareGrey = "#a9a9a9";
+    //var blackSquareGrey = "#696969";
+    //var whiteSquare = "#9e7863";
+    //var blacksquare = "#633526";
     var futureMove = false;
     var futureMoveData = null;
     var player_id = null;
     var other_remaining = 300000;
     var my_color = null;
-    var boardTheme = "metro";
-    var pieceTheme = "metro";
+    var needsBoardRendering = false;
+    var boardTheme = "classical";
+    var pieceTheme = "classical";
     var timeControl = "5+0";
     var queenAutopromote = false;
     var highlightMoves = false;
+    var clockGlow = false;
     var the_game_moves = [];
     var the_game_fens = [];
     var promotion_in_progress = [];
     var promote = "q";
+    var game_over = false;
 
     var cookie_data = localStorage.getItem("user_session");
     var socket = io("http://localhost:5000/connect");
 
     socket.on("connection_id", function (ans) {
-        delete ans.user.preferences;
-        user_data = JSON.stringify(ans.user);
+        load_cookies();
+        data = ans.user;
+        prefs = data.preferences;
+        delete data.preferences;
+        user_data = JSON.stringify(data);
         localStorage.setItem("user_session", user_data);
         cookie_data = user_data;
     });
-    socket.on("game_over", function (ans) {
-        alert(JSON.stringify(ans));
-        clearInterval(timeintervalA);
-        clearInterval(timeintervalB);
-    });
-    socket.on("game", function (ans) {
+
+    /*socket.on("game", function (ans) {
         load_cookies();
+        console.log(ans)
         my_color = JSON.stringify(ans.color);
         the_game = ans.game;
-        my_time = JSON.stringify(the_game.white_remaining);
-        rival_time = JSON.stringify(the_game.black_remaining);
+        my_time = JSON.stringify(the_game.white.time_remaining);
+        rival_time = JSON.stringify(the_game.black.time_remaining);
         ttl_time = JSON.stringify(the_game.move_ttl);
+        draw_offer = the_game.draw_offer;
+        game_status = the_game.status;
         me = the_game.white;
         rival = the_game.black;
-        my_color = my_color.slice(1, -1);
-        if (my_color === "black") {        // swap
+        if (parseInt(rival_time) === 0 || parseInt(my_time) === 0 || game_status === 3) {
+            game_over = true;
+        }
+        my_color = my_color.slice(1, -1);       // remove quotes from both sides
+        if (my_color === "black") {        // swap objects
             my_time = [rival_time, rival_time = my_time][0];
             me = [rival, rival = me][0];
+        }
+        console.log("DRAW OFFER " + my_color + " " + draw_offer)
+        if (my_color == draw_offer) {
+            // I offered draw
+            changeDrawButton('disabled');
+        } else if (draw_offer != null){
+            // Rival offered draw
+            changeDrawButton('hidden');
         }
         the_game_fen = the_game.position;
         the_game_moves = JSON.parse(the_game.moves);
         the_game_fens = JSON.parse(the_game.fens);
         player_id = cookie_data.sid;
+        console.log(me)
         document.getElementById("labelTitleA").innerText = rival["name"];
         document.getElementById("labelRatingA").innerText = rival["rating"];
         document.getElementById("labelTitleASmall").innerText = rival["name"];
         document.getElementById("labelRatingASmall").innerText = rival["rating"];
-        document.getElementById("labelTitleB").innerText = cookie_data.name;
-        document.getElementById("labelRatingB").innerText = cookie_data.rating;
-        document.getElementById("labelTitleBSmall").innerText = cookie_data.name;
-        document.getElementById("labelRatingBSmall").innerText = cookie_data.rating;
+        document.getElementById("labelTitleB").innerText = me.name;
+        document.getElementById("labelRatingB").innerText = me.rating;
+        document.getElementById("labelTitleBSmall").innerText = me.name;
+        document.getElementById("labelRatingBSmall").innerText = me.rating;
         document.getElementById("playerInfoA").style.visibility = "visible";
         document.getElementById("playerInfoB").style.visibility = "visible";
         var panes = document.getElementsByClassName("clock");
@@ -160,12 +187,9 @@ $(document).ready(function () {
             pane.style.opacity = 1;
         }
         document.getElementById("gameBox").style.opacity = 1;
-        //document.getElementById("ldbar").style.opacity = 0
         setTime("clockdivA", rival_time);
         setTime("clockdivB", my_time);
 
-        whiteSquare = boardTheme[0];
-        blacksquare = boardTheme[1];
         fenobj = Chessboard.fenToObj(the_game_fen);
         var config = {
             pieceTheme: "static/img/chesspieces/" + pieceTheme + "/{piece}.png",
@@ -176,6 +200,7 @@ $(document).ready(function () {
             onDragStart: onDragStart,
             onDrop: onDrop,
             //onMoveEnd: onMoveEnd,
+            onDragMove: onDragMove,
             onMouseoutSquare: onMouseoutSquare,
             onMouseoverSquare: onMouseoverSquare,
             onSnapEnd: onSnapEnd
@@ -184,28 +209,155 @@ $(document).ready(function () {
         game = new Chess(the_game_fen);
         insertBulkMoves(the_game_moves, ttl_time);
         isStart = my_time === rival_time && my_time % 1000 == 0;
-        if (!isStart) {
-            if (is_my_turn()) {
-                clearInterval(timeintervalA);
-                initializeClock("clockdivB", my_time);
-            } else {
-                clearInterval(timeintervalB);
-                initializeClock("clockdivA", rival_time);
+        if (game_status != 3) {     // NOT ENDED
+            draw = document.getElementById("drawButton");
+            draw.addEventListener("click", drawAction);
+
+            resign = document.getElementById("resignButton");
+            resign.addEventListener("click", resignAction);
+
+            offeredDraw = document.getElementById("drawOffer");
+            offeredDraw.addEventListener("click", offeredDrawAction);
+
+            acceptDraw = document.getElementById("acceptDraw");
+            acceptDraw.addEventListener("click", drawAction);
+
+            declineDraw = document.getElementById("declineDraw");
+            declineDraw.addEventListener("click", declineDrawAction);
+            hideArrows();
+            if (game_status == 2) {     // PLAYING
+                if (is_my_turn()) {
+                    discardTimeInterval('A');
+                    initializeClock("clockdivB", my_time);
+                } else {
+                    discardTimeInterval('B');
+                    initializeClock("clockdivA", rival_time);
+                }
+            } else if (game_status == 1) {      // STARTED
+                game_over = false;
+                enableGameButtons();
+                hideEndGameBoxes();
             }
+        } else {
+            disableGameButtons();
+        }
+        rematches = document.getElementsByClassName("button-box");
+        for (var t = 0; t < rematches.length; t++) {
+            rematch = rematches.item(t);
+            rematch.addEventListener("click", rematchAction);
+        }
+        dots = document.getElementsByClassName("dot");
+        for (var t = 0; t < dots.length; t++) {
+            dot = dots.item(t);
+            dot.addEventListener("click", function(evt) {
+                evt.target.parentElement.style.display = "none";
+                json = {"data": {
+                    "sid": player_id,
+                    "flag": false
+                }};
+                socket.emit("rematch", json, function (ret) {});
+            });
+        }
+        window.onclick = function(event) {
+          if (event.target.id != 'drawOfferedButton') {
+              inner_div = document.getElementById("droppedDrawOffer");
+              inner_div.style.display = "none";
+          }
+        };
+
+        var x = window.matchMedia("(max-width: 1105px)");
+        //myFunction(x) // Call listener function at run time
+        x.addEventListener("change", boardResize); // Attach listener function on state changes
+        $(".fullpage").fadeOut("slow");
+
+        function rematchAction(x) {
+            json = {"data": {
+                    "sid": player_id,
+                    "flag": true
+                }};
+            socket.emit("rematch", json, function (ret) {
+                if (ret) {
+                    changeRematchButton('disabled')
+                }
+            });
         }
 
-        function myFunction(x) {
+        function drawAction(x) {
+            json = {"data": {
+                    "sid": player_id,
+                    "flag": true
+                }};
+            socket.emit("draw", json, function (ret) {
+                if (ret) {
+                    changeDrawButton('disabled')
+                }
+            });
+        }
+        function declineDrawAction(x) {
+            json = {"data": {
+                    "sid": player_id,
+                    "flag": false
+                }};
+            socket.emit("draw", json, function (ret) {
+                if (ret) {
+                    changeDrawButton('enabled')
+                }
+            });
+        }
+
+        function offeredDrawAction(x) {
+            inner_div = document.getElementById("droppedDrawOffer");
+            inner_div.style.display = "block";
+        }
+
+        function resignAction(x) {
+            json = {"data": {
+                    "sid": player_id
+                }};
+            socket.emit("resign", json, function (ret) {
+                if (ret != null) {
+                }
+            });
+        }
+
+        function boardResize(x) {
             if (x.matches) { // If media query matches
                 board.resize();
             } else {
                 board.resize();
             }
         }
-
-        var x = window.matchMedia("(max-width: 1105px)");
-        //myFunction(x) // Call listener function at run time
-        x.addEventListener("change", myFunction); // Attach listener function on state changes
-        $(".fullpage").fadeOut("slow");
+    });
+    socket.on("draw", function (ans) {
+        if (ans.color === my_color) {
+            // Got my own draw offer back
+            if (ans.flag == 1) {    // I offered draw
+                changeDrawButton('disabled')
+            } else {                // I declined draw
+                changeDrawButton('enabled')
+            }
+        } else {
+            if (ans.flag == 1) {    // Draw offer
+                changeDrawButton('hidden');
+            } else {                  // My draw offer declined
+                changeDrawButton('enabled')
+            }
+        }
+    });
+    socket.on("rematch", function (ans) {
+        console.log("Got Rematch " + ans.flag)
+        if (ans.color === my_color) {
+            // Got my own rematch offer back
+            if (ans.flag == 4) {    // I offered rematch
+                changeRematchButton('disabled')
+            }
+        } else {
+            if (ans.flag == 4) {    // Rematch offered to me
+                changeRematchButton('glow');
+            } else if (ans.flag == 6) {    // Rematch declined
+                changeRematchButton('disabled');
+            }
+        }
     });
     socket.on("move", function (ans) {
         ans = JSON.parse(ans);
@@ -226,16 +378,17 @@ $(document).ready(function () {
 
         removeCheck()
         insertMove(the_move);
+        changeDrawButton('enabled');
         if (ans.remaining) {
             if (my_color.charAt(0) == the_move.color) {
                 other_remaining = ans.remaining;
                 initializeClock("clockdivA", ans.remaining);
-                clearInterval(timeintervalB);
+                discardTimeInterval('B');
                 setTime("clockdivB", ans.other_remaining);
             } else {
                 other_remaining = ans.other_remaining;
                 initializeClock("clockdivB", ans.remaining);
-                clearInterval(timeintervalA);
+                discardTimeInterval('A');
                 setTime("clockdivA", ans.other_remaining);
             }
         }
@@ -243,6 +396,8 @@ $(document).ready(function () {
         source = array[0];
         if (game.in_checkmate()) {
             $board.find(".square-" + source).addClass("highlight-mate");
+            game_over = true;
+            return;
         } else if (game.in_check()) {
             $board.find(".square-" + source).addClass("highlight-check");
         }
@@ -260,16 +415,17 @@ $(document).ready(function () {
                 "move": move
             };
             if (move != null) {
-                socket.emit("update", json, function (ret) {
+                socket.emit("move", json, function (ret) {
                     if (ret == null) {      // In case this move is illegal we should abort
                         game.undo();
-                        checkIn();
+                        heartbeat();
                         return;
                     }
                     ret = JSON.parse(ret);
                     insertMove(move);
+                    changeDrawButton('enabled');
                     if (ret.remaining) {
-                        clearInterval(timeintervalB);
+                        discardTimeInterval('B');
                         setTime("clockdivB", ret["other_remaining"]);
                         initializeClock("clockdivA", ret["remaining"]);
                     }
@@ -285,12 +441,226 @@ $(document).ready(function () {
             }
 
             removeHighlights("yellow");
-            //onDrop()
             futureMoveData = null;
         }
     });
-    checkIn();
+    alert("HEARTBEAT");
+    heartbeat();
 
+    function hideEndGameBoxes() {
+        y = document.getElementById("conty");
+        y.style.display = "none";
+        x = document.getElementById("draw-box");
+        x.style.display = "none";
+        x = document.getElementById("win-box");
+        x.style.display = "none";
+        x = document.getElementById("lose-box");
+        x.style.display = "none";
+    }
+
+    function discardTimeInterval(str) {
+        if (str === 'B') {
+            clearInterval(timeintervalB);
+            clearInterval(timecolorintervalB);
+            clock = document.getElementById("clockdivB");
+            clockspan = clock.children.item(0);
+            clockspan.style.color = "black";
+            clockspan.style.backgroundColor = "#E1ECE0";
+            clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
+            timecolorintervalB = null;
+        }
+        else if (str === 'A') {
+            clearInterval(timeintervalA);
+            clearInterval(timecolorintervalA);
+            clock = document.getElementById("clockdivA");
+            clockspan = clock.children.item(0);
+            clockspan.style.color = "black";
+            clockspan.style.backgroundColor = "#E1ECE0";
+            clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
+            timecolorintervalA = null;
+        }
+        else {
+            clearInterval(timeintervalA);
+            clearInterval(timecolorintervalA);
+            timecolorintervalA = null;
+            clearInterval(timeintervalB);
+            clearInterval(timecolorintervalB);
+            timecolorintervalB = null;
+
+            clock = document.getElementById("clockdivA");
+            clockspan = clock.children.item(0);
+            clockspan.style.color = "black";
+            clockspan.style.backgroundColor = "#E1ECE0";
+
+            clock = document.getElementById("clockdivB");
+            clockspan = clock.children.item(0);
+            clockspan.style.color = "black";
+            clockspan.style.backgroundColor = "#E1ECE0";
+        }
+    }
+
+    function showEndGame(color_win, msg) {
+        var y = document.getElementById("conty");
+        y.style.display = "block";
+        console.log(color_win + " " + my_color);
+        var x = null;
+        if (color_win === '-') {
+            x = document.getElementById("draw-box");
+            x.style.display = "block";
+        } else if (my_color === color_win) {
+            x = document.getElementById("win-box");
+            x.style.display = "block";
+        } else {
+            x = document.getElementById("lose-box");
+            x.style.display = "block";
+        }
+        changeRematchButton('enabled');
+        for (var r = 0; r < x.children.length; r++) {
+            if (x.children[r].className === 'message') {
+                message = x.children[r];
+                for (var t = 0; t < message.children.length; t++) {
+                    if (message.children[t].tagName === 'P') {
+                        message.children[t].innerHTML = msg;
+                        break;
+                    }
+                }
+            }
+            if (x.children[r].className.includes('experiment')) {
+                exp = x.children[r];
+                for (var t = 0; t < exp.children.length; t++) {
+                    if (exp.children[t].className === 'endgame') {
+                        if (my_color === 'black')
+                            exp.children[t].innerHTML = "&#x265A;";
+                        else
+                            exp.children[t].innerHTML = "&#x2654;";
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    function hideArrows() {
+        document.getElementById("arrowRatingA").style.display = "none";
+        document.getElementById("arrowRatingB").style.display = "none";
+    }
+
+    function setRatings(dict) {
+        if (my_color == "white") {      // I'm white
+            if (parseInt(document.getElementById("labelRatingA").innerHTML) < dict.black_rating) {
+                setRating("arrowRatingA", "labelRatingA", "up", dict.black_rating);
+                setRating("arrowRatingB", "labelRatingB", "down", dict.white_rating);
+            } else if (parseInt(document.getElementById("labelRatingA").innerHTML) > dict.black_rating) {
+                setRating("arrowRatingB","labelRatingB", "up", dict.white_rating);
+                setRating("arrowRatingA", "labelRatingA", "down", dict.black_rating);
+            }
+        } else {    // I'm black
+            if (parseInt(document.getElementById("labelRatingA").innerHTML) < dict.white_rating) {
+                setRating("arrowRatingA", "labelRatingA", "up", dict.white_rating);
+                setRating("arrowRatingB", "labelRatingB", "down", dict.black_rating);
+            } else if (parseInt(document.getElementById("labelRatingA").innerHTML) > dict.white_rating) {
+                setRating("arrowRatingB", "labelRatingB", "up", dict.black_rating);
+                setRating("arrowRatingA", "labelRatingA", "down", dict.white_rating);
+            }
+        }
+    }
+
+    function setRating(arrow, label, orient, rating) {
+        document.getElementById(arrow).style.display = "inline-block";
+        if (orient == 'up') {
+            document.getElementById(arrow).innerHTML = "&#x2197";
+            document.getElementById(arrow).style.color = "green";
+        } else if (orient == 'down') {
+            document.getElementById(arrow).innerHTML = "&#x2198";
+            document.getElementById(arrow).style.color = "crimson";
+        }
+        document.getElementById(label).innerHTML = rating;
+    }
+
+    function disableGameButtons() {
+        x = document.getElementById("resignButton");
+        x.style.display = 'block';
+        x.style.opacity = 0.5;
+        x.style.pointerEvents = 'none';
+
+        x = document.getElementById("drawButton");
+        x.style.display = 'block';
+        x.style.opacity = 0.5;
+        x.style.pointerEvents = 'none';
+
+        x = document.getElementById("drawOffer");
+        x.style.display = 'none';
+        inner_div = document.getElementById("droppedDrawOffer");
+        inner_div.style.display = "none";
+    }
+    function enableGameButtons() {
+        x = document.getElementById("resignButton");
+        x.style.display = 'block';
+        x.style.opacity = 1;
+        x.style.pointerEvents = '';
+
+        x = document.getElementById("drawButton");
+        x.style.display = 'block';
+        x.style.opacity = 1;
+        x.style.pointerEvents = '';
+
+        x = document.getElementById("drawOffer");
+        x.style.display = 'none';
+        inner_div = document.getElementById("droppedDrawOffer");
+        inner_div.style.display = "none";
+    }
+
+    function changeRematchButton(status) {
+        buttons = document.getElementsByClassName("button-box");
+        for (var d=0; d<buttons.length; d++)
+        {
+            var x = buttons.item(d);
+            if (status === 'enabled') {
+                x.style.display = 'block';
+                x.style.opacity = 1;
+                x.style.pointerEvents = '';
+            } else if (status === 'disabled') {
+                x.style.display = 'block';
+                x.style.opacity = 0.5;
+                x.style.pointerEvents = 'none';
+                x.style.animation = '';
+            } else if (status === 'glow') {
+                x.style.display = 'block';
+                x.style.opacity = 1;
+                x.style.pointerEvents = '';
+                x.style.animation = "scale 1s ease-in infinite"
+            }
+        }
+    }
+
+    function changeDrawButton(status) {
+        x = document.getElementById("drawButton");
+        if (status === 'enabled') {
+            x.style.display = 'block';
+            x.style.opacity = 1;
+            x.style.pointerEvents = '';
+            offeredButton = document.getElementById("drawOffer");
+            offeredButton.style.display = "none";
+            inner_div = document.getElementById("droppedDrawOffer");
+            inner_div.style.display = "none";
+        }
+        else if (status === 'disabled') {
+            x.style.display = 'block';
+            x.style.opacity = 0.5;
+            x.style.pointerEvents = 'none';
+            offeredButton = document.getElementById("drawOffer");
+            offeredButton.style.display = "none";
+            inner_div = document.getElementById("droppedDrawOffer");
+            inner_div.style.display = "none";
+        } else if (status === 'hidden') {
+            x.style.display = 'none';
+            offeredButton = document.getElementById("drawOffer");
+            offeredButton.style.display = "block";
+        }
+    }
+    */
+
+    /*
     function getBoardColorsByName(str) {
         if (str === "urban") return urban_board_theme;
         if (str === "standard") return standard_board_theme;
@@ -320,7 +690,7 @@ $(document).ready(function () {
         } else {
             index = 2;
         }
-        moveList.push(move.san);
+        //moveList.push(move.san);
         the_game_fens.push(game.fen());
         handle_move(move.san, index, 30000, true);
     }
@@ -332,7 +702,7 @@ $(document).ready(function () {
             table.deleteRow(-1);
         }
         let index = 0;
-        moveList = moves;
+        //moveList = moves;
         for (var i = 0; i < moves.length; i++) {
             if (i % 2 == 0) {
                 index = 0;
@@ -397,7 +767,7 @@ $(document).ready(function () {
         }
     }
 
-    function checkIn() {
+    function heartbeat() {
         load_cookies();
         socket.emit("heartbeat", {"data": JSON.stringify(cookie_data)}, function (ans) {
             if (ans) {
@@ -408,7 +778,7 @@ $(document).ready(function () {
             }
         });
     }
-
+    */
     function load_cookies() {
         cookie_data = localStorage.getItem("user_session");
         cookie_data = JSON.parse(cookie_data);
@@ -422,11 +792,13 @@ $(document).ready(function () {
             timeControl = obj_prefs.time_control;
             queenAutopromote = obj_prefs.queen_autopromote;
             highlightMoves = obj_prefs.highlight_moves;
+            clockGlow = obj_prefs.clock_warn;
         }
     }
 
     function initSettings() {
         // prerequisite is load_cookies
+        load_cookies();
         board_themes = [
             urban_board_theme,
             standard_board_theme,
@@ -493,6 +865,39 @@ $(document).ready(function () {
         }
         conts = document.getElementsByClassName("themeContainer");
         for (var c = 0; c < conts.length; c++) {
+            if (cookie_data != null && cookie_data.preferences != null ) {
+                if (conts[c].parentElement.id === "settingItemBoard" && conts[c].id.includes(cookie_data.preferences.board_theme)) {
+                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.color = "white";
+                    conts[c].style.fontWeight = "bolder";
+                }
+                if (conts[c].parentElement.id === "settingItemPiece" && conts[c].id.includes(cookie_data.preferences.piece_theme)) {
+                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.color = "white";
+                    conts[c].style.fontWeight = "bolder";
+                }
+                if (conts[c].parentElement.id === "settingItemTimeControl" && conts[c].children[0].innerHTML.toLowerCase() === cookie_data.preferences.time_control) {
+                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.color = "white";
+                    conts[c].style.fontWeight = "bolder";
+                }
+            } else {        // load default config
+                if (conts[c].parentElement.id === "settingItemBoard" && conts[c].id.includes(boardTheme)) {
+                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.color = "white";
+                    conts[c].style.fontWeight = "bolder";
+                }
+                if (conts[c].parentElement.id === "settingItemPiece" && conts[c].id.includes(pieceTheme)) {
+                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.color = "white";
+                    conts[c].style.fontWeight = "bolder";
+                }
+                if (conts[c].parentElement.id === "settingItemTimeControl" && conts[c].children[0].innerHTML.toLowerCase() === timeControl) {
+                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.color = "white";
+                    conts[c].style.fontWeight = "bolder";
+                }
+            }
             conts[c].addEventListener("click", function (event) {
                 var elem = event.srcElement;
                 while (elem.className != "themeContainer") {
@@ -501,18 +906,21 @@ $(document).ready(function () {
                 if (elem.parentElement.id === "settingItemBoard") {
                     boardTheme = elem.children[1].id;
                     $("#settingItemBoard .themeContainer").css("backgroundColor", "");
+                    $("#settingItemBoard .themeContainer").css("border", "3px solid transparent");
                     $("#settingItemBoard .themeContainer").css("color", "white");
                     $("#settingItemBoard .themeContainer").css("fontWeight", "");
                 }
                 if (elem.parentElement.id === "settingItemPiece") {
                     pieceTheme = elem.children[0].innerHTML.toLowerCase();
                     $("#settingItemPiece .themeContainer").css("color", "white");
+                    $("#settingItemPiece .themeContainer").css("border", "3px solid transparent");
                     $("#settingItemPiece .themeContainer").css("backgroundColor", "");
                     $("#settingItemPiece .themeContainer").css("fontWeight", "");
                 }
                 if (elem.parentElement.id === "settingItemTimeControl") {
                     timeControl = elem.children[0].innerHTML.toLowerCase();
                     $("#settingItemTimeControl .themeContainer").css("color", "white");
+                    $("#settingItemTimeControl .themeContainer").css("border", "3px solid lavender");
                     $("#settingItemTimeControl .themeContainer").css("backgroundColor", "");
                     $("#settingItemTimeControl .themeContainer").css("fontWeight", "");
                     $("#settingItemTimeControl .timeLabel").css("border", "");
@@ -529,24 +937,30 @@ $(document).ready(function () {
                     gc.style.opacity = 1;
                     promote = elem.id;
                     onDrop(promotion_in_progress[0], promotion_in_progress[1]);
-                    onSnapEnd();
+                    board.position(game.fen(), useAnimation = true);
                     promotion_in_progress = [];
                 }
-                elem.style.backgroundColor = "#fc5185"//"#bdcad8";
+                elem.style.border = "3px solid #fc5185";
                 elem.style.color = "white";
                 elem.style.fontWeight = "bolder";
             }, false);
         }
+
         if (cookie_data != null) {
             checks = document.getElementsByClassName("checkContainer");
             for (var ch = 0; ch < checks.length; ch++) {
                 box = checks[ch].children[0];
                 box.style.checked = "";
                 if (cookie_data.preferences != null) {
-                    if (box.id == "qa" && cookie_data.preferences.queen_autopromote)
-                        box.style.checked = "checked";
-                    if (box.id == "mh" && cookie_data.preferences.highlight_moves)
-                        box.style.checked = "checked";
+                    if (box.id === "qa" && cookie_data.preferences.queen_autopromote) {
+                        box.checked = "checked";
+                    }
+                    if (box.id === "mh" && cookie_data.preferences.highlight_moves) {
+                        box.checked = "checked";
+                    }
+                    if (box.id === "cg" && cookie_data.preferences.clock_warn) {
+                        box.checked = "checked";
+                    }
                 }
             }
         } else
@@ -558,23 +972,34 @@ $(document).ready(function () {
             qa = document.getElementById("settingItemQueenAutopromote");
             qa_checked = qa.children[0].children[0].checked;
             mh = document.getElementById("settingItemMoveHighlight");
-            mh_checked = mh.children[0].children[0].checked;
+            mh_checked = mh.children[0].children[0].checked
+            cg = document.getElementById("settingItemClockGlow");
+            cg_checked = cg.children[0].children[0].checked;
             prefs = {
                 "board_theme": boardTheme,
                 "piece_theme": pieceTheme,
                 "time_control": timeControl,
                 "queen_autopromote": qa_checked,
-                "highlight_moves": mh_checked
+                "highlight_moves": mh_checked,
+                "clock_warn": cg_checked
             };
             cookie_data.preferences = prefs;
             localStorage.setItem("user_prefs", JSON.stringify(prefs));
-            res = socket.emit("play", {"data": JSON.stringify(cookie_data)}, function (ans) {
-                document.getElementById("settingsBox").style.display = "none";
-                document.getElementById("gameBox").style.display = "flex";
+            res = socket.emit("play", {"data": cookie_data}, function (ans) {
+                // Save my sid
+                cookie_data.sid = ans;
+                localStorage.setItem("user_session", JSON.stringify(cookie_data));
+                window.location.href = "/game";
+                //document.getElementById("settingsBox").style.display = "none";
+                //document.getElementById("gameBox").style.display = "flex";
             });
+
         });
+
     }
 
+    initSettings();
+    /*
     function removeGreySquares() {
         //$('#myBoard .white-1e1d7').css('background', whiteSquare)
         //$('#myBoard .black-3c85d').css('background', blacksquare)
@@ -591,8 +1016,24 @@ $(document).ready(function () {
         $("#myBoard .square-55d63").removeClass("highlight-" + color);
     }
 
+    function changeCursor(square, change) {
+        var $square = $("#myBoard .square-" + square);
+        isPiece = false;
+        image = null;
+        if ($square.children().length > 0) {
+            for (var r = 0; r < $square.children().length; r++) {
+                if ($square.children()[r].tagName == "IMG")
+                    isPiece = true;
+                image = $square.children()[r];
+            }
+        }
+        if (isPiece) {
+            image.style.cursor = change;
+        }
+    }
+
     function greySquare(square) {
-        if (highlightMoves){
+        if (!highlightMoves){
             return
         }
         var $square = $("#myBoard .square-" + square);
@@ -622,13 +1063,12 @@ $(document).ready(function () {
             the_square = $square.get()[0];
             the_square.appendChild(svg);
         }
-
     }
 
     function onDragStart(source, piece, position, orientation) {
         // do not pick up pieces if the game is over
         cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.game_over() || cut_game_fen != board.fen() || promotion_in_progress.length > 0) return false;
+        if (game.game_over() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
         removeHighlights("yellow");
@@ -674,25 +1114,44 @@ $(document).ready(function () {
             "move": move
         };
         if (move != null) {
-            removeCheck()
-            socket.emit("update", json, function (ret) {
+            removeCheck();
+
+            if (move.san == "O-O-O" ||
+                move.san == "O-O" ||
+                move.san.indexOf("=") > -1 ||
+                (move.san.indexOf("x") > -1 && move.flags == "e")
+            ) {
+                needsBoardRendering = true;
+            }
+
+            socket.emit("move", json, function (ret) {
                 ret = JSON.parse(ret);
                 if (ret.remaining) {
-                    clearInterval(timeintervalB);
+                    discardTimeInterval('B');
                     setTime("clockdivB", ret["other_remaining"]);
                     initializeClock("clockdivA", ret["remaining"]);
                 }
                 insertMove(move);
+                offeredButton = document.getElementById("drawOffer");
+                if (offeredButton.style.display != "none") {
+                    changeDrawButton('enabled');
+                }
+                if (game.in_checkmate()) {
+                    array = get_piece_positions(game, {type: "k", color: game.turn()});
+                    source = array[0];
+                    $board.find(".square-" + source).addClass("highlight-mate");
+                    game_over = true;
+                } else if (game.in_check()) {
+                    array = get_piece_positions(game, {type: "k", color: game.turn()});
+                    source = array[0];
+                    $board.find(".square-" + source).addClass("highlight-check");
+                }
             });
-        }
-        if (game.in_checkmate()) {
-            array = get_piece_positions(game, {type: "k", color: game.turn()});
-            source = array[0];
-            $board.find(".square-" + source).addClass("highlight-mate");
-        } else if (game.in_check()) {
-            array = get_piece_positions(game, {type: "k", color: game.turn()});
-            source = array[0];
-            $board.find(".square-" + source).addClass("highlight-check");
+            return 'drop'
+        } else {
+            // This was snapped back - rerender
+            //needsBoardRendering = true;
+            return 'snapback'
         }
     }
 
@@ -737,10 +1196,8 @@ $(document).ready(function () {
                     return false;
                 }
             }
-            console.log("UNABLE TO HANDLE PROMOTION " + source + " " + target + " " + promotion_in_progress)
             return false
         }
-        console.log("CANNOT HANDLE PROMOTION " + source + " " + target)
         return false
     }
 
@@ -758,9 +1215,10 @@ $(document).ready(function () {
 
     function onMouseoverSquare(square, piece, position, orientation) {
         cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.game_over() || piece == false || cut_game_fen != board.fen() || promotion_in_progress.length > 0) return false;
+        if (game.game_over() || piece == false || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
+        changeCursor(square, "grab");
         // get list of possible moves for this square
         var moves = game.moves({
             square: square,
@@ -769,7 +1227,6 @@ $(document).ready(function () {
 
         // exit if there are no moves available for this square
         if (moves.length === 0) return;
-
         removeGreySquares();
         // highlight the possible squares for this piece
         for (var i = 0; i < moves.length; i++) {
@@ -779,13 +1236,24 @@ $(document).ready(function () {
     }
 
     function onMouseoutSquare(square, piece) {
+        changeCursor(square, "default");
         removeGreySquares();
     }
 
+    function onDragMove (newLocation, oldLocation, source, piece, position, orientation) {
+        if (newLocation === 'offboard') {
+            changeCursor(newLocation, "no-drop");
+        }
+    }
+
+
     // update the board position after the piece snap
-    // for castling, en passant, pawn promotion
-    function onSnapEnd() {
-        board.position(game.fen(), useAnimation = true);
+    // for castling, en passant, pawn promotion and illegal moves
+    function onSnapEnd(draggedPieceSource, square, draggedPiece) {
+        if (needsBoardRendering) {
+            board.position(game.fen(), useAnimation = true);
+        }
+        needsBoardRendering = false;
     }
 
     function updateStatus() {
@@ -816,10 +1284,10 @@ $(document).ready(function () {
             }
         }
 
-        $status.html(status);
-        $fen.html(game.fen());
-        $pgn.html(game.pgn());
+        //$status.html(status);
+        //$fen.html(game.fen());
+        //$pgn.html(game.pgn());
     }
-
+    */
     (jQuery);
 });

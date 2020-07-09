@@ -8,18 +8,54 @@
 }
 
 .lds-ellipsis {
-  display: inline-block;
-  position: relative;
-  top: 50%;
-  left: 50%;
+
+    display: inline-block;
+    position: relative;
+    margin: auto;
+    left: 42%;
+    padding: 20px;
 }
 .lds-ellipsis div {
   position: absolute;
+  padding: 10px;
   width: 13px;
   height: 13px;
   border-radius: 50%;
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
+
+.loadButton {
+    border: 1px solid #FCBBCD;
+    border-radius: 20px;
+    color: #fc5185;
+    position: relative;
+    margin: auto;
+}
+
+.loadGameCanvas {
+    margin: auto;
+    display: inline-block;
+    top: 40%;
+    position: relative;
+    left: 36%;
+}
+
+.loadSettingsCanvas {
+    margin: auto;
+    display: inline-block;
+    top: 45%;
+    position: relative;
+    left: 38%;
+}
+
+.loadMessage {
+    position: relative;
+    color: #fc5185;
+    font-weight: lighter;
+    margin: auto;
+    padding: 20px;
+}
+
 .myloader {
     background-color: #fc5185;
 }

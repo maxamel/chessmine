@@ -1425,6 +1425,205 @@ button:focus {
   #margin: 20px
 }
 
+.gameBox {
+  opacity: 1;
+  display: none;
+  #background: #364f6b;
+  background-size: cover;
+  #background-image: url("../img/wood-pattern2.png");
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin-left: 0px;
+  background: -moz-linear-gradient(135deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* ff3.6+ */
+  background: -webkit-gradient(linear, left top, right bottom, color-stop(0%, rgba(54,79,107,1)), color-stop(0%, rgba(0,0,0,1)), color-stop(0%, rgba(54,79,107,1)), color-stop(48%, rgba(54,79,107,1)), color-stop(100%, rgba(252,81,133,1))); /* safari4+,chrome */
+  background: -webkit-linear-gradient(135deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* safari5.1+,chrome10+ */
+  background: -o-linear-gradient(135deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* opera 11.10+ */
+  background: -ms-linear-gradient(135deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* ie10+ */
+  background: linear-gradient(315deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* w3c */
+
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#364f6b', endColorstr='#fc5185',GradientType=1 ); /* ie6-9 */
+
+}
+
+
+
+.bar {
+  opacity: 1;
+  data-type: "stroke";
+  data-stroke: #fc5185;
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  top: 300px;
+  right: -300px;
+  height: 160px;
+  width: 160px;
+}
+
+.bar path.mainline {
+    stroke-width: 2;
+    stroke: #fc5185;
+    stroke-linecap: round;
+  }
+
+.bar-label {
+    color: #09f;
+    font-family: 'varela round';
+    font-size: 2.5em;
+    font-weight: 900;
+  }
+
+.playerInfoA {
+  position: relative;
+  width: 90%;
+  top: 35%;
+  left: 5%;
+  visibility: hidden;
+}
+
+.playerInfoB {
+  position: relative;
+  width: 90%;
+  top: 35%;
+  left: 5%;
+  visibility: hidden;
+}
+
+.label {
+  width: 58%;
+  font-weight: bolder;
+  font-size: 20px;
+  #font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+}
+
+.labelRating {
+  font-weight: bolder;
+  font-size: 20px;
+  #font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+}
+
+.dottop {
+  height: 15px;
+  width: 15px;
+  background-color: #59fb74;
+  border: 2px double #E1ECE0;
+  border-radius: 50%;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 20px;
+  margin-right: 10px;
+  #position: relative;
+}
+
+.dotbottom {
+  height: 15px;
+  width: 15px;
+  background-color: #59fb74;
+  border: 2px double #E1ECE0;
+  border-radius: 50%;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 20px;
+  margin-right: 10px;
+  #position: relative;
+}
+
+.clockspan {
+    padding: 10px;
+    background: #E1ECE0;
+    width: 200px;
+    margin: 10px;
+    box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+    border-radius: 15px;
+    #border: 3px solid black;
+}
+
+.playerBox {
+  margin: auto;
+  max-width: 400px;
+  width: 100%;
+  height: 80px;
+  color: black;
+  font-family: "Baloo Paaji 2";
+  font-weight: lighter;
+  position: relative;
+  bottom: 0;
+  background: #E1ECE0;
+  box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+}
+
+.roundTop {
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+}
+
+.roundBottom {
+  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
+
+.board {
+  margin: auto;
+  width: 450px;
+  height: 450px;
+  position: relative;
+}
+
+.boxesHolder {
+  margin: auto;
+  position: relative;
+  margin-left: 5px;
+  margin-top: 64px;
+  background: ghostwhite;
+  #background: #fcf8ff;
+  border-radius: 25px;
+  border: 1px hidden #fc5185;
+  max-width: 400px;
+  height: 500px;
+  box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+}
+
+.boardHolder {
+  margin: auto;
+  margin-right:5px;
+  background: #E1ECE0;
+  box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+  border: 1px hidden #fc5185;
+  border-radius: 25px;
+  width: 500px;
+  height: 500px;
+}
+
+.vbottom{
+	position: absolute;
+}
+
+.vbottomclock {
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  right: 0;
+}
+
+.leftpane {
+  width: 50%;
+}
+.rightpane {
+  width: 50%;
+}
+
+.timeCell {
+  padding: 5px;
+  width: 45%;
+  text-align: center;
+  border: 1px solid lavender;
+  font-size: 20px;
+  font-weight: bolder;
+  font-family: 'ProFontWindows';
+  box-shadow: inset 0px 0px 1px 1px #c2d0c1;
+}
+
 th, td {
   padding: 5px;
   width: 45%;
@@ -1435,7 +1634,106 @@ th, td {
   box-shadow: inset 0px 0px 1px 1px #c2d0c1;
 }
 
-.myButton {
+.regularCell {
+  padding: 5px;
+  width: 45%;
+  text-align: center;
+  border: 1px solid lavender;
+  font-size: 15px;
+  font-family: "Baloo Paaji 2";
+  box-shadow: inset 0px 0px 1px 1px #c2d0c1;
+}
+
+.regularCell:hover {
+  color: black;
+  cursor: pointer;
+  #font-weight: bolder;
+  background: #f3f3f5;
+  #background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+}
+.selectedCell {
+  color: black;
+  cursor: pointer;
+  font-weight: bolder;
+  background: #f3f3f5;
+  text-decoration: underline;
+  #background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+}
+
+.tableNavigator {
+    height: 35px;
+    background: lavender;
+    width: 100%;
+    margin: 0px;
+}
+
+.blinking{
+    animation:blinkingText 1.2s infinite;
+}
+@keyframes blinkingText{
+    0%{     color: #000;    }
+    49%{    color: #000; }
+    60%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #000;    }
+}
+
+.highlight-check {
+  box-shadow: inset 0 0 15px 0 orange;
+}
+.highlight-mate {
+  box-shadow: inset 0 0 15px 0 red;
+}
+
+.moveBox {
+  height: 390px;
+}
+
+.tableWrapper {
+  overflow-y: scroll;
+  height: 78%;
+}
+
+.edgeCell {
+  width: 5%;
+  padding: 0px;
+}
+
+.whiteCell {
+  background-color: white;
+  width: 5.25%;
+
+}
+.blackCell {
+  background-color: black;
+}
+
+.moveTableHeader {
+  width: 100%;
+}
+.moveTable {
+  width: 100%;
+  position: relative;
+}
+
+.playButton {
+    float: right;
+}
+
+.gameButton {
+  float: left;
+  display: none;
+}
+
+/*.myButton {
     width: 100px;
     margin: 15px;
     padding: 10px;
@@ -1460,8 +1758,86 @@ th, td {
       #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
       color: #fc5185;
       background: white;
+}*/
+
+.myButtonClone {
+    width: 100px;
+    cursor: pointer;
+    margin: 15px;
+    padding: 10px;
+    font-size: 14px;
+    color: white;
+    text-align: center;
+    font-family: "Baloo Paaji 2";
+    #float: right;
+    border-radius: 20px;
+    background: #fc5185;
+    #animation: glowingButton 1.5s infinite;
 }
 
+.downmenu {
+    width: 5px;
+    height: 5px;
+    border: 1px solid #fff;
+    border-color: inherit;
+    border-left-color: transparent;
+    border-top-color: transparent;
+    display: inline-block;
+    margin-left: 3px;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    vertical-align: middle;
+    margin-bottom: 3px;
+}
+
+.droppedDrawOffer{
+  display: none;
+  position: absolute;
+  margin: 40px;
+  margin-left: 80px;
+}
+
+.drawOffer {
+  display: none;
+}
+
+.liner {
+  border: 0.5px solid #222222;
+}
+
+.dropped {
+    width: 100px;
+    #margin: 15px;
+    padding: 5px;
+    font-size: 14px;
+    color: #222222;
+    text-align: center;
+    font-family: "Baloo Paaji 2";
+    font-style: italic;
+    font-weight: lighter;
+    #border-radius: 20px;
+    background: white;
+    cursor: pointer;
+}
+.dropped:hover {
+    width: 100px;
+    #margin: 15px;
+    padding: 5px;
+    font-size: 14px;
+    color:  white;
+    text-align: center;
+    font-family: "Baloo Paaji 2";
+    font-style: italic;
+    font-weight: lighter;
+    #border-radius: 20px;
+    #background: white;
+    background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+    background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+    background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+    background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+    background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+
+}
 
 @media screen and (max-width: 1105px){
   .rightpane{
@@ -1553,6 +1929,19 @@ th, td {
     #background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
     background-origin: border-box;
     background-clip: content-box, border-box; }
+}
+
+.playerInfoSmall {
+  position: relative;
+  width: 90%;
+  margin: auto;
+  color: black;
+  font-weight: lighter;
+}
+
+.boardandclock {
+  display: inline-block;
+  float: right;
 }
 
 .contact_info .info_item {

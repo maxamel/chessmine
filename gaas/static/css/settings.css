@@ -2,14 +2,19 @@
 .settingsBox {
   opacity: 1;
   padding: 30px;
-  display: block;
+  display: inline-block;
   #display: none;
   background: #364f6b;
   background-size: cover;
-  position: absolute;
+  #position: absolute;
   width: 100%;
-  height: 800px;
+  min-height: 800px;
 }
+
+.playButton {
+    float: right;
+}
+
 
 .slider {
     width: 85%;
@@ -19,27 +24,30 @@
     width: 85%;
 }
 
-.goButton {
-    width: 100px;
-    margin: 15px;
-    padding: 10px;
-    font-size: 14px;
-    color: white;
-    text-align: center;
-    font-family: "Baloo Paaji 2";
-    float: right;
-    border-radius: 20px;
+@keyframes glowingButton{
+    0% {
     background: #fc5185;
+  }
+
+  50% {
+      #background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      background: white;
+      color: #fc5185;
+  }
+
+  100% {
+    background: #fc5185;
+  }
 }
-.goButton:hover {
-      color: white;
-      cursor: pointer;
-      background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+
+.dropButton {
+    float: left;
+    animation: glowingButton 1.5s infinite;
 }
 
 .themeLabel {
@@ -54,8 +62,9 @@
 
 .themeContainer {
     text-align: center;
-    margin: auto;
+    margin-left: 80px;
     padding: 10px;
+    border: 3px solid transparent;
 }
 
 .themeTable {
@@ -130,7 +139,7 @@ td.settings {
 }
 
 .themeBox {
-    width: 85%;
+    width: 100%;
     background: #0f2f53;
     border-radius: 10px;
 }
@@ -139,20 +148,20 @@ td.settings {
     background: #0f2f53;
     border-radius: 10px;
     padding-bottom: 15px;
-    width: 5%;
+    width: 100%;
     #margin: auto;
 }
 
 .settingSelector{
-    padding: 15px;
+    padding: 40px;
     width: 100%;
 }
 .settingItem {
-  padding: 20px;
+  padding: 30px;
   color: white;
   font-family: "Baloo Paaji 2";
   font-weight: normal;
-  font-size: 15px;
+  #font-size: 15px;
   margin: auto;
 }
 .boardSetting {
@@ -170,12 +179,13 @@ td.settings {
 .settingPoint {
   color: lavender;
   font-family: "Baloo Paaji 2";
-  font-weight: lighter;
-  font-size: 15px;
+  font-weight: bolder;
+  font-size: 25px;
   width: 15%;
   margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 0;
+  margin-bottom: -15px;
+  margin-left: 20px;
+  z-index: 1000;
 }
 
 .settingsContainer {
@@ -206,6 +216,7 @@ td.settings {
   position: relative;
   padding-left: 35px;
   margin-bottom: 12px;
+    margin-left: 80px;
   cursor: pointer;
   font-size: 22px;
   -webkit-user-select: none;

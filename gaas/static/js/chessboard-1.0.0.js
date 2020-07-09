@@ -1001,7 +1001,6 @@
         // exit if all the animations aren't finished
         numFinished = numFinished + 1
         if (numFinished !== animations.length) return
-
         drawPositionInstant()
 
         // run their onMoveEnd function
@@ -1275,7 +1274,15 @@
 
       // animation complete
       function onAnimationComplete () {
-        drawPositionInstant()
+        // Instead of redrawing the whole board - redraw only the moved piece.
+        // This allows a performance optimization.
+        // It also fixes the bug when opponents' move is made right after our move(premove/future move).
+        // When our move calls drawPositionInstant, the opponents' piece may already be in the new position and will be drawn
+        // at its new square. But the opponents' move animation hasn't completed yet, so it will be animated although it already
+        // occupies its final square. This creates a buggy UI experience of flickering piece
+        $('#' + squareElsIds[square]).find('.' + CSS.piece).remove()
+        $('#' + squareElsIds[square]).append(buildPieceHTML(currentPosition[square]))
+        //drawPositionInstant();
         $draggedPiece.css('display', 'none')
 
         // execute their onSnapEnd function
@@ -1341,7 +1348,6 @@
         left: x - squareSize / 2,
         top: y - squareSize / 2
       })
-
       // get location
       var location = isXYOnSquare(x, y)
 
@@ -1356,6 +1362,13 @@
       // add highlight to new square
       if (validSquare(location)) {
         $('#' + squareElsIds[location]).addClass(CSS.highlight2)
+          $draggedPiece.css({
+            cursor: "grabbing"
+        })
+      } else {
+          $draggedPiece.css({
+            cursor: "no-drop"
+        })
       }
 
       // run onDragMove
@@ -1498,7 +1511,6 @@
 
       // update the board
       widget.position(newPos, useAnimation)
-
       // return the new position object
       return newPos
     }
@@ -1531,28 +1543,23 @@
       if (arguments.length === 0) {
         return deepCopy(currentPosition)
       }
-
       // get position as FEN
       if (isString(position) && position.toLowerCase() === 'fen') {
         return objToFen(currentPosition)
       }
-
       // start position
       if (isString(position) && position.toLowerCase() === 'start') {
         position = deepCopy(START_POSITION)
       }
-
       // convert FEN to position object
       if (validFen(position)) {
         position = fenToObj(position)
       }
-
       // validate position object
       if (!validPositionObject(position)) {
         error(6482, 'Invalid value passed to the position method.', position)
         return
       }
-
       // default for useAnimations is true
       if (useAnimation !== false) useAnimation = true
 
