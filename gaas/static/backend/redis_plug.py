@@ -147,7 +147,7 @@ class RedisPlug:
 
     def set_game_timeout(self, game_id, timeout):
         key = self.game_expire
-        self.r.zadd(key, game_id, timeout)
+        self.r.zadd(key, {game_id: timeout})
 
     def peek_game_timeout(self):
         key = self.game_expire

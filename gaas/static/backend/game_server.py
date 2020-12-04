@@ -66,6 +66,7 @@ class GameServer:
 
     def map_rivals(self, player1, player2, time_control):
         game_id = uuid.uuid4().hex
+        lgr.info("Mapping rivals with args: {}, {}, {}, {}".format(player1, player2, game_id, time_control))
         self.redis.map_player(player=player1, opponent=player2, game_id=game_id, color=WHITE, time_control=time_control)
         self.redis.map_player(player=player2, opponent=player1, game_id=game_id, color=BLACK, time_control=time_control)
         self.redis.map_game(game_id=game_id, white_sid=player1, black_sid=player2)
@@ -300,7 +301,7 @@ class GameServer:
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
         lgr.debug("Move {} played by player {} in game {}".format(move["san"], player_info.sid, player_info.game_id))
         if player_info.ttl_start_time != 'None':
-            self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, None)
+            self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None')
         if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
             # we're in the process of timeouting the game. Just quit now and let it timeout gracefully
             lgr.error("Move {} by player {} is not counted due to game {} termination".format(move["san"], player_info.sid, player_info.game_id))
@@ -405,7 +406,7 @@ class GameServer:
         This method is called by client in two cases:
         1) A periodic keepalive ("checkin")
         2) A request to pull entire game data
-        If player's sid is unknonw
+        If player's sid is unknown
         :param payload: the cookie as sent by player
         :return: ServerResponse with sid of recepient player in case of periodic call and full game data in case of full heartbeat request
         :raises: ValueError if player's sid is unknown

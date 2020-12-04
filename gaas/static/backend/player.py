@@ -29,6 +29,7 @@ class Player:
             rating = int(rating)
         return Player(sid=d[SID], name=d[NAME], rating=rating, preferences=json.loads(d[PREFERENCES]))
 
+
 class PlayerGameInfo:
     def __init__(self, name="Guest", rating=1500, rating_delta=None, time_remaining=None, connect_status=None):
         self.name = name
@@ -60,9 +61,10 @@ class PlayerGameInfo:
         return PlayerGameInfo(name=d[NAME], rating=rating, rating_delta=rating_delta,
                               time_remaining=rm_time, connect_status=d[CONNECT_STATUS])
 
+
 class PlayerMapping:
-    def __init__(self, sid, opponent=None, color=None, time_remaining=None,
-                 turn_start_time=None, game_id=None, ttl_start_time=None, draw_offer=0,
+    def __init__(self, sid, opponent, color, time_remaining,
+                 game_id, turn_start_time, ttl_start_time=None, draw_offer=0,
                  rematch_offer=0, last_seen=None):
         self.sid = sid
         self.opponent = opponent
@@ -76,17 +78,18 @@ class PlayerMapping:
         self.last_seen = last_seen
 
     def to_dict(self):
+        # set 'None' as string value explicitly. Prior to py-redis3.0 this was automatic
         return {
             "sid": self.sid,
             "opponent": self.opponent,
             "color": self.color,
             "time_remaining": self.time_remaining,
-            "turn_start_time": self.turn_start_time,
+            "turn_start_time": self.turn_start_time if self.turn_start_time is not None else 'None',
             "game_id": self.game_id,
-            "ttl_start_time": self.ttl_start_time,
+            "ttl_start_time": self.ttl_start_time if self.ttl_start_time is not None else 'None',
             "draw_offer": self.draw_offer,
             "rematch_offer": self.rematch_offer,
-            "last_seen": self.last_seen
+            "last_seen": self.last_seen if self.last_seen is not None else 'None'
         }
 
     @staticmethod

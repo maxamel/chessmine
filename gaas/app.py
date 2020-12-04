@@ -16,9 +16,10 @@ socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
 oauth = OAuth(app)
 oauth.register('lichess')
 
-Payload.max_decode_packets = 50
+Payload.max_decode_packets = 150
 
 game_server = GameServer()
+
 
 @app.route('/match/<sid1>/<sid2>')
 def match(sid1, sid2):
