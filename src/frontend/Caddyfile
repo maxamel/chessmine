@@ -1,0 +1,43 @@
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# Unless the file starts with a global options block, the first
+# uncommented line is always the address of your site.
+#
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace the line below with your
+# domain name.
+
+
+{
+    experimental_http3
+}
+
+chesslune.com
+
+# Set this path to your site's directory.
+root * /var/www/html/
+
+
+# Another common task is to set up a reverse proxy:
+route {
+        @notStatic {
+                path /api/* /socket.io/*
+        }
+        reverse_proxy @notStatic game_server:5000
+        try_files {path}.html {path}
+        file_server
+
+}
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile
+
+log {
+        output file /var/log/access.log {
+        roll_size       150mb
+        roll_keep_for   48h
+        roll_keep       5
+        }
+        format  console
+}
