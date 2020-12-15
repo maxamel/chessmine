@@ -13,7 +13,7 @@ $(document).ready(function () {
         json = {"data": {
             "sid": player_id
         }};
-        socket.emit("cancelSearch", json, function (ret) {
+        socket.emit("/api/cancelSearch", json, function (ret) {
             if (ret === 0) {
                 evt.target.style.opacity = 0.5;
                 evt.target.style.pointerEvents = 'none';
@@ -147,7 +147,7 @@ $(document).ready(function () {
     var attached_listeners = false;
 
     var cookie_data = localStorage.getItem("user_session");
-    var socket = io("https://chesslune.com/connect");
+    var socket = io("http://chesslune.com/connect");
 
     /*socket.on("connection_id", function (ans) {
         data = ans.user;
@@ -157,7 +157,7 @@ $(document).ready(function () {
         localStorage.setItem("user_session", user_data);
         cookie_data = user_data;
     });*/
-    socket.on("/api/game_over", function (ans) {
+    socket.on("game_over", function (ans) {
         console.log(JSON.stringify(ans))
         game_over = true;
         discardTimeInterval('all');
@@ -166,7 +166,7 @@ $(document).ready(function () {
         showEndGame(ans.winner, ans.message);
         setRatings(ans)
     });
-    socket.on("/api/game", function (ans) {
+    socket.on("game", function (ans) {
         load_cookies();
         console.log(ans)
         my_color = JSON.stringify(ans.color);
@@ -307,7 +307,7 @@ $(document).ready(function () {
                         "flag": false
                     }
                 };
-                socket.emit("rematch", json, function (ret) {
+                socket.emit("/api/rematch", json, function (ret) {
                     updateLastCall();
                 });
             });
@@ -325,7 +325,7 @@ $(document).ready(function () {
                     "sid": player_id,
                     "flag": true
                 }};
-            socket.emit("rematch", json, function (ret) {
+            socket.emit("/api/rematch", json, function (ret) {
                 if (ret) {
                     changeRematchButton('disabled')
                 }
@@ -367,7 +367,7 @@ $(document).ready(function () {
                     "sid": player_id,
                     "flag": true
                 }};
-            socket.emit("draw", json, function (ret) {
+            socket.emit("/api/draw", json, function (ret) {
                 if (ret) {
                     updateLastCall();
                     changeDrawButton('disabled')
@@ -379,7 +379,7 @@ $(document).ready(function () {
                     "sid": player_id,
                     "flag": false
                 }};
-            socket.emit("draw", json, function (ret) {
+            socket.emit("/api/draw", json, function (ret) {
                 if (ret) {
                     updateLastCall();
                     changeDrawButton('enabled')
@@ -397,7 +397,7 @@ $(document).ready(function () {
             json = {"data": {
                     "sid": player_id
                 }};
-            socket.emit("resign", json, function (ret) {
+            socket.emit("/api/resign", json, function (ret) {
                 if (ret) {
                     updateLastCall();
                 }
@@ -408,7 +408,7 @@ $(document).ready(function () {
             json = {"data": {
                     "sid": player_id
                 }};
-            socket.emit("abort", json, function (ret) {
+            socket.emit("/api/abort", json, function (ret) {
                 if (ret) {
                     updateLastCall();
                     x = document.getElementById("abortButton")
@@ -426,7 +426,7 @@ $(document).ready(function () {
             }
         }
     });
-    socket.on("/api/draw", function (ans) {
+    socket.on("draw", function (ans) {
         if (ans.color === my_color) {
             // Got my own draw offer back
             if (ans.flag == 1) {    // I offered draw
@@ -445,7 +445,7 @@ $(document).ready(function () {
             }
         }
     });
-    socket.on("/api/rematch", function (ans) {
+    socket.on("rematch", function (ans) {
         console.log("Got Rematch " + ans.flag)
         if (ans.color === my_color) {
             // Got my own rematch offer back
@@ -466,7 +466,7 @@ $(document).ready(function () {
             }
         }
     });
-    socket.on("/api/move", function (ans) {
+    socket.on("move", function (ans) {
         ans = JSON.parse(ans);
         the_move = ans.move;
         if (game.turn() != the_move.color) {
@@ -522,7 +522,7 @@ $(document).ready(function () {
                 "move": move
             };
             if (move != null) {
-                socket.emit("move", json, function (ret) {
+                socket.emit("/api/move", json, function (ret) {
                     updateLastCall();
                     if (ret == null) {      // In case this move is illegal we should abort
                         game.undo();
@@ -941,7 +941,7 @@ $(document).ready(function () {
             };
             dict = {"data": json};
         }
-        socket.emit("heartbeat", dict, function (ans) {
+        socket.emit("/api/heartbeat", dict, function (ans) {
             updateLastCall();
             console.log("Got some response from heartbeat");
             if (ans) {
@@ -1106,7 +1106,7 @@ $(document).ready(function () {
                 needsBoardRendering = true;
             }
 
-            socket.emit("move", json, function (ret) {
+            socket.emit("/api/move", json, function (ret) {
                 updateLastCall();
                 ret = JSON.parse(ret);
                 if (ret.remaining) {

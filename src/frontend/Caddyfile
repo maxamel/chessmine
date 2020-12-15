@@ -9,11 +9,12 @@
 # domain name.
 
 
-{
-    experimental_http3
-}
+#{
+#    experimental_http3
+#}
 
-chesslune.com
+# Remove http:// to enable TLS
+http://chesslune.com
 
 # Set this path to your site's directory.
 root * /var/www/html/

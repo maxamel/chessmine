@@ -127,7 +127,7 @@ $(document).ready(function () {
     var game_over = false;
 
     var cookie_data = localStorage.getItem("user_session");
-    var socket = io("https://chesslune.com/connect");
+    var socket = io("http://chesslune.com/connect");
 
     socket.on("connection_id", function (ans) {
         load_cookies();
@@ -985,7 +985,7 @@ $(document).ready(function () {
             };
             cookie_data.preferences = prefs;
             localStorage.setItem("user_prefs", JSON.stringify(prefs));
-            res = socket.emit("play", {"data": cookie_data}, function (ans) {
+            res = socket.emit("/api/play", {"data": cookie_data}, function (ans) {
                 // Save my sid
                 cookie_data.sid = ans;
                 localStorage.setItem("user_session", JSON.stringify(cookie_data));
