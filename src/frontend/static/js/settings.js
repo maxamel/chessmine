@@ -127,7 +127,7 @@ $(document).ready(function () {
     var game_over = false;
 
     var cookie_data = localStorage.getItem("user_session");
-    var socket = io("http://chesslune.com/connect");
+    var socket = io("http://localhost:5000/connect");
 
     socket.on("connection_id", function (ans) {
         load_cookies();

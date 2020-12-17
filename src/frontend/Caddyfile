@@ -14,18 +14,20 @@
 #}
 
 # Remove http:// to enable TLS
-http://chesslune.com
+#http://chesslune.com
+http://localhost:3000
 
 # Set this path to your site's directory.
-root * /var/www/html/
-
+#root * /var/www/html/
+root * C:\Users\mamelchenko\Desktop\chesslune\src\frontend
 
 # Another common task is to set up a reverse proxy:
 route {
         @notStatic {
                 path /api/* /socket.io/*
         }
-        reverse_proxy @notStatic game_server:5000
+        #reverse_proxy @notStatic game_server:5000
+		reverse_proxy @notStatic localhost:5000
         try_files {path}.html {path}
         file_server
 
@@ -35,7 +37,7 @@ route {
 # https://caddyserver.com/docs/caddyfile
 
 log {
-        output file /var/log/access.log {
+        output file C:\Users\mamelchenko\Desktop\chesslune\src\frontend\log		{
         roll_size       150mb
         roll_keep_for   48h
         roll_keep       5

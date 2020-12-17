@@ -10,7 +10,7 @@ from util import GameStatus
 class RedisPlug:
 
     def __init__(self):
-        self.redis_url = "redis"
+        self.redis_url = "localhost"
         self.redis_port = "6379"
         self.search_pool = "search_pool"
         self.player_info = "player_session_"
