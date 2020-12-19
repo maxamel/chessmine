@@ -3,7 +3,7 @@ import json, time, threading, chess, uuid, requests
 from elo import EloRating
 from logger import get_logger
 from player import Player, PlayerMapping, Game, PlayerGameInfo
-from random_matcher import RandomMatcher
+from matcher.random_matcher import RandomMatcher
 from consts import *
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
