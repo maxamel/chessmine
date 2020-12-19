@@ -2,7 +2,7 @@ import time, requests
 
 from threading import Thread
 
-from matcher import Matcher
+from matcher.matcher import Matcher
 from player import Player
 from redis_plug import RedisPlug
 from util import get_millis_for_time_control
