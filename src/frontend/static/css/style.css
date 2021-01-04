@@ -93,11 +93,14 @@ button:focus {
 /* Main Title Area css
 ============================================================================================ */
 .main_title {
+  color: white;
+  font-size: 50px;
   text-align: center;
-  margin-bottom: 75px; }
+  margin-bottom: 50px;
+  margin-top: 50px;}
   @media (max-width: 767px) {
     .main_title {
-      margin-bottom: 40px; } }
+      margin-bottom: 50px; } }
   .main_title h2 {
     font-family: "Rajdhani", sans-serif;
     font-size: 36px;
@@ -122,6 +125,33 @@ button:focus {
     font-size: 12px;
     letter-spacing: 2px;
     margin-bottom: 20px; }
+
+  .first_title {
+    font-family: "Rajdhani", sans-serif;
+    color: white;
+    font-size: 40px;
+    text-align: center;
+    margin: auto;
+  }
+  .second_title {
+    font-family: ProFontWindows;
+    font-size: 70px;
+    text-align: center;
+    margin: auto;
+    padding: 14px;
+  }
+  .third_title {
+    font-family: "Rajdhani", sans-serif;
+    font-size: 16px;
+    text-align: center;
+    margin: auto;
+    padding: 20px;
+  }
+  @font-face
+  {
+    font-family: myFancyFont;
+    src: url('../fonts/Jetbrains/JetBrainsMono-Bold.ttf');
+  }
 
 /* End Main Title Area css
 ============================================================================================ */
@@ -467,12 +497,17 @@ button:focus {
 ============================================================================================ */
 .home_banner_area {
   z-index: 1;
-  background: url(../img/banner/home-banner.png) no-repeat right center;
+  background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  #background: url(../img/banner/home-banner.png) no-repeat right center;
   background-size: cover; }
   .home_banner_area .banner_inner {
     width: 100%; }
     .home_banner_area .banner_inner .home_right_img {
-      padding-top: 260px;
+      padding-top: 180px;
       padding-bottom: 142px; }
     .home_banner_area .banner_inner .col-lg-5 {
       vertical-align: middle;
@@ -482,7 +517,7 @@ button:focus {
       color: #fff; }
       .home_banner_area .banner_inner .banner_content h2 {
         margin-top: 0px;
-        font-size: 48px;
+        font-size: 38px;
         font-weight: 400;
         line-height: 54px;
         margin-bottom: 20px; }
@@ -3036,9 +3071,8 @@ h6 {
 /* Price Area css
 ============================================================================================ */
 .price_area {
-  background-image: url(../img/pricing-bg.png);
-  background-size: cover;
-  padding-top: 290px; }
+  background-image: url(../img/chess-cover.jpg);
+  background-size: cover; }
 
 .price_item {
   text-align: center;
@@ -3215,10 +3249,14 @@ h6 {
 /* Impress Area css
 ============================================================================================ */
 .impress_area {
-  background-image: url(../img/impress-bg.png);
+  #background-image: url(../img/impress-bg.png);
+  background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
   background-size: cover;
-  padding: 290px 0 320px;
-  margin-bottom: -200px; }
+  padding: 120px 0 120px;}
   .impress_area .impress_inner {
     text-align: center;
     max-width: 780px;
@@ -3232,16 +3270,22 @@ h6 {
     .impress_area .impress_inner p {
       color: #fff;
       margin-bottom: 35px; }
+    .home_banner_area .banner_inner .banner_content .primary_btn {
+        color: #fff;
+        margin-right: 30px; }
+        .home_banner_area .banner_inner .banner_content .primary_btn:hover {
+          background: #fff;
+          color: #222222; }
     .impress_area .impress_inner .primary_btn {
-      background: #fff;
+      background: rgba(255, 255, 255, 0.1);
       width: auto;
+      color: #fff;
       font-size: 14px;
       box-shadow: -14.142px 14.142px 20px 0px rgba(0, 0, 0, 0.1);
       border-color: #fff; }
       .impress_area .impress_inner .primary_btn:hover {
-        color: #fff;
-        background: transparent;
-        border-color: #fff; }
+        background: #fff;
+        color: #222222; }
         .impress_area .impress_inner .primary_btn:hover:after {
           border-image: -webkit-linear-gradient(0deg, #fff, #fff);
           border-image: -moz-linear-gradient(0deg, #fff, #fff);
@@ -3523,7 +3567,7 @@ h6 {
     margin: 0px auto 30px; }
 
   .price_inner {
-    margin-bottom: -30px; } }
+    padding-bottom: 50px; } }
 @media (max-width: 767px) {
   .home_banner_area {
     min-height: 300px; }

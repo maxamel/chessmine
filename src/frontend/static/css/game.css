@@ -3427,7 +3427,7 @@ h6 {
 .price_area {
   background-image: url(../img/pricing-bg.png);
   background-size: cover;
-  padding-top: 290px; }
+ }
 
 .price_item {
   text-align: center;
