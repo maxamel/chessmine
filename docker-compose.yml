@@ -1,4 +1,3 @@
-version: "3.3"
 services:
     redis:
         container_name: "redis"
@@ -30,8 +29,6 @@ services:
         build:
           context: .
           dockerfile: ./src/frontend/Dockerfile
-        volumes:
-          - ./src/frontend/:/var/www/html
         ports:
           - 443:443
           - 80:80

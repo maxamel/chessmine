@@ -14,7 +14,7 @@
 #}
 
 # Remove http:// to enable TLS
-http://chesslune.com
+{$APP_URL}
 
 # Set this path to your site's directory.
 root * /var/www/html/
