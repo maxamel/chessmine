@@ -10,7 +10,7 @@ $(document).ready(function () {
 
     var cancel = document.getElementById("cancelSearch");
     cancel.addEventListener("click", function(evt) {
-        json = {"data": {
+        var json = {"data": {
             "sid": player_id
         }};
         socket.emit("/api/cancelSearch", json, function (ret) {
@@ -71,7 +71,7 @@ $(document).ready(function () {
         }
 
         function updateClock() {
-            now = new Date().getTime();
+            var now = new Date().getTime();
             endtime -= now - lastClockSet;
             lastClockSet = now;
             var t = getTimeRemaining(endtime);
@@ -146,6 +146,7 @@ $(document).ready(function () {
     var abort_button = null;
     var attached_listeners = false;
 
+    var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
     var socket = io("APP_URL/connect");
 
@@ -170,14 +171,14 @@ $(document).ready(function () {
         load_cookies();
         console.log(ans)
         my_color = JSON.stringify(ans.color);
-        the_game = ans.game;
-        my_time = JSON.stringify(the_game.white.time_remaining);
-        rival_time = JSON.stringify(the_game.black.time_remaining);
-        ttl_time = JSON.stringify(the_game.move_ttl);
-        draw_offer = the_game.draw_offer
-        game_status = the_game.status;
-        me = the_game.white;
-        rival = the_game.black;
+        var the_game = ans.game;
+        var my_time = JSON.stringify(the_game.white.time_remaining);
+        var rival_time = JSON.stringify(the_game.black.time_remaining);
+        var ttl_time = JSON.stringify(the_game.move_ttl);
+        var draw_offer = the_game.draw_offer
+        var game_status = the_game.status;
+        var me = the_game.white;
+        var rival = the_game.black;
         if (parseInt(rival_time) === 0 || parseInt(my_time) === 0 || game_status === 3) {
             game_over = true;
         }
@@ -186,7 +187,7 @@ $(document).ready(function () {
             my_time = [rival_time, rival_time = my_time][0];
             me = [rival, rival = me][0];
         }
-        the_game_fen = the_game.position;
+        var the_game_fen = the_game.position;
         the_game_moves = JSON.parse(the_game.moves);
         the_game_fens = JSON.parse(the_game.fens);
         player_id = cookie_data.sid;
@@ -209,7 +210,7 @@ $(document).ready(function () {
         setTime("clockdivA", rival_time);
         setTime("clockdivB", my_time);
 
-        fenobj = Chessboard.fenToObj(the_game_fen);
+        var fenobj = Chessboard.fenToObj(the_game_fen);
         var config = {
             pieceTheme: "static/img/chesspieces/" + pieceTheme + "/{piece}.png",
             boardTheme: getBoardColorsByName(boardTheme),
@@ -228,36 +229,36 @@ $(document).ready(function () {
         game = new Chess(the_game_fen);
         insertBulkMoves(the_game_moves, ttl_time);
 
-        isStart = the_game_moves.length < 2;
+        var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
 
         if (game_status != 3) {     // NOT ENDED
             if (!attached_listeners) {
                 window.onclick = function(event) {
                   if (event.target.id != 'drawOfferedButton') {
-                      inner_div = document.getElementById("droppedDrawOffer");
+                      var inner_div = document.getElementById("droppedDrawOffer");
                       inner_div.style.display = "none";
                   }
                 };
 
                 attachPromotionListeners();
 
-                draw = document.getElementById("drawButton");
+                var draw = document.getElementById("drawButton");
                 draw.addEventListener("click", drawAction);
 
-                resign = document.getElementById("resignButton");
+                var resign = document.getElementById("resignButton");
                 resign.addEventListener("click", resignAction);
 
-                abort = document.getElementById("abortButton");
+                var abort = document.getElementById("abortButton");
                 abort.addEventListener("click", abortAction);
 
-                offeredDraw = document.getElementById("drawOffer");
+                var offeredDraw = document.getElementById("drawOffer");
                 offeredDraw.addEventListener("click", offeredDrawAction);
 
-                acceptDraw = document.getElementById("acceptDraw");
+                var acceptDraw = document.getElementById("acceptDraw");
                 acceptDraw.addEventListener("click", drawAction);
 
-                declineDraw = document.getElementById("declineDraw");
+                var declineDraw = document.getElementById("declineDraw");
                 declineDraw.addEventListener("click", declineDrawAction);
                 attached_listeners = true;
             }
@@ -291,17 +292,17 @@ $(document).ready(function () {
             disableGameButtons();
         }
 
-        rematches = document.getElementsByClassName("button-box");
+        var rematches = document.getElementsByClassName("button-box");
         for (var t = 0; t < rematches.length; t++) {
-            rematch = rematches.item(t);
+            var rematch = rematches.item(t);
             rematch.addEventListener("click", rematchAction);
         }
-        dots = document.getElementsByClassName("dot");
+        var dots = document.getElementsByClassName("dot");
         for (var t = 0; t < dots.length; t++) {
-            dot = dots.item(t);
+            var dot = dots.item(t);
             dot.addEventListener("click", function (evt) {
                 evt.target.parentElement.style.display = "none";
-                json = {
+                var json = {
                     "data": {
                         "sid": player_id,
                         "flag": false
@@ -321,7 +322,7 @@ $(document).ready(function () {
 
 
         function rematchAction(x) {
-            json = {"data": {
+            var json = {"data": {
                     "sid": player_id,
                     "flag": true
                 }};
@@ -333,7 +334,7 @@ $(document).ready(function () {
         }
 
         function attachPromotionListeners(){
-            conts = document.getElementsByClassName("themeContainer");
+            var conts = document.getElementsByClassName("themeContainer");
             for (var c = 0; c < conts.length; c++) {
                 conts[c].addEventListener("click", function (event) {
                     var elem = event.srcElement;
@@ -348,7 +349,7 @@ $(document).ready(function () {
                         elem.style.color = "black";
                         elem.style.fontWeight = "bold";
                         elem.parentElement.style.display = "none";
-                        gc = document.getElementById("gameBox");
+                        var gc = document.getElementById("gameBox");
                         gc.style.opacity = 1;
                         promote = elem.id;
                         onDrop(promotion_in_progress[0], promotion_in_progress[1]);
@@ -363,7 +364,7 @@ $(document).ready(function () {
         }
 
         function drawAction(x) {
-            json = {"data": {
+            var json = {"data": {
                     "sid": player_id,
                     "flag": true
                 }};
@@ -375,7 +376,7 @@ $(document).ready(function () {
             });
         }
         function declineDrawAction(x) {
-            json = {"data": {
+            var json = {"data": {
                     "sid": player_id,
                     "flag": false
                 }};
@@ -388,13 +389,13 @@ $(document).ready(function () {
         }
 
         function offeredDrawAction(x) {
-            inner_div = document.getElementById("droppedDrawOffer");
+            var inner_div = document.getElementById("droppedDrawOffer");
             inner_div.style.display = "block";
         }
 
         function resignAction(x) {
             console.log("BLAHA " + x.target.id);
-            json = {"data": {
+            var json = {"data": {
                     "sid": player_id
                 }};
             socket.emit("/api/resign", json, function (ret) {
@@ -405,7 +406,7 @@ $(document).ready(function () {
         }
 
         function abortAction(x) {
-            json = {"data": {
+            var json = {"data": {
                     "sid": player_id
                 }};
             socket.emit("/api/abort", json, function (ret) {
@@ -468,7 +469,7 @@ $(document).ready(function () {
     });
     socket.on("move", function (ans) {
         ans = JSON.parse(ans);
-        the_move = ans.move;
+        var the_move = ans.move;
         if (game.turn() != the_move.color) {
             return;      // Got my own move back
         }
@@ -499,13 +500,13 @@ $(document).ready(function () {
                 setTime("clockdivA", ans.other_remaining);
             }
         }
-        array = get_piece_positions(game, {type: "k", color: game.turn()});
-        source = array[0];
-        if (game.in_checkmate()) {
+        var array = get_piece_positions(game, {type: "k", color: game.turn()});
+        var source = array[0];
+        if (game.isCheckmate()) {
             $board.find(".square-" + source).addClass("highlight-mate");
             game_over = true;
             return;
-        } else if (game.in_check()) {
+        } else if (game.inCheck()) {
             $board.find(".square-" + source).addClass("highlight-check");
         }
         if (futureMoveData != null) {
@@ -556,24 +557,19 @@ $(document).ready(function () {
     setInterval(heartbeat, 3000, false);
 
     function hideEndGameBoxes() {
-        y = document.getElementById("conty");
-        y.style.display = "none";
-        x = document.getElementById("draw-box");
-        x.style.display = "none";
-        x = document.getElementById("win-box");
-        x.style.display = "none";
-        x = document.getElementById("lose-box");
-        x.style.display = "none";
-        x = document.getElementById("abort-box");
-        x.style.display = "none";
+        document.getElementById("conty").style.display = "none";
+        document.getElementById("draw-box").style.display = "none";
+        document.getElementById("win-box").style.display = "none";
+        document.getElementById("lose-box").style.display = "none";
+        document.getElementById("abort-box").style.display = "none";
     }
 
     function discardTimeInterval(str) {
         if (str === 'B') {
             clearInterval(timeintervalB);
             clearInterval(timecolorintervalB);
-            clock = document.getElementById("clockdivB");
-            clockspan = clock.children.item(0);
+            var clock = document.getElementById("clockdivB");
+            var clockspan = clock.children.item(0);
             clockspan.style.color = "black";
             clockspan.style.backgroundColor = "#E1ECE0";
             clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
@@ -699,7 +695,7 @@ $(document).ready(function () {
     }
 
     function disableGameButtons() {
-        x = document.getElementById("resignButton");
+        var x = document.getElementById("resignButton");
         x.style.display = 'block';
         x.style.opacity = 0.5;
         x.style.pointerEvents = 'none';
@@ -711,7 +707,7 @@ $(document).ready(function () {
 
         x = document.getElementById("drawOffer");
         x.style.display = 'none';
-        inner_div = document.getElementById("droppedDrawOffer");
+        var inner_div = document.getElementById("droppedDrawOffer");
         inner_div.style.display = "none";
 
         x = document.getElementById("abortButton");
@@ -721,7 +717,7 @@ $(document).ready(function () {
     function enableGameButtons() {
         console.log("About to enable buttons " + the_game_moves.length + " " + abort_button);
         if (the_game_moves.length > 1) {
-            x = document.getElementById("abortButton");
+            var x = document.getElementById("abortButton");
             x.style.display = 'none';
             x.style.pointerEvents = 'none';
 
@@ -755,13 +751,13 @@ $(document).ready(function () {
 
         x = document.getElementById("drawOffer");
         x.style.display = 'none';
-        inner_div = document.getElementById("droppedDrawOffer");
+        var inner_div = document.getElementById("droppedDrawOffer");
         inner_div.style.display = "none";
 
     }
 
     function changeRematchButton(status) {
-        buttons = document.getElementsByClassName("button-box");
+        var buttons = document.getElementsByClassName("button-box");
         for (var d=0; d<buttons.length; d++)
         {
             var x = buttons.item(d);
@@ -785,14 +781,14 @@ $(document).ready(function () {
 
     function changeDrawButton(status) {
         if (!abort_button) {
-            x = document.getElementById("drawButton");
+            var x = document.getElementById("drawButton");
             if (status === 'enabled') {
                 x.style.display = 'block';
                 x.style.opacity = 1;
                 x.style.pointerEvents = '';
-                offeredButton = document.getElementById("drawOffer");
+                var offeredButton = document.getElementById("drawOffer");
                 offeredButton.style.display = "none";
-                inner_div = document.getElementById("droppedDrawOffer");
+                var inner_div = document.getElementById("droppedDrawOffer");
                 inner_div.style.display = "none";
             } else if (status === 'disabled') {
                 x.style.display = 'block';
@@ -834,7 +830,7 @@ $(document).ready(function () {
     }
 
     function insertMove(move) {
-        index = 0;
+        var index = 0;
         if (game.turn() === "b") {
             document.getElementById("moveTable").insertRow(-1);
         } else {
@@ -868,8 +864,8 @@ $(document).ready(function () {
     }
 
     function insert_counter_cell(index, ttl) {
-        num_rows = document.getElementById("moveTable").rows.length;
-        cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index);
+        var num_rows = document.getElementById("moveTable").rows.length;
+        var cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index);
         cell.innerHTML = Math.floor(ttl / 1000);
         cell.setAttribute("class", "timeCell");
         clearInterval(moveInterval);
@@ -883,19 +879,19 @@ $(document).ready(function () {
     }
 
     function handle_move(move, index, ttl, isFirstMove) {
-        num_rows = document.getElementById("moveTable").rows.length;
+        var num_rows = document.getElementById("moveTable").rows.length;
         if (index == 0) {
             cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index);
             cell.innerHTML = num_rows;
             cell.setAttribute("class", "edgeCell");
             index++;
         }
-        row = document.getElementById("moveTable").rows[num_rows - 1];
+        var row = document.getElementById("moveTable").rows[num_rows - 1];
         if (row.cells.length == 3) {        // remove timer cell
             clearInterval(moveInterval);
             document.getElementById("moveTable").rows[num_rows - 1].deleteCell(-1);
         }
-        cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index);
+        var cell = document.getElementById("moveTable").rows[num_rows - 1].insertCell(index);
         cell.innerHTML = move;
         cell.setAttribute("class", "regularCell");
         cell.addEventListener("click", clickedCell, false);
@@ -903,16 +899,16 @@ $(document).ready(function () {
             index++;
             insert_counter_cell(index, ttl);
         }
-        d = document.getElementById("tableWrapper");
+        var d = document.getElementById("tableWrapper");
         d.scrollTo(0, d.scrollHeight);
     }
 
     function clickedCell(cell) {
-        row = cell.srcElement.parentElement.rowIndex;
-        index = cell.srcElement.cellIndex;
-        normalized_index = index - 1;
-        position_in_array = row * 2 + normalized_index;
-        selected_fen = the_game_fens[position_in_array];
+        var row = cell.srcElement.parentElement.rowIndex;
+        var index = cell.srcElement.cellIndex;
+        var normalized_index = index - 1;
+        var position_in_array = row * 2 + normalized_index;
+        var selected_fen = the_game_fens[position_in_array];
         board.position(selected_fen, useAnimation = true);
         $("td").removeClass("selectedCell");
         if (position_in_array < the_game_fens.length - 1) {
@@ -924,12 +920,13 @@ $(document).ready(function () {
         var d = new Date();
         console.log("Calling heartbeat at " + d.toLocaleTimeString() + " with hearbeatOK=" + heartbeatOK + " and force=" + force);
         if (!force) {
-            now = new Date().getTime();
+            var now = new Date().getTime();
             if (now - last_call < 3000) { // In case server has already been contacted in past 3 secs
                 return;
             }
         }
         load_cookies();
+        var dict = {}
         if (last_call == null || force || !heartbeatOK) {
             console.log("Requesting full heartbeat");
             dict = {"data": cookie_data};
@@ -947,10 +944,10 @@ $(document).ready(function () {
             if (ans) {
                 console.log("Got heartbeat response " + JSON.stringify(ans))
                 document.getElementById("gameBox").style.display = "flex";
-                connect_icons = document.getElementsByClassName("dottop");
+                var connect_icons = document.getElementsByClassName("dottop");
                 console.log(connect_icons)
                 if (ans.rival_connect_status === 2) {
-                    for (icon of connect_icons)
+                    for (const icon of connect_icons)
                         icon.style.backgroundColor = "#59fb74"
                 } else if (ans.rival_connect_status === 3) {
                     console.log("WOODY")
@@ -968,7 +965,7 @@ $(document).ready(function () {
         cookie_data = localStorage.getItem("user_session");
         cookie_data = JSON.parse(cookie_data);
         prefs = localStorage.getItem("user_prefs");
-        obj_prefs = JSON.parse(prefs);
+        var obj_prefs = JSON.parse(prefs);
         if (cookie_data != null)
             cookie_data.preferences = obj_prefs;
             player_id = cookie_data.sid
@@ -1000,8 +997,8 @@ $(document).ready(function () {
 
     function changeCursor(square, change) {
         var $square = $("#myBoard .square-" + square);
-        isPiece = false;
-        image = null;
+        var isPiece = false;
+        var image = null;
         if ($square.children().length > 0) {
             for (var r = 0; r < $square.children().length; r++) {
                 if ($square.children()[r].tagName == "IMG")
@@ -1019,8 +1016,8 @@ $(document).ready(function () {
             return
         }
         var $square = $("#myBoard .square-" + square);
-        isPiece = false;
-        image = null;
+        var isPiece = false;
+        var image = null;
         if ($square.children().length > 0) {
             for (var r = 0; r < $square.children().length; r++) {
                 if ($square.children()[r].tagName == "IMG")
@@ -1042,15 +1039,15 @@ $(document).ready(function () {
             //circle.setAttributeNS(null, 'stroke-width', "3")
             circle.setAttributeNS(null, "fill", "#fc5185");
             svg.appendChild(circle);
-            the_square = $square.get()[0];
+            var the_square = $square.get()[0];
             the_square.appendChild(svg);
         }
     }
 
     function onDragStart(source, piece, position, orientation) {
         // do not pick up pieces if the game is over
-        cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.game_over() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
+        var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
+        if (game.isGameOver() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
         removeHighlights("yellow");
@@ -1062,8 +1059,8 @@ $(document).ready(function () {
     }
 
     function is_my_turn() {
-        turn = game.turn();
-        mine = my_color.charAt(0);
+        var turn = game.turn();
+        var mine = my_color.charAt(0);
         return turn === mine;
 
     }
@@ -1115,16 +1112,17 @@ $(document).ready(function () {
                     initializeClock("clockdivA", ret["remaining"]);
                 }
                 insertMove(move);
-                offeredButton = document.getElementById("drawOffer");
+                var offeredButton = document.getElementById("drawOffer");
                 if (offeredButton.style.display != "none") {
                     changeDrawButton('enabled');
                 }
-                if (game.in_checkmate()) {
+                var array = 0;
+                if (game.isCheckmate()) {
                     array = get_piece_positions(game, {type: "k", color: game.turn()});
                     source = array[0];
                     $board.find(".square-" + source).addClass("highlight-mate");
                     game_over = true;
-                } else if (game.in_check()) {
+                } else if (game.inCheck()) {
                     array = get_piece_positions(game, {type: "k", color: game.turn()});
                     source = array[0];
                     $board.find(".square-" + source).addClass("highlight-check");
@@ -1152,15 +1150,15 @@ $(document).ready(function () {
                 promotion: "q" // NOTE: always promote to a queen for example simplicity
             });
             if (move != null) {
-                curr_position = Chessboard.fenToObj(the_game.position);
-                piece = curr_position[source];
+                var curr_position = Chessboard.fenToObj(the_game.position);
+                var piece = curr_position[source];
                 if (piece[1] == "P") {
                     promotion_in_progress = [source, target];
-                    pieceType = ["B", "N", "R", "Q"];
-                    themes = document.getElementsByClassName("promotionPieceHolder");
+                    var pieceType = ["B", "N", "R", "Q"];
+                    var themes = document.getElementsByClassName("promotionPieceHolder");
                     for (var t = 0; t < themes.length; t++) {
-                        theme = themes.item(t);
-                        piece_theme = getPieceFuncByName(pieceTheme);
+                        var theme = themes.item(t);
+                        var piece_theme = getPieceFuncByName(pieceTheme);
                         my_color.charAt(0);
                         var img = document.createElement("IMG");
                         img.src = piece_theme(my_color.charAt(0) + pieceType[t]);
@@ -1168,9 +1166,9 @@ $(document).ready(function () {
                         img.style.maxWidth = "100%";
                         theme.appendChild(img);
                     }
-                    promotionTab = document.getElementById("promotion");
+                    var promotionTab = document.getElementById("promotion");
                     promotionTab.style.display = "flex";
-                    gc = document.getElementById("gameBox");
+                    var gc = document.getElementById("gameBox");
                     gc.style.opacity = 0.2;
                     game.undo();
                     return true;
@@ -1197,8 +1195,8 @@ $(document).ready(function () {
     }
 
     function onMouseoverSquare(square, piece, position, orientation) {
-        cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.game_over() || piece == false || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
+        var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
+        if (game.isGameOver() || piece == false || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
         changeCursor(square, "grab");
@@ -1248,12 +1246,12 @@ $(document).ready(function () {
         }
 
         // checkmate?
-        if (game.in_checkmate()) {
+        if (game.isCheckmate()) {
             status = "Game over, " + moveColor + " is in checkmate.";
         }
 
         // draw?
-        else if (game.in_draw()) {
+        else if (game.isDraw()) {
             status = "Game over, drawn position";
         }
 
@@ -1262,7 +1260,7 @@ $(document).ready(function () {
             status = moveColor + " to move";
 
             // check?
-            if (game.in_check()) {
+            if (game.inCheck()) {
                 status += ", " + moveColor + " is in check";
             }
         }
@@ -1271,6 +1269,5 @@ $(document).ready(function () {
         //$fen.html(game.fen());
         //$pgn.html(game.pgn());
     }
-
     (jQuery);
 });
