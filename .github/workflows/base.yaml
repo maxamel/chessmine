@@ -24,6 +24,7 @@ jobs:
           pip install pylint
       - name: Analysing the code with pylint
         run: |
+          export PYTHONPATH='.'
           pylint $(git ls-files '*.py') --disable=R,C
       - name: Test with Checkov
         id: checkov

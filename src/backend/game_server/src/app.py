@@ -1,6 +1,6 @@
 import chess
 import requests
-from flask import Flask, render_template, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for
 from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
 
@@ -30,7 +30,7 @@ def match(sid1, sid2):
     p1 = PlayerGameInfo(name=player1.name, rating=player1.rating, time_remaining=tc)
     p2 = PlayerGameInfo(name=player2.name, rating=player2.rating, time_remaining=tc)
     game_id = game_server.map_rivals(sid1, sid2, time_control=tc)
-    game = Game(game_id=game_id, position=chess.Board().fen(), fens=[], moves=[],
+    Game(game_id=game_id, position=chess.Board().fen(), fens=[], moves=[],
                 white=p1, black=p2, status=GameStatus.STARTED.value)
     print("Got match - %s %s", sid1, sid2)
     '''
@@ -60,25 +60,8 @@ def authorize():
     token = oauth.lichess.authorize_access_token()
     bearer = token['access_token']
     headers = {'Authorization': f'Bearer {bearer}'}
-    response = requests.get("https://lichess.org/api/account", headers=headers)
+    response = requests.get("https://lichess.org/api/account", headers=headers, timeout=15)
     return jsonify(**response.json())
-
-
-'''
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-@app.route('/game')
-def game():
-    return render_template('game.html')
-
-
-@app.route('/settings')
-def settings():
-    return render_template('settings.html')
-'''
 
 
 @socketio.on('/api/cancelSearch', namespace='/connect')
