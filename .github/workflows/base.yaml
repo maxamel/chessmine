@@ -13,6 +13,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
+      - name: Build
+        uses: py-actions/py-dependency-install@v4
+        with:
+          path: "src/backend/game_server/requirements.txt"
       - name: Run Pylint
         id: pylint
         run: |
