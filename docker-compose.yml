@@ -1,0 +1,34 @@
+services:
+    redis:
+        container_name: "redis"
+        image: "redis:alpine"
+        ports:
+          - 6379:6379
+    sanicfish:
+        container_name: "sanicfish"
+        environment:
+          - STOCKFISH_PATH=/
+        build:
+          context: .
+          dockerfile: ./src/backend/sanicfish/Dockerfile
+        volumes:
+          - ./src/backend/sanicfish/:/usr/app
+        ports:
+          - 8040:8040
+    game_server:
+        container_name: "game_server"
+        build:
+          context: .
+          dockerfile: ./src/backend/game_server/Dockerfile
+        volumes:
+          - ./src/backend/game_server/:/usr/app
+        ports:
+          - 5000:5000
+    caddy:
+        container_name: "caddy"
+        build:
+          context: .
+          dockerfile: ./src/frontend/Dockerfile
+        ports:
+          - 443:443
+          - 80:80

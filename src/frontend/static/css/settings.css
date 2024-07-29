@@ -1,0 +1,280 @@
+
+.settingsBox {
+  opacity: 1;
+  padding: 30px;
+  display: inline-block;
+  #display: none;
+  background: #364f6b;
+  background-size: cover;
+  #position: absolute;
+  width: 100%;
+  min-height: 800px;
+}
+
+.playButton {
+    float: right;
+}
+
+
+.slider {
+    width: 85%;
+    vertical-align: middle;
+}
+.sliderData {
+    width: 85%;
+}
+
+@keyframes glowingButton{
+    0% {
+    background: #fc5185;
+  }
+
+  50% {
+      #background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      background: white;
+      color: #fc5185;
+  }
+
+  100% {
+    background: #fc5185;
+  }
+}
+
+.dropButton {
+    float: left;
+    animation: glowingButton 1.5s infinite;
+}
+
+.themeLabel {
+    font-family: "Baloo Paaji 2";;
+}
+.timeLabel {
+    font-family: "DS-Digital";
+    font-weight: bolder;
+    font-size: 40px;
+    padding: 10px;
+}
+
+.themeContainer {
+    text-align: center;
+    margin-left: 80px;
+    padding: 10px;
+    border: 3px solid transparent;
+}
+
+.themeTable {
+    height: 66px;
+    width: 66px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+
+td.settings {
+      padding: 5px;
+      width: 33%;
+      text-align: center;
+      border: 1px solid lavender;
+      font-size: 15px;
+      font-family: 'Baloo Paaji 2';
+      box-shadow: inset 0px 0px 1px 1px #c2d0c1;
+}
+
+.highlightTable {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.themeContainer:hover {
+    background-color: #364f6b;
+    outline: none;
+    cursor: pointer;
+}
+
+.themeContainer:focus {
+    outline: none;
+}
+
+#promotion {
+    display: none;
+    margin: auto;
+    width: 50%;
+    top: 50%;
+    position: sticky;
+    z-index: 1000;
+}
+
+.pieceHolder {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.promotionPieceHolder {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.settingsWrapper {
+  #border: 1px solid #bdcad8;
+  #box-shadow: inset 0px 0px 1px 1px #fc5185;
+  padding: 4px;
+  width: 100%;
+  height: 90%;
+  margin: auto;
+}
+
+.themeBox {
+    width: 100%;
+    background: #0f2f53;
+    border-radius: 10px;
+}
+
+.checkmarkBox {
+    background: #0f2f53;
+    border-radius: 10px;
+    padding-bottom: 15px;
+    width: 100%;
+    #margin: auto;
+}
+
+.settingSelector{
+    padding: 40px;
+    width: 100%;
+}
+.settingItem {
+  padding: 30px;
+  color: white;
+  font-family: "Baloo Paaji 2";
+  font-weight: normal;
+  #font-size: 15px;
+  margin: auto;
+}
+.boardSetting {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.boardChoice {
+  width: 100px;
+  height: 100px;
+  border: 1px solid crimson;
+}
+
+.settingPoint {
+  color: lavender;
+  font-family: "Baloo Paaji 2";
+  font-weight: bolder;
+  font-size: 25px;
+  width: 15%;
+  margin-top: auto;
+  margin-bottom: -15px;
+  margin-left: 20px;
+  z-index: 1000;
+}
+
+.settingsContainer {
+  opacity: 1;
+  background: #364f6b;
+  #border: 1px solid #bdcad8;
+  #box-shadow: inset 0px 0px 1px 1px #fc5185;
+  #outline: 2px solid yellowgreen;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+.borderText {
+  padding: 0 10px;
+  height: 40px;
+  width: 255px;
+  background: #364f6b;
+  color: #bdcad8;
+  font-family: "Baloo Paaji 2 SemiBold";
+  text-shadow: 1px 1px #fc5185;
+  text-decoration: underline;
+}
+
+/* Customize the label (the container) */
+.checkContainer {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+    margin-left: 80px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.checkContainer input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.checkContainer:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.checkContainer input:checked ~ .checkmark {
+  background-color:  #fc5185;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.checkContainer input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.checkContainer .checkmark:after {
+  left: 10px;
+  top: -10px;
+  width: 15px;
+  height: 30px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
