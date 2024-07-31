@@ -4,11 +4,10 @@ from flask import Flask, request, jsonify, url_for
 from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
 
-from game_server import GameServer
+from game_server import GameServer, get_opposite_color, GameStatus, Result
 from player import Game, PlayerGameInfo
 from authlib.integrations.flask_client import OAuth
 
-from game_server import get_opposite_color, GameStatus, Result
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'secret!'

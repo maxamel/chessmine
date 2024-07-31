@@ -7,7 +7,7 @@ is the file you need to edit to change the look of the
 theme.
 ---------------------------------------------------- */
 /*=====================================================================
-@Template Name: HostHub Construction 
+@Template Name: HostHub Construction
 @Developed By: Naim Lasker
 Author E-mail: naimlasker@gmail.com
 
@@ -135,7 +135,16 @@ button:focus {
   }
   .second_title {
     font-family: ProFontWindows;
+    color: white;
     font-size: 70px;
+    text-align: center;
+    margin: auto;
+    padding: 14px;
+  }
+  .fourth_title {
+    font-family: monof56;
+    color: white;
+    font-size: 55px;
     text-align: center;
     margin: auto;
     padding: 14px;
@@ -3801,8 +3810,7 @@ h6 {
   padding-top: 50px;
   #padding-bottom: 120px; }
 
-.f_title {
-  margin-bottom: 35px; }
+.f_title {}
   .f_title h3 {
     color: white;
     font-size: 20px;
