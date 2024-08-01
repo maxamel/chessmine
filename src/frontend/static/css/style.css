@@ -499,8 +499,8 @@ button:focus {
 /*----------------------------------------------------*/
 
 .colin {
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 /* Home Banner Area css
 ============================================================================================ */
@@ -3080,7 +3080,12 @@ h6 {
 /* Price Area css
 ============================================================================================ */
 .price_area {
-  background-image: url(../img/chess-cover.jpg);
+  z-index: 1;
+  background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+  background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
   background-size: cover; }
 
 .price_item {
@@ -3507,8 +3512,8 @@ h6 {
   /* Footer Area css
   ============================================================================================ */
   .footer_area {
-    padding-top: 80px !important;
-    padding-bottom: 80px !important;
+    /*padding-top: 80px !important;
+    padding-bottom: 80px !important;*/
     background-image: none !important;
     background-color: #fcf8ff; }
 
