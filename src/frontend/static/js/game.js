@@ -212,7 +212,7 @@ $(document).ready(function () {
 
         var fenobj = Chessboard.fenToObj(the_game_fen);
         var config = {
-            pieceTheme: "static/img/chesspieces/" + pieceTheme + "/{piece}.png",
+            pieceTheme: "../img/chesspieces/" + pieceTheme + "/{piece}.png",
             boardTheme: getBoardColorsByName(boardTheme),
             draggable: true,
             position: the_game_fen,
@@ -353,7 +353,7 @@ $(document).ready(function () {
                         gc.style.opacity = 1;
                         promote = elem.id;
                         onDrop(promotion_in_progress[0], promotion_in_progress[1]);
-                        board.position(game.fen(), useAnimation = true);
+                        board.position(game.fen(), true);
                         promotion_in_progress = [];
                     }
                     elem.style.border = "3px solid #fc5185";
@@ -480,7 +480,7 @@ $(document).ready(function () {
             the_move.san.indexOf("=") > -1 ||
             (the_move.san.indexOf("x") > -1 && the_move.flags == "e")
         )
-            board.position(game.fen(), useAnimation = true);
+            board.position(game.fen(), true);
         else
             board.move(the_move.from + "-" + the_move.to);
 
@@ -543,7 +543,7 @@ $(document).ready(function () {
                         move.san.indexOf("=") > -1 ||
                         (move.san.indexOf("x") > -1 && move.flags == "e")
                     )
-                        board.position(game.fen(), useAnimation = true);
+                        board.position(game.fen(), true);
                     else
                         board.move(move.from + "-" + move.to);
                 });
@@ -627,7 +627,7 @@ $(document).ready(function () {
         changeRematchButton('enabled');
         for (var r = 0; r < x.children.length; r++) {
             if (x.children[r].className === 'message') {
-                message = x.children[r];
+                var message = x.children[r];
                 for (var t = 0; t < message.children.length; t++) {
                     if (message.children[t].tagName === 'P') {
                         message.children[t].innerHTML = msg;
@@ -636,7 +636,7 @@ $(document).ready(function () {
                 }
             }
             if (x.children[r].className.includes('experiment')) {
-                exp = x.children[r];
+                var exp = x.children[r];
                 for (var t = 0; t < exp.children.length; t++) {
                     if (exp.children[t].className === 'endgame') {
                         if (my_color === 'black')
@@ -909,7 +909,7 @@ $(document).ready(function () {
         var normalized_index = index - 1;
         var position_in_array = row * 2 + normalized_index;
         var selected_fen = the_game_fens[position_in_array];
-        board.position(selected_fen, useAnimation = true);
+        board.position(selected_fen, true);
         $("td").removeClass("selectedCell");
         if (position_in_array < the_game_fens.length - 1) {
             cell.target.classList.add("selectedCell");
@@ -950,8 +950,8 @@ $(document).ready(function () {
                     for (const icon of connect_icons)
                         icon.style.backgroundColor = "#59fb74"
                 } else if (ans.rival_connect_status === 3) {
-                    console.log("WOODY")
-                    for (icon of connect_icons)
+                    console.log("Rival disconnected")
+                    for (const icon of connect_icons)
                         icon.style.backgroundColor = "crimson"
                 }
             } else {
@@ -1070,11 +1070,17 @@ $(document).ready(function () {
         if (handlePromotion(source, target)) {
             return;
         }
-        var move = game.move({
-            from: source,
-            to: target,
-            promotion: promote
-        });
+        var move = null;
+        try {
+            move = game.move({
+                from: source,
+                to: target,
+                promotion: promote
+            });
+        }
+        catch (e) {
+            console.log(`Detected pre-move since move is invalid:  ${JSON.stringify(move)} `);
+        }
         removeHighlights("yellow");
         if (futureMove == true && source != target) {
             $board.find(".square-" + source).addClass("highlight-yellow");
@@ -1232,7 +1238,7 @@ $(document).ready(function () {
     // for castling, en passant, pawn promotion and illegal moves
     function onSnapEnd(draggedPieceSource, square, draggedPiece) {
         if (needsBoardRendering) {
-            board.position(game.fen(), useAnimation = true);
+            board.position(game.fen(), true);
         }
         needsBoardRendering = false;
     }

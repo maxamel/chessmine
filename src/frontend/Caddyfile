@@ -25,8 +25,9 @@ route {
         @notStatic {
                 path /api/* /socket.io/*
         }
+        root * static/
         reverse_proxy @notStatic game_server:5000
-        try_files {path}.html {path}
+        try_files {path} {path}.html html/{path}.html
         file_server
 
 }

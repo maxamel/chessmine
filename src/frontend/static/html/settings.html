@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="icon" href="../img/chesspieces/metro/wN.png" type="image/png">
+        <title>Chessmine</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <link rel="stylesheet" href="../vendors/linericon/style.css">
+        <link rel="stylesheet" href="../css/font-awesome.min.css">
+        <link rel="stylesheet" href="../vendors/owl-carousel/owl.carousel.min.css">
+        <link rel="stylesheet" href="../css/magnific-popup.css">
+        <link rel="stylesheet" href="../vendors/nice-select/css/nice-select.css">
+        <link rel="stylesheet" href="../vendors/animate-css/animate.css">
+        <link rel="stylesheet" href="../vendors/flaticon/flaticon.css">
+        <!-- main css -->
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/settings.css">
+        <link rel="stylesheet" href="../css/responsive.css">
+        <link rel="stylesheet" href="../css/loading.css">
+        <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+        <!--link rel="stylesheet" href="static/css/clock.css"-->
+    </head>
+    <body>
+        <!--================Header Menu Area =================-->
+        <div id="header"></div>
+
+        <!--================Header Menu Area =================-->
+        <div id="gameContainer" class="gameContainer">
+            <div id="fullpage" class="fullpage">
+                <div id="loadCanvas" class="loadSettingsCanvas">
+                    <div class="lds-ellipsis" style="left: 25%;">
+                        <div class="myloader"></div>
+                        <div class="myloader"></div>
+                        <div class="myloader"></div>
+                        <div class="myloader"></div>
+                    </div>
+                    <div class="loadMessage">Loading. Please wait...</div>
+                </div>
+                <!--div class="loadButton myButton">Cancel</div-->
+            </div>
+            <div id="settingsBox" class="settingsBox">
+                <!--h1 class="borderText">Game Settings</h1-->
+
+                <div id="settingsWrapper" class="settingsWrapper">
+                    <div id="settingsContainer" class="settingsContainer">
+                        <div id="themeSelector" class="settingSelector">
+                            <div class="settingPoint">Theme</div><div id="themeBox" class="themeBox">
+                                <div id="settingItemBoard" class="settingItem row">
+                                    <!--div id="boardSetting" class="boardSetting">Board</div-->
+                                    <div tabindex="1" id="urbanContainer" class="themeContainer">
+                                        <div class="themeLabel">Urban</div>
+                                        <table id="urban" class="themeTable"></table>
+                                    </div>
+                                    <div tabindex="2" id="standardContainer" class="themeContainer">
+                                        <div class="themeLabel">Standard</div>
+                                        <table id="standard" class="themeTable"></table>
+                                    </div>
+                                    <div tabindex="3" id="wikiContainer" class="themeContainer">
+                                        <div class="themeLabel">Wiki</div>
+                                        <table id="wiki" class="themeTable"></table>
+                                    </div>
+                                    <div tabindex="4" id="woodContainer" class="themeContainer">
+                                        <div class="themeLabel">Wood</div>
+                                        <table id="wood" class="themeTable"></table>
+                                    </div>
+                                    <div tabindex="5" id="americanContainer" class="themeContainer">
+                                        <div class="themeLabel">American</div>
+                                        <table id="american" class="themeTable"></table>
+                                    </div>
+                                    <div tabindex="6" id="metroContainer" class="themeContainer">
+                                        <div class="themeLabel">Metro</div>
+                                        <table id="metro" class="themeTable"></table>
+                                    </div>
+                                    <div tabindex="7" id="classicalContainer" class="themeContainer">
+                                        <div class="themeLabel">Classical</div>
+                                        <table id="classical" class="themeTable"></table>
+                                    </div>
+                                </div>
+                                <div id="settingItemPiece" class="settingItem row">
+                                    <!--div id="pieceSetting" class="boardSetting">Pieces</div-->
+                                    <div tabindex="1" id="urbanPiece" class="themeContainer">
+                                        <div class="themeLabel">Urban</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                    <div tabindex="2" id="standardPiece" class="themeContainer">
+                                        <div class="themeLabel">Standard</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                    <div tabindex="3" id="wikiPiece" class="themeContainer">
+                                        <div class="themeLabel">Wiki</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                    <div tabindex="4" id="woodPiece" class="themeContainer">
+                                        <div class="themeLabel">Wood</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                    <div tabindex="5" id="americanPiece" class="themeContainer">
+                                        <div class="themeLabel">American</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                    <div tabindex="6" id="metroPiece" class="themeContainer">
+                                        <div class="themeLabel">Metro</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                    <div tabindex="7" id="classicalPiece" class="themeContainer">
+                                        <div class="themeLabel">Classical</div>
+                                        <div class="pieceHolder"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="timeControlSelector" class="settingSelector">
+                            <div class="settingPoint">Time Control</div>
+                            <div id="timeControlBox" class="themeBox">
+                                <div id="settingItemTimeControl" class="settingItem row">
+                                        <div tabindex="1" class="themeContainer" style="border: 3px solid lavender">
+                                            <div class="timeLabel">1+0</div>
+                                            <div class="timeHolder"></div>
+                                        </div>
+                                        <div tabindex="2" class="themeContainer" style="border: 3px solid lavender">
+                                            <div class="timeLabel">3+0</div>
+                                            <div class="timeHolder"></div>
+                                        </div>
+                                        <div tabindex="3" class="themeContainer" style="border: 3px solid lavender">
+                                            <div class="timeLabel">5+0</div>
+                                            <div class="timeHolder"></div>
+                                        </div>
+                                        <div tabindex="5" class="themeContainer" style="border: 3px solid lavender">
+                                            <div class="timeLabel">15+0</div>
+                                            <div class="timeHolder"></div>
+                                        </div>
+                                        <div tabindex="6" class="themeContainer" style="border: 3px solid lavender">
+                                            <div class="timeLabel">30+0</div>
+                                            <div class="timeHolder"></div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="moveHighlightSelector" class="settingSelector">
+                            <div class="settingPoint">Moves Highlight</div>
+                            <div id="moveHighlightBox" class="checkmarkBox">
+                                <div id="settingItemMoveHighlight" class="settingItem row">
+                                    <label class="checkContainer">
+                                      <input id="mh" type="checkbox">
+                                      <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="queenAutopromoteSelector" class="settingSelector">
+                            <div class="settingPoint">Queen Auto-promote</div>
+                            <div id="queenAutopromoteBox" class="checkmarkBox">
+                                <div id="settingItemQueenAutopromote" class="settingItem row">
+                                    <label class="checkContainer">
+                                      <input id="qa" type="checkbox">
+                                      <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="clockGlowSelector" class="settingSelector">
+                            <div class="settingPoint">Clock Warn <small>(last 30 sec.)</small></div>
+                            <div id="clockGlowBox" class="checkmarkBox">
+                                <div id="settingItemClockGlow" class="settingItem row">
+                                    <label class="checkContainer">
+                                      <input id="cg" type="checkbox">
+                                      <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="goButton" class="myButton playButton">Play!</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--================Header Menu Area =================-->
+
+        <!--================Header Menu Area =================-->
+        <!--================Footer Area =================-->
+        <div id="footer"></div>
+        <!--================End Footer Area =================-->
+
+        <!-- Modals error -->
+
+        <div id="error" class="modal modal-message fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-close"></i>
+                        </button>
+                        <h2>Sorry !</h2>
+                        <p> Something went wrong </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--================End Contact Success and Error message Area =================-->
+
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+                integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js"
+                integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script type="text/javascript">
+            $(function(){
+              $("#header").load("html/header.html");
+              $("#footer").load("html/footer.html");
+            });
+	    </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
+                integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar.js/0.6.2/jquery.stellar.min.js"
+                integrity="sha512-PNXCBnFH9wShbV+mYnrfo0Gf3iSREgBWmYAoMIfc+Z83vVq3Nu4yxBk6j+BZ40ZIhtW3WlTQdBvW3AYLAnlgpA=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.2.0/jquery.magnific-popup.min.js"
+                integrity="sha512-fCRpXk4VumjVNtE0j+OyOqzPxF1eZwacU3kN3SsznRPWHgMTSSo7INc8aY03KQDBWztuMo5KjKzCFXI/a5rVYQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="../js/theme.js"></script>
+        <script src="../vendors/nice-select/js/jquery.nice-select.min.js"></script>
+        <script src="../vendors/isotope/imagesloaded.pkgd.min.js"></script>
+        <script src="../vendors/isotope/isotope-min.js"></script>
+        <script src="../vendors/owl-carousel/owl.carousel.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxchimp/1.3.0/jquery.ajaxchimp.min.js"
+                integrity="sha512-5yj5elY9u6clGe9/97bj3jJlw8+O9XSv/tbme8m/LR8cKnnT5+rR8qHW/UYQ/MozLg3cvTHeYIpM5kRktASSbg=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="../vendors/counter-up/jquery.waypoints.min.js"></script>
+        <script src="../vendors/counter-up/jquery.counterup.min.js"></script>
+        <script src="../js/mail-script.js"></script>
+        <script src="../vendors/lightbox/simpleLightbox.min.js"></script>
+        <!-- contact js -->
+        <script>var exports = {};</script>
+        <script src="../js/chess.min.js"></script>
+        <script src="../js/chessboard-1.0.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
+                integrity="sha512-YUkaLm+KJ5lQXDBdqBqk7EVhJAdxRnVdT2vtCzwPHSweCzyMgYV/tgGF4/dCyqtCC2eCphz0lRQgatGVdfR0ww=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js"
+                integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script type="module" src="../js/settings.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"
+                integrity="sha512-11t8Q+vY9JlCrr+PveZKTYJq8n7O09Y5X/pk/aMd3vJugSvu4xOunGEUzaADqL3I8cZKE/pBwwCfXzDkRJh2sQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+
+        <!--gmaps Js-->
+        <script src="../js/chessboardjs-themes.js"></script>
+        <script src="../js/loading-bar.js"></script>
+
+    </body>
+</html>

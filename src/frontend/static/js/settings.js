@@ -298,7 +298,7 @@ $(document).ready(function () {
                     gc.style.opacity = 1;
                     promote = elem.id;
                     onDrop(promotion_in_progress[0], promotion_in_progress[1]);
-                    board.position(game.fen(), useAnimation = true);
+                    board.position(game.fen(), true);
                     promotion_in_progress = [];
                 }
                 elem.style.border = "3px solid #fc5185";
