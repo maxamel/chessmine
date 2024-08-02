@@ -4,7 +4,7 @@
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="icon" href="../img/pawn-white-chess.png" type="image/png">
+        <link rel="icon" href="../img/chesspieces/metro/wN.png" type="image/png">
         <title>Chessmine</title>
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="../css/bootstrap.css">
@@ -95,7 +95,7 @@
                                         <div class="endgame">&#9818;</div>
                                     </div>
                                     <div class="shadow scale"></div>
-                                    <div class="message"><h1 class="alert">You Win!</h1><p>Black won by checkmate!</p></div>
+                                    <div class="message"><h1 class="alert">You Win!</h1><p class="paragraph_style">Black won by checkmate!</p></div>
                                     <button class="button-box"><h1 class="rematch green">Rematch</h1></button>
                                   </div>
                                   <div id="lose-box">
@@ -105,7 +105,7 @@
                                             <div class="endgame">&#9818;</div>
                                         </div>
                                         <div class="shadow move"></div>
-                                        <div class="message"><h1 class="alert">You Lose!</h1><p>Black lost on time!</div>
+                                        <div class="message"><h1 class="alert">You Lose!</h1><p class="paragraph_style">Black lost on time!</div>
                                         <button class="button-box"><h1 class="rematch red">Rematch</h1></button>
                                   </div>
                                   <div id="draw-box">
@@ -115,7 +115,7 @@
                                             <div class="endgame">&#9818;</div>
                                         </div>
                                         <div class="shadow"></div>
-                                        <div class="message"><h1 class="alert">Draw!</h1><p>Draw by agreement!</div>
+                                        <div class="message"><h1 class="alert">Draw!</h1><p class="paragraph_style">Draw by agreement!</div>
                                         <button class="button-box"><h1 class="rematch red">Rematch</h1></button>
                                   </div>
                                   <div id="abort-box">
@@ -125,7 +125,7 @@
                                             <div class="endgame">&#9818;</div>
                                         </div>
                                         <div class="shadow"></div>
-                                        <div class="message"><h1 class="alert">Aborted!</h1><p>Game Aborted!</div>
+                                        <div class="message"><h1 class="alert">Aborted!</h1><p class="paragraph_style">Game Aborted!</div>
                                         <button class="button-box"><h1 class="rematch red">Rematch</h1></button>
                                   </div>
                             </div>
@@ -203,76 +203,9 @@
 
         <!--================Header Menu Area =================-->
 
-        <!--================Contact Area =================-->
-        <section class="contact_area section_gap">
-            <div class="container">
-                <!--div id="mapBox" class="mapBox"
-                    data-lat="40.701083"
-                    data-lon="-74.1522848"
-                    data-zoom="13"
-                    data-info="PO Box CT16122 Collins Street West, Victoria 8007, Australia."
-                    data-mlat="40.701083"
-                    data-mlon="-74.1522848">
-                </--div-->
-                <div class="row">
-                        <div class="contact_info">
-                            <div class="info_item">
-                                <i class="lnr lnr-home"></i>
-                                <h6>California, United States</h6>
-                                <p>Santa monica bullevard</p>
-                            </div>
-                            <div class="info_item">
-                                <i class="lnr lnr-phone-handset"></i>
-                                <h6><a href="#">00 (440) 9865 562</a></h6>
-                                <p>Mon to Fri 9am to 6 pm</p>
-                            </div>
-                            <div class="info_item">
-                                <i class="lnr lnr-envelope"></i>
-                                <h6><a href="#">support@colorlib.com</a></h6>
-                                <p>Send us your query anytime!</p>
-                            </div>
-                        </div>
-                </div>
-            </div>
-        </section>
-        <!--================Contact Area =================-->
-
         <!--================Footer Area =================-->
         <div id="footer"></div>
         <!--================End Footer Area =================-->
-
-        <!--================Contact Success and Error message Area =================-->
-        <div id="success" class="modal modal-message fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <i class="fa fa-close"></i>
-                        </button>
-                        <h2>Thank you</h2>
-                        <p>Your message is successfully sent...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modals error -->
-
-        <div id="error" class="modal modal-message fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <i class="fa fa-close"></i>
-                        </button>
-                        <h2>Sorry !</h2>
-                        <p> Something went wrong </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--================End Contact Success and Error message Area =================-->
-
 
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -288,8 +221,8 @@
         </script>
         <script type="text/javascript">
             $(function(){
-              $("#header").load("static/header.html");
-              $("#footer").load("static/footer.html");
+              $("#header").load("html/header.html");
+              $("#footer").load("html/footer.html");
             });
 	    </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
@@ -323,8 +256,8 @@
         <script src="../vendors/lightbox/simpleLightbox.min.js"></script>
         <!-- contact js -->
         <script>var exports = {};</script>
-        <script src="static/js/chess.min.js"></script>
-        <script src="static/js/chessboard-1.0.0.min.js"></script>
+        <script src="../js/chess.min.js"></script>
+        <script src="../js/chessboard-1.0.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
                 integrity="sha512-YUkaLm+KJ5lQXDBdqBqk7EVhJAdxRnVdT2vtCzwPHSweCzyMgYV/tgGF4/dCyqtCC2eCphz0lRQgatGVdfR0ww=="
                 crossorigin="anonymous"

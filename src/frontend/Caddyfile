@@ -42,5 +42,4 @@ log {
         roll_keep       5
         }
         format  console
-        level   debug
 }

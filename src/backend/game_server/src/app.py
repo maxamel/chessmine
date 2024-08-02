@@ -6,14 +6,15 @@ from engineio.payload import Payload
 
 from game_server import GameServer, get_opposite_color, GameStatus, Result
 from player import Game, PlayerGameInfo
-from authlib.integrations.flask_client import OAuth
 
+import logging
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'secret!'
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
-oauth = OAuth(app)
-oauth.register('lichess')
 
 Payload.max_decode_packets = 150
 
@@ -31,40 +32,20 @@ def match(sid1, sid2):
     game_id = game_server.map_rivals(sid1, sid2, time_control=tc)
     Game(game_id=game_id, position=chess.Board().fen(), fens=[], moves=[],
                 white=p1, black=p2, status=GameStatus.STARTED.value)
-    print("Got match - %s %s", sid1, sid2)
-    '''
-    socketio.emit("game", {'color': WHITE, 'game': game.to_dict()},
-                  namespace='/connect', room=sid1)
-    socketio.emit("game", {'color': BLACK, 'game': game.to_dict()},
-                  namespace='/connect', room=sid2)
-    '''
+    logging.info("Matched players - %s %s", sid1, sid2)
+
     return 'OK'
 
 
 @app.route('/game_over/<winner>')
 def game_over(winner):
     socketio.emit("game_over", {'winner': winner, 'message': get_opposite_color(winner) + " ran out of time"}, namespace='/connect')
-    #socketio.emit("game_over", {'winner': winner, 'message': get_opposite_color(winner) + " ran out of time"}, namespace='/connect')
     return 'OK'
-
-
-@app.route('/login')
-def login():
-    redirect_uri = url_for('authorize', _external=True)
-    return oauth.lichess.authorize_redirect(redirect_uri)
-
-
-@app.route('/authorize')
-def authorize():
-    token = oauth.lichess.authorize_access_token()
-    bearer = token['access_token']
-    headers = {'Authorization': f'Bearer {bearer}'}
-    response = requests.get("https://lichess.org/api/account", headers=headers, timeout=15)
-    return jsonify(**response.json())
 
 
 @socketio.on('/api/cancelSearch', namespace='/connect')
 def cancelSearch(payload):
+    logging.info(f"Cancellig search with payload {payload}")
     return game_server.cancel_search(payload)
 
 
@@ -84,8 +65,6 @@ def play(payload):
 def heartbeat(payload):
     try:
         response = game_server.heartbeat(payload)
-        #if response is None:
-        #    return
         join_room(response.dst_sid)
         if not response.extra_data:
             return {}
@@ -95,8 +74,7 @@ def heartbeat(payload):
         socketio.emit(connection, {'color': response.src_color, 'game':response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
         return {}
     except Exception as e:
-        print("Got Exception from heartbeat")
-        print(e)
+        logging.error(f"Exception from heartbeat: {e}")
         return None
 
 

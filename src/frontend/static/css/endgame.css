@@ -48,7 +48,7 @@
 	 font-weight: 700;
 	 letter-spacing: 5px;
 }
- p {
+ .paragraph_style {
 	 margin-top: -20px;
      letter-spacing: 2px;
 	 font-size: 1em;
@@ -204,7 +204,6 @@
   #background: #fff;
   height: 20px;
   #width: 15px;
-  margin: 0 auto;
   position: relative;
   cursor: default;
   font-size: 20px;
