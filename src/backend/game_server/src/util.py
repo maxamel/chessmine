@@ -59,3 +59,9 @@ class Result(Enum):
     GAME_IN_PROGRESS = 9
     GAME_STARTED = 10
     GAME_ENDED = 11
+
+class Outcome(Enum):
+    FIRST_PLAYER_WINS = 1
+    SECOND_PLAYER_WINS = 2
+    DRAW = 0
+    NO_GAME = 3

@@ -1,3 +1,5 @@
+import os
+
 import chess
 import redis
 
@@ -10,8 +12,8 @@ from util import GameStatus
 class RedisPlug:
 
     def __init__(self):
-        self.redis_url = "redis"
-        self.redis_port = "6379"
+        self.redis_url = os.getenv('REDIS_URL', "redis")
+        self.redis_port = os.getenv('REDIS_PORT', "6379")
         self.search_pool = "search_pool"
         self.player_info = "player_session_"
         self.player = "player_mapping_"
@@ -20,7 +22,7 @@ class RedisPlug:
         self.game_fens = "game_fens_"
         self.game_endgame = "game_endgame_"
         self.game_expire = "game_expirations"
-        self.r = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, decode_responses=True)
+        self.r = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, decode_responses=True, retry_on_timeout=True)
 
     def add_players_to_search_pool(self, *player_sids):
         self.r.sadd(self.search_pool, *player_sids)
