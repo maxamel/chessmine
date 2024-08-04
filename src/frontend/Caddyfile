@@ -26,7 +26,7 @@ route {
                 path /api/* /socket.io/*
         }
         root * static/
-        reverse_proxy @notStatic game_server:5000
+        reverse_proxy @notStatic {$BE_URL}:5000
         try_files {path} {path}.html html/{path}.html
         file_server
 
@@ -41,5 +41,5 @@ log {
         roll_keep_for   48h
         roll_keep       5
         }
-        format  console
+        format json
 }

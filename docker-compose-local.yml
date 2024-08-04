@@ -15,17 +15,6 @@ services:
           - ./src/backend/sanicfish/:/usr/app
         ports:
           - 8040:8040
-    game_server:
-        container_name: "game_server"
-        build:
-          context: .
-          dockerfile: ./src/backend/game_server/Dockerfile
-        volumes:
-          - ./src/backend/game_server/:/usr/app
-        ports:
-          - 5000:5000
-        depends_on:
-          - redis
     caddy:
         container_name: "caddy"
         build:
@@ -33,9 +22,7 @@ services:
           dockerfile: ./src/frontend/Dockerfile
           args:
             APP_URL: http://localhost
-            BE_URL: game_server
+            BE_URL: host.docker.internal
         ports:
           - 443:443
           - 80:80
-        depends_on:
-          - game_server

@@ -1,10 +1,11 @@
+from typing import Any
+
 import chess
-import requests
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request
 from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
 
-from game_server import GameServer, get_opposite_color, GameStatus, Result
+from game_server import GameServer, GameStatus, Result, EndGameInfo, get_opposite_color
 from player import Game, PlayerGameInfo
 
 import logging
@@ -37,9 +38,15 @@ def match(sid1, sid2):
     return 'OK'
 
 
-@app.route('/game_over/<winner>')
-def game_over(winner):
-    socketio.emit("game_over", {'winner': winner, 'message': get_opposite_color(winner) + " ran out of time"}, namespace='/connect')
+@app.route('/game_over', methods=['POST'])
+def game_over():
+    logging.info(f"The request: {request.get_json()}")
+    payload = request.get_json()
+    logging.info(f"Game over with content: {payload}")
+    winner: str = payload.get('winner')
+    loser: str = payload.get('loser')
+    socketio.emit("game_over", payload.get('extra_data'), namespace='/connect', room=winner)
+    socketio.emit("game_over", payload.get('extra_data'), namespace='/connect', room=loser)
     return 'OK'
 
 

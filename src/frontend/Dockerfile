@@ -1,7 +1,10 @@
 FROM caddy:2.8.4-alpine
 
 WORKDIR /var/www/html/
-ENV APP_URL=http://localhost
+ARG APP_URL
+ARG BE_URL
+ENV APP_URL=$APP_URL
+ENV BE_URL=$BE_URL
 ADD src/frontend/ /var/www/html/
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/settings.js  # for dynamic config of url
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for dynamic config of url
