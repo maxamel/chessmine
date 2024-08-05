@@ -408,7 +408,7 @@ $(document).ready(function () {
         function abortAction(x) {
             var json = {"data": {
                     "sid": player_id
-                }};
+            }};
             socket.emit("/api/abort", json, function (ret) {
                 if (ret) {
                     updateLastCall();
@@ -870,11 +870,11 @@ $(document).ready(function () {
         cell.setAttribute("class", "timeCell");
         clearInterval(moveInterval);
         moveInterval = setInterval(function () {
-            cell.innerHTML = cell.innerHTML - 1;
             if (cell.innerHTML == 0) {
                 alert("No move was made on time. Game abandoned.");
                 clearInterval(moveInterval);
             }
+            cell.innerHTML = cell.innerHTML - 1;
         }, 1000);
     }
 

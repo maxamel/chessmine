@@ -145,7 +145,7 @@ def resign(payload):
 
 
 @socketio.on('/api/abort', namespace='/connect')
-def abort(payload):
+def abort(payload: dict[str, dict[str, str]]):
     server_response = game_server.abort(payload)
     if server_response is None:
         # Illegal abort

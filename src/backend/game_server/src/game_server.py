@@ -1,6 +1,6 @@
 import json, time, threading, chess, uuid, requests
 import logging
-from typing import Union
+from typing import Union, Any
 
 from elo import EloRating
 from logger import get_logger
@@ -53,18 +53,24 @@ class GameServer:
                         loser_sid = game[turn]
                         winner_sid = game[winner]
 
-                        rating_dict = self._update_ratings(winner_sid, loser_sid, winner, outcome=Outcome.FIRST_PLAYER_WINS)
-                        egi = EndGameInfo(winner=winner, message=f"{turn} ran out of time",
-                                          white_rating=rating_dict[WHITE].get(RATING),
-                                          black_rating=rating_dict[BLACK].get(RATING),
-                                          white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
-                                          black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
+                        count = len(self.redis.get_game_moves(game_id))
+                        if count == 1:
+                            payload: dict[str, Any] = {"data": {"sid": loser_sid}}
+                            srv_res: ServerResponse = self.abort(payload)
+                            egi = srv_res.end_game_info
+                        else:
+                            rating_dict = self._update_ratings(winner_sid, loser_sid, winner, outcome=Outcome.FIRST_PLAYER_WINS)
+                            egi = EndGameInfo(winner=winner, message=f"{turn} ran out of time",
+                                              white_rating=rating_dict[WHITE].get(RATING),
+                                              black_rating=rating_dict[BLACK].get(RATING),
+                                              white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
+                                              black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
                         self.set_game_endgame(game_id=game_id, end_game_info=egi)
 
                         self.redis.set_player_mapping_value(loser_sid, REMAINING_TIME, 0)
                         payload = {'winner': winner_sid, 'loser': loser_sid, 'extra_data': egi.to_dict()}
                         ans = requests.post("http://localhost:5000/game_over", json=payload)
-                        logging.info(f"Response from game_over request: {ans.json()}")
+                        logging.info(f"Response from game_over request: {ans.status_code}: {ans.reason}")
                         self.set_game_status(game_id, GameStatus.ENDED)
                         #self.cleanup(game_id=game_id)
         except Exception as e:
@@ -263,7 +269,14 @@ class GameServer:
         lgr.info("Player {} resigned game {}".format(player_info.sid, player_info.game_id))
         return res
 
-    def abort(self, payload):
+    def abort(self, payload: dict[str, dict[str, str]]) -> ServerResponse:
+        """
+        :param payload: data containing the aborting player id
+
+        Example: {"data": {"sid": player_id}}
+
+        :return: ServerResponse with the abort info
+        """
         data = payload["data"]
         sid = data["sid"]
         player_info = self.redis.get_player_mapping(sid)
@@ -271,7 +284,8 @@ class GameServer:
             lgr.info("Illegal attempt by player {} to abort game {} which is already ended".format(player_info.sid, player_info.game_id))
             return
         rival_info = self.redis.get_player_mapping(player_info.opponent)
-        if player_info.turn_start_time != 'None' and rival_info.turn_start_time != 'None':
+        # turn_start_time equals None if no moves have been played, and zero in case first move has been played
+        if player_info.turn_start_time != 'None' and rival_info.turn_start_time != 'None' and player_info.turn_start_time != 0 and rival_info.turn_start_time != 0:
             lgr.info("Illegal attempt by player {} to abort game {} which is already in progress".format(player_info.sid, player_info.game_id))
             return None
         rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.NO_GAME)
@@ -345,7 +359,7 @@ class GameServer:
             self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
             self.redis.set_player_mapping_value(sid, REMAINING_TIME, payload["other_remaining"])
             self.redis.set_player_mapping_value(rival, TURN_START_TIME, curr_time)
-        else:
+        else:  # game starting
             self.redis.set_player_mapping_value(sid, TURN_START_TIME, 0)
             self.redis.set_player_mapping_value(rival, TURN_START_TIME, 0)
 
@@ -502,6 +516,7 @@ class GameServer:
         elif status == GameStatus.ENDED.value:
             result = Result.GAME_ENDED
             egi = self.get_game_endgame(game_id=mapping.game_id)
+            move_ttl = 0
         else:
             raise ValueError("Unknown game status %s", status)
 
@@ -518,8 +533,7 @@ class GameServer:
                     status=status,
                     end_game_info=egi
                     )
-        ser_res = ServerResponse(dst_sid=player.sid, src_color=mapping.color, result=result, extra_data={'game': game.to_dict()})
-        return ser_res
+        return ServerResponse(dst_sid=player.sid, src_color=mapping.color, result=result, extra_data={'game': game.to_dict()})
 
     def _update_ratings(self, sid1: str, sid2: str, winner_color: Union[BLACK, WHITE], outcome: Outcome):
         # returns rating, delta for sid1 and rating, delta for sid2
