@@ -223,7 +223,7 @@ class GameServer:
             if flag:    # draw by agreement
                 self.redis.cancel_game_timeout(game_id=game_id)
                 self.set_game_status(player_info.game_id, GameStatus.ENDED)
-                rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.FIRST_PLAYER_WINS)
+                rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.DRAW)
                 egi = EndGameInfo(message="Draw By Agreement", white_rating=rating_dict[WHITE].get(RATING),
                                   black_rating=rating_dict[BLACK].get(RATING), white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                                   black_rating_delta=rating_dict[BLACK].get(RATING_DELTA), winner="Draw")
@@ -306,7 +306,7 @@ class GameServer:
         :return: sid of the player to send this move to and the move data slightly changed
         '''
         sid = payload["sid"]
-        player_info = self.redis.get_player_mapping(sid)
+        player_info: PlayerMapping = self.redis.get_player_mapping(sid)
         if (self.get_game_status(player_info.game_id) == GameStatus.ENDED.value):
             return
         game_id = player_info.game_id
@@ -380,29 +380,27 @@ class GameServer:
             # Draw by fivefold repetition
             self.redis.cancel_game_timeout(game_id=game_id)
             self.set_game_status(player_info.game_id, GameStatus.ENDED)
-            rating_dict = self._update_ratings(sid, rival_info.sid, outcome=Outcome.DRAW)
+            rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=sid, outcome=Outcome.DRAW)
             egi = EndGameInfo(winner="Draw", message=f"Draw By Five-Fold Repetition",
                               white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                               white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
-            payload["extra_data"] = egi
-            lgr.info("Game Over. Five-Fold Repetition", get_turn_from_fen(board.fen()))
+            payload["extra_data"] = egi.to_dict()
+            lgr.info("Game Over. Five-Fold Repetition - {}".format(get_turn_from_fen(board.fen())))
         elif board.is_game_over():
             # reset previous timeout settings due to turn switching
             self.redis.cancel_game_timeout(game_id=game_id)
             self.set_game_status(player_info.game_id, GameStatus.ENDED)
-            rating_dict = self._update_ratings(sid, rival_info.sid, outcome=Outcome.FIRST_PLAYER_WINS)
+            rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=player_info.color, outcome=Outcome.FIRST_PLAYER_WINS)
             egi = EndGameInfo(winner=player_info.color, message=f"{rival_info.color} checkmated",
                               white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                               white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
-            payload["extra_data"] = egi
-            lgr.info("Game Over. {} checkmated", rival_info.color)
-        update = json.dumps(payload)
-        #print(update)
-        return rival, update
+            payload["extra_data"] = egi.to_dict()
+            lgr.info("Game Over. {} checkmated".format(rival_info.color))
+        return rival, payload
 
     def play(self, payload):
         '''
@@ -537,6 +535,7 @@ class GameServer:
 
     def _update_ratings(self, sid1: str, sid2: str, winner_color: Union[BLACK, WHITE], outcome: Outcome):
         # returns rating, delta for sid1 and rating, delta for sid2
+        # In case of draw winner_color should be of sid1
         player_session = self.get_player_session(sid1)
         rival_session = self.get_player_session(sid2)
         ratingA, ratingB = EloRating(player_session.rating, rival_session.rating, d=outcome.value)

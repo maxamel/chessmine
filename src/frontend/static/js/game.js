@@ -1,12 +1,10 @@
+import { getPieceFuncByName, getBoardColorsByName } from './utils.js';
+import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
+
 $(document).ready(function () {
     load_cookies()
 
-    var timeintervalA = null;
-    var timeintervalB = null;
-    var timecolorintervalA = null
-    var timecolorintervalB = null
     var moveInterval = null;
-    var clockStatus = false;
 
     var cancel = document.getElementById("cancelSearch");
     cancel.addEventListener("click", function(evt) {
@@ -23,107 +21,9 @@ $(document).ready(function () {
         });
     });
 
-    ///// CLOCK
-    function getTimeRemaining(endtime) {
-        var t = endtime;// - new Date().getTime();
-        var millis = Math.floor((t % 1000) / 10);
-        var seconds = Math.floor((t / 1000) % 60);
-        var minutes = Math.floor((t / 1000 / 60) % 60);
-        return {
-            "total": t,
-            "minutes": minutes,
-            "seconds": seconds,
-            "millis": millis
-        };
-    }
-
-    function setTime(id, endtime) {
-        var clock = document.getElementById(id);
-        var minutesSpan = clock.querySelector(".minutes");
-        var secondsSpan = clock.querySelector(".seconds");
-        var millisSpan = clock.querySelector(".millis");
-        var t = getTimeRemaining(endtime);
-        minutesSpan.innerHTML = ("0" + t.minutes).slice(-2);
-        secondsSpan.innerHTML = ("0" + t.seconds).slice(-2);
-        millisSpan.innerHTML = ("0" + t.millis).slice(-2);
-    }
-
-    function initializeClock(id, endtime) {
-        var clock = document.getElementById(id);
-        var clockspan = clock.children.item(0);
-        var minutesSpan = clock.querySelector(".minutes");
-        var secondsSpan = clock.querySelector(".seconds");
-        var millisSpan = clock.querySelector(".millis");
-        var lastClockSet = new Date().getTime();
-
-        function changeClockColor() {
-            if (clockStatus) {
-                clockspan.style.backgroundColor = "#E1ECE0";
-                clockspan.style.color = "black";
-                clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
-                clockStatus = !clockStatus;
-            } else {
-                clockspan.style.backgroundColor = "black";
-                clockspan.style.boxShadow = "";
-                clockspan.style.color = "#E1ECE0";
-                clockStatus = !clockStatus;
-            }
-        }
-
-        function updateClock() {
-            var now = new Date().getTime();
-            endtime -= now - lastClockSet;
-            lastClockSet = now;
-            var t = getTimeRemaining(endtime);
-            if (clockGlow) {
-                if (t.total < 30000 && id == "clockdivA" && timecolorintervalA == null) {
-                    timecolorintervalA = setInterval(function () {
-                        changeClockColor();
-                    }, 500);
-                }
-                if (t.total < 30000 && id == "clockdivB" && timecolorintervalB == null) {
-                    timecolorintervalB = setInterval(function () {
-                        changeClockColor();
-                    }, 500);
-                }
-            }
-            if (t.total <= 0) {
-                discardTimeInterval('all');
-
-                millisSpan.innerHTML = ("00").slice(-2);
-                return;
-            }
-            minutesSpan.innerHTML = ("0" + t.minutes).slice(-2);
-            secondsSpan.innerHTML = ("0" + t.seconds).slice(-2);
-            millisSpan.innerHTML = ("0" + t.millis).slice(-2);
-        }
-
-        updateClock();
-        if (id == "clockdivA") {
-            discardTimeInterval('A');
-            timeintervalA = setInterval(function () {
-                updateClock();
-            }, 10);
-        } else {
-            discardTimeInterval('B');
-            timeintervalB = setInterval(function () {
-                updateClock();
-            }, 10);
-        }
-    }
-
-    ///// CLOCK
     var board = null;
     var $board = $("#myBoard");
     var game = new Chess();
-    //var moveList = [];
-    //var $status = $("#status");
-    //var $fen = $("#fen");
-    //var $pgn = $("#pgn");
-    //var whiteSquareGrey = "#a9a9a9";
-    //var blackSquareGrey = "#696969";
-    //var whiteSquare = "#9e7863";
-    //var blacksquare = "#633526";
     var futureMove = false;
     var futureMoveData = null;
     var player_id = null;
@@ -135,7 +35,6 @@ $(document).ready(function () {
     var timeControl = "5+0";
     var queenAutopromote = false;
     var highlightMoves = false;
-    var clockGlow = false;
     var the_game_moves = [];
     var the_game_fens = [];
     var promotion_in_progress = [];
@@ -150,14 +49,6 @@ $(document).ready(function () {
     var cookie_data = localStorage.getItem("user_session");
     var socket = io("APP_URL/connect");
 
-    /*socket.on("connection_id", function (ans) {
-        data = ans.user;
-        prefs = data.preferences;
-        delete data.preferences;
-        user_data = JSON.stringify(data);
-        localStorage.setItem("user_session", user_data);
-        cookie_data = user_data;
-    });*/
     socket.on("game_over", function (ans) {
         console.log(JSON.stringify(ans))
         game_over = true;
@@ -210,7 +101,6 @@ $(document).ready(function () {
         setTime("clockdivA", rival_time);
         setTime("clockdivB", my_time);
 
-        var fenobj = Chessboard.fenToObj(the_game_fen);
         var config = {
             pieceTheme: "../img/chesspieces/" + pieceTheme + "/{piece}.png",
             boardTheme: getBoardColorsByName(boardTheme),
@@ -468,7 +358,6 @@ $(document).ready(function () {
         }
     });
     socket.on("move", function (ans) {
-        ans = JSON.parse(ans);
         var the_move = ans.move;
         if (game.turn() != the_move.color) {
             return;      // Got my own move back
@@ -530,7 +419,6 @@ $(document).ready(function () {
                         heartbeat(true);
                         return;
                     }
-                    ret = JSON.parse(ret);
                     insertMove(move);
                     changeDrawButton('enabled');
                     if (ret.remaining) {
@@ -562,47 +450,6 @@ $(document).ready(function () {
         document.getElementById("win-box").style.display = "none";
         document.getElementById("lose-box").style.display = "none";
         document.getElementById("abort-box").style.display = "none";
-    }
-
-    function discardTimeInterval(str) {
-        if (str === 'B') {
-            clearInterval(timeintervalB);
-            clearInterval(timecolorintervalB);
-            var clock = document.getElementById("clockdivB");
-            var clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
-            clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
-            timecolorintervalB = null;
-        }
-        else if (str === 'A') {
-            clearInterval(timeintervalA);
-            clearInterval(timecolorintervalA);
-            clock = document.getElementById("clockdivA");
-            clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
-            clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
-            timecolorintervalA = null;
-        }
-        else {
-            clearInterval(timeintervalA);
-            clearInterval(timecolorintervalA);
-            timecolorintervalA = null;
-            clearInterval(timeintervalB);
-            clearInterval(timecolorintervalB);
-            timecolorintervalB = null;
-
-            clock = document.getElementById("clockdivA");
-            clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
-
-            clock = document.getElementById("clockdivB");
-            clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
-        }
     }
 
     function showEndGame(color_win, msg) {
@@ -806,29 +653,6 @@ $(document).ready(function () {
         }
     }
 
-
-    function getBoardColorsByName(str) {
-        if (str === "urban") return urban_board_theme;
-        if (str === "standard") return standard_board_theme;
-        if (str === "wiki") return wiki_board_theme;
-        if (str === "wood") return wood_board_theme;
-        if (str === "american") return american_board_theme;
-        if (str === "metro") return metro_board_theme;
-        if (str === "classical") return classical_board_theme;
-        return ["#f0d9b5", "#b58863"];
-    }
-
-    function getPieceFuncByName(str) {
-        if (str === "urban") return urban_piece_theme;
-        if (str === "standard") return standard_piece_theme;
-        if (str === "wiki") return wiki_piece_theme;
-        if (str === "wood") return wood_piece_theme;
-        if (str === "american") return american_piece_theme;
-        if (str === "metro") return metro_piece_theme;
-        if (str === "classical") return classical_piece_theme;
-        return alpha_piece_theme;
-    }
-
     function insertMove(move) {
         var index = 0;
         if (game.turn() === "b") {
@@ -975,7 +799,7 @@ $(document).ready(function () {
             timeControl = obj_prefs.time_control;
             queenAutopromote = obj_prefs.queen_autopromote;
             highlightMoves = obj_prefs.highlight_moves;
-            clockGlow = obj_prefs.clock_glow;
+            setClockGlow(obj_prefs.clock_glow);
         }
     }
 
@@ -1111,7 +935,6 @@ $(document).ready(function () {
 
             socket.emit("/api/move", json, function (ret) {
                 updateLastCall();
-                ret = JSON.parse(ret);
                 if (ret.remaining) {
                     discardTimeInterval('B');
                     setTime("clockdivB", ret["other_remaining"]);
@@ -1270,10 +1093,6 @@ $(document).ready(function () {
                 status += ", " + moveColor + " is in check";
             }
         }
-
-        //$status.html(status);
-        //$fen.html(game.fen());
-        //$pgn.html(game.pgn());
     }
     (jQuery);
 });

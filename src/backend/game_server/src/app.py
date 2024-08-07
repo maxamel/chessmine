@@ -1,4 +1,3 @@
-from typing import Any
 
 import chess
 from flask import Flask, request
@@ -78,7 +77,7 @@ def heartbeat(payload):
         elif "game" not in response.extra_data:
             return response.extra_data
         connection = "game"
-        socketio.emit(connection, {'color': response.src_color, 'game':response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
+        socketio.emit(connection, {'color': response.src_color, 'game': response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
         return {}
     except Exception as e:
         logging.error(f"Exception from heartbeat: {e}")
@@ -94,9 +93,9 @@ def move(payload):
     # send back to sender in case he has more than one page open
     socketio.emit("move", data, namespace='/connect', room=payload["sid"])
     if "extra_data" in data:
-        socketio.emit("game_over", data["extra_data"].to_dict(), namespace='/connect', room=send_to)
+        socketio.emit("game_over", data["extra_data"], namespace='/connect', room=send_to)
         # send back to sender to signal draw
-        socketio.emit("game_over", data["extra_data"].to_dict(), namespace='/connect', room=payload["sid"])
+        socketio.emit("game_over", data["extra_data"], namespace='/connect', room=payload["sid"])
     return data
 
 
