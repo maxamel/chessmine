@@ -1,3 +1,4 @@
+import logging
 import time, requests
 
 from threading import Thread
@@ -16,19 +17,21 @@ class RandomMatcher(Matcher):
         self.redis_plug.add_players_to_search_pool(player.sid)
         thread = Thread(target=self.search, args=(player.sid,))
         thread.start()
+        thread.join()
 
     def search(self, player_sid: str) -> str:
-        while True:
+        loop_round = 0
+        while loop_round < 6:    # up to six rounds
             rival_sid = self.redis_plug.draw_player_from_search_pool()
             if rival_sid is None:
-                print("Could not draw player out of pool")
+                logging.info("Could not draw player out of pool")
                 return None
             elif rival_sid != player_sid:
                 ret = self.redis_plug.remove_players_from_search_pool(rival_sid, player_sid)
                 if ret == 0:
                     if not self.redis_plug.is_player_in_search_pool(player_sid=player_sid):
                         # Someone already matched us
-                        print("Someone else matched our player. We can safely abandon search")
+                        logging.info("Someone else matched our player. We can safely abandon search")
                         return None
                     else:
                         # Someone beat us to the rival
@@ -44,4 +47,8 @@ class RandomMatcher(Matcher):
                 else:
                     requests.get(url="http://localhost:5000/match/"+player_sid+"/"+rival_sid,
                              json={'time_control': get_millis_for_time_control(player.preferences['time_control'])})
+            loop_round += 1
             time.sleep(1)
+        logging.info("Search yielded no results so matching with engine")
+        requests.get(url="http://localhost:5000/match/" + player_sid + "/@",
+                     json={'time_control': get_millis_for_time_control('5+0')})

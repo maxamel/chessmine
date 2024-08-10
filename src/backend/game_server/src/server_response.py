@@ -47,7 +47,7 @@ class EndGameInfo:
                            white_rating_delta=white_rating_delta, black_rating_delta=black_rating_delta)
 
 class ServerResponse:
-    def __init__(self, dst_sid: str, src_sid:str = None, src_color: str = None, dst_color: str = None,
+    def __init__(self, dst_sid: str, src_sid: str = None, src_color: str = None, dst_color: str = None,
                  result: Result = None, end_game_info: EndGameInfo = None, extra_data: dict = None):
         self.dst_sid = dst_sid
         self.src_sid = src_sid

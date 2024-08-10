@@ -1,4 +1,4 @@
-import json, time, threading, chess, uuid, requests
+import time, threading, chess, uuid, requests
 import logging
 from typing import Union, Any
 
@@ -10,7 +10,7 @@ from consts import *
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, Result, \
-    piece_symbol_to_obj, ConnectStatus, Outcome
+    piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -86,12 +86,12 @@ class GameServer:
         self.redis.remove_player_mapping()
         lgr.info("Removed info of game with id {}".format(game_id))
 
-    def map_rivals(self, player1, player2, time_control):
+    def map_rivals(self, player1_sid, player2_sid, time_control):
         game_id = uuid.uuid4().hex
-        lgr.info("Mapping rivals with args: {}, {}, {}, {}".format(player1, player2, game_id, time_control))
-        self.redis.map_player(player=player1, opponent=player2, game_id=game_id, color=WHITE, time_control=time_control)
-        self.redis.map_player(player=player2, opponent=player1, game_id=game_id, color=BLACK, time_control=time_control)
-        self.redis.map_game(game_id=game_id, white_sid=player1, black_sid=player2)
+        lgr.info("Mapping rivals with args: {}, {}, {}, {}".format(player1_sid, player2_sid, game_id, time_control))
+        self.redis.map_player(player=player1_sid, opponent=player2_sid, game_id=game_id, color=WHITE, time_control=time_control)
+        self.redis.map_player(player=player2_sid, opponent=player1_sid, game_id=game_id, color=BLACK, time_control=time_control)
+        self.redis.map_game(game_id=game_id, white_sid=player1_sid, black_sid=player2_sid)
         return game_id
 
     def get_game_fen(self, game_id):
@@ -118,10 +118,7 @@ class GameServer:
     def get_player_mapping(self, sid) -> PlayerMapping:
         return self.redis.get_player_mapping(sid)
 
-    def set_player_session(self, player: Player) -> Player:
-        self.redis.set_player_session(player=player)
-
-    def set_player_session(self, player: Player) -> Player:
+    def set_player_session(self, player: Player) -> None:
         self.redis.set_player_session(player=player)
 
     def get_player_session(self, sid) -> Player:
@@ -307,28 +304,29 @@ class GameServer:
         '''
         sid = payload["sid"]
         player_info: PlayerMapping = self.redis.get_player_mapping(sid)
-        if (self.get_game_status(player_info.game_id) == GameStatus.ENDED.value):
-            return
+        if self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
+            return None, None
         game_id = player_info.game_id
 
         move = payload["move"]
-        the_move = chess.Move.from_uci(move["from"] + move["to"])
+        the_move = chess.Move.from_uci(move["from"] + move["to"]) if isinstance(move, dict) else chess.Move.from_uci(move)
         if "promotion" in move:
             piece = piece_symbol_to_obj(move["promotion"])
             the_move.promotion = piece
 
         game_fen = self.redis.get_game_fen(player_info.game_id)
+        lgr.info(f'Got move {the_move} and fen {game_fen}')
         if game_fen is None:
             board = chess.Board()
         else:
             board = chess.Board(game_fen)
         if not board.is_legal(the_move):
-            lgr.error("Illegal move {} by player {} in game {}".format(move["san"], player_info.sid, player_info.game_id))
+            lgr.error("Illegal move {} by player {} in game {}".format(move, player_info.sid, player_info.game_id))
             return None, None
         board.push(the_move)
 
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
-        lgr.debug("Move {} played by player {} in game {}".format(move["san"], player_info.sid, player_info.game_id))
+        lgr.info("Move {} played by player {} in game {}".format(move, player_info.sid, player_info.game_id))
         if player_info.ttl_start_time != 'None':
             self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None')
         if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
@@ -372,7 +370,7 @@ class GameServer:
             self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
         self.redis.set_game_fen(game_id, board.fen())
         self.redis.add_fen_to_game(game_id, board.fen())
-        self.redis.add_move_to_game(game_id, move["san"])
+        self.redis.add_move_to_game(game_id, move["san"] if isinstance(move, dict) else move)   # engine produces move as string of form 'e2e4'
 
         if len(moves) > 1:
             self.redis.set_game_status(game_id, GameStatus.PLAYING)
@@ -449,8 +447,11 @@ class GameServer:
             if self.redis.is_player_mapping_exists(sid):    # There is a game in progress
                 self.redis.set_player_mapping_value(sid, LAST_SEEN, curr_time)
                 rival_sid = self.redis.get_player_mapping_value(sid, OPPONENT)
-                rival_last_seen = int(self.redis.get_player_mapping_value(rival_sid, LAST_SEEN))
-                rival_connect_status = ConnectStatus.CONNECTED.value if curr_time-rival_last_seen < 10000 else ConnectStatus.DISCONNECTED.value
+                rival_last_seen = self.redis.get_player_mapping_value(rival_sid, LAST_SEEN)
+                if rival_last_seen == 'None':   # rival is an engine
+                    rival_connect_status = ConnectStatus.CONNECTED.value
+                else:
+                    rival_connect_status = ConnectStatus.CONNECTED.value if curr_time-int(rival_last_seen) < 10000 else ConnectStatus.DISCONNECTED.value
             return ServerResponse(dst_sid=sid, extra_data={"rival_connect_status": rival_connect_status})
 
         player = self.get_player_from_cookie(cookie)
@@ -518,8 +519,8 @@ class GameServer:
         else:
             raise ValueError("Unknown game status %s", status)
 
-        white_info = PlayerGameInfo(name=white.name, rating=white.rating, time_remaining=white_time)
-        black_info = PlayerGameInfo(name=black.name, rating=black.rating, time_remaining=black_time)
+        white_info = PlayerGameInfo(name=white.name, rating=white.rating, player_type=white.player_type, time_remaining=white_time)
+        black_info = PlayerGameInfo(name=black.name, rating=black.rating, player_type=black.player_type, time_remaining=black_time)
         game = Game(game_id=mapping.game_id,
                     position=fen,
                     moves=moves,
@@ -529,7 +530,8 @@ class GameServer:
                     move_ttl=move_ttl,
                     draw_offer=draw_offer,
                     status=status,
-                    end_game_info=egi
+                    end_game_info=egi,
+                    engine_sid=rival.sid if rival.player_type == PlayerType.ENGINE.value else None
                     )
         return ServerResponse(dst_sid=player.sid, src_color=mapping.color, result=result, extra_data={'game': game.to_dict()})
 

@@ -1,5 +1,6 @@
 import { getPieceFuncByName, getBoardColorsByName } from './utils.js';
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
+import { stockfish_load, stockfish_move } from './stockfish_handler.js';
 
 $(document).ready(function () {
     load_cookies()
@@ -44,6 +45,8 @@ $(document).ready(function () {
     var heartbeatOK = false;
     var abort_button = null;
     var attached_listeners = false;
+    var engine = null;       // stockfish instance
+    var engine_sid = null;   // for engine play only
 
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
@@ -70,6 +73,7 @@ $(document).ready(function () {
         var game_status = the_game.status;
         var me = the_game.white;
         var rival = the_game.black;
+        var the_game_fen = the_game.position;
         if (parseInt(rival_time) === 0 || parseInt(my_time) === 0 || game_status === 3) {
             game_over = true;
         }
@@ -78,7 +82,32 @@ $(document).ready(function () {
             my_time = [rival_time, rival_time = my_time][0];
             me = [rival, rival = me][0];
         }
-        var the_game_fen = the_game.position;
+        if (rival.player_type == 1) {   // rival is engine
+            // lazy initialization of stockfish
+            engine_sid = the_game.engine_sid;
+            engine = stockfish_load(the_game_moves);
+            console.log(`The current position ${the_game_fen}`);
+            engine.onmessage = function(line) {
+                //console.log(line);
+                var responseWords = line.split(' ');
+                if (responseWords[0] === 'bestmove') {
+                    // make move to get full structure of chess move and then undo. This move will be processed
+                    // properly nce it goes through the server and back
+                    var preetified_engine_move = game.move(responseWords[1]);
+                    game.undo();
+                    var json = {
+                        "sid": engine_sid,
+                        "move": preetified_engine_move
+                    };
+                    console.log('Sending move on behalf of engine with payload: ' + JSON.stringify(json));
+                    socket.emit("/api/move", json, function (ret) {
+                        console.log('Sent engine move ' + JSON.stringify(preetified_engine_move));
+                        console.log('Response to engine move: ' + JSON.stringify(ret));
+                    });
+                }
+            };
+        }
+
         the_game_moves = JSON.parse(the_game.moves);
         the_game_fens = JSON.parse(the_game.fens);
         player_id = cookie_data.sid;
@@ -310,6 +339,7 @@ $(document).ready(function () {
         }
 
         function boardResize(x) {
+            console.log('called board resize');
             if (x.matches) { // If media query matches
                 board.resize();
             } else {
@@ -317,6 +347,7 @@ $(document).ready(function () {
             }
         }
     });
+
     socket.on("draw", function (ans) {
         if (ans.color === my_color) {
             // Got my own draw offer back
@@ -336,6 +367,7 @@ $(document).ready(function () {
             }
         }
     });
+
     socket.on("rematch", function (ans) {
         console.log("Got Rematch " + ans.flag)
         if (ans.color === my_color) {
@@ -357,23 +389,46 @@ $(document).ready(function () {
             }
         }
     });
+
+    function handleMoveOnBoard(the_move) {
+        // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
+        if (the_move.san === 'O-O-O' ||
+          the_move.san === 'O-O' ||
+          the_move.san.indexOf('=') > -1 ||
+          (the_move.san.indexOf('x') > -1 && the_move.flags == 'e')
+        ) {
+            console.log('Called board positioning while move handling');
+            board.position(game.fen(), true)
+        }
+        else {
+            board.move(the_move.from + '-' + the_move.to)
+        }
+    }
+
+    function highlight_check_mate(source) {
+        var array = 0
+        if (game.isCheckmate()) {
+            array = get_piece_positions(game, { type: 'k', color: game.turn() })
+            source = array[0]
+            $board.find('.square-' + source).addClass('highlight-mate')
+            game_over = true
+        } else if (game.inCheck()) {
+            array = get_piece_positions(game, { type: 'k', color: game.turn() })
+            source = array[0]
+            $board.find('.square-' + source).addClass('highlight-check')
+        }
+    }
+
     socket.on("move", function (ans) {
         var the_move = ans.move;
+        console.log('Got move data ' + JSON.stringify(ans));
         if (game.turn() != the_move.color) {
             return;      // Got my own move back
         }
         game.move(the_move.san);
-        // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
-        if (the_move.san == "O-O-O" ||
-            the_move.san == "O-O" ||
-            the_move.san.indexOf("=") > -1 ||
-            (the_move.san.indexOf("x") > -1 && the_move.flags == "e")
-        )
-            board.position(game.fen(), true);
-        else
-            board.move(the_move.from + "-" + the_move.to);
 
-        removeCheck()
+        handleMoveOnBoard(the_move);
+        removeCheck();
         insertMove(the_move);
         changeDrawButton('enabled');
         if (ans.remaining) {
@@ -398,6 +453,7 @@ $(document).ready(function () {
         } else if (game.inCheck()) {
             $board.find(".square-" + source).addClass("highlight-check");
         }
+        // handle future move
         if (futureMoveData != null) {
             if (handlePromotion(futureMoveData.from, futureMoveData.to)) {
                 return;
@@ -419,21 +475,20 @@ $(document).ready(function () {
                         heartbeat(true);
                         return;
                     }
-                    insertMove(move);
-                    changeDrawButton('enabled');
                     if (ret.remaining) {
                         discardTimeInterval('B');
                         setTime("clockdivB", ret["other_remaining"]);
                         initializeClock("clockdivA", ret["remaining"]);
                     }
-                    if (move.san == "O-O-O" ||
-                        move.san == "O-O" ||
-                        move.san.indexOf("=") > -1 ||
-                        (move.san.indexOf("x") > -1 && move.flags == "e")
-                    )
-                        board.position(game.fen(), true);
-                    else
-                        board.move(move.from + "-" + move.to);
+                    insertMove(move);
+                    changeDrawButton('enabled');
+                    handleMoveOnBoard(move);
+                    highlight_check_mate(source);
+
+                    if (engine) {
+                        console.log('Generating engine move after future move: ' + move.lan);
+                        stockfish_move(game.history({verbose: true}).map((x) => x.lan).join(' '));
+                    }
                 });
             }
 
@@ -695,7 +750,7 @@ $(document).ready(function () {
         clearInterval(moveInterval);
         moveInterval = setInterval(function () {
             if (cell.innerHTML == 0) {
-                alert("No move was made on time. Game abandoned.");
+                console.log("No move was made on time. Game abandoned.");
                 clearInterval(moveInterval);
             }
             cell.innerHTML = cell.innerHTML - 1;
@@ -764,12 +819,10 @@ $(document).ready(function () {
         }
         socket.emit("/api/heartbeat", dict, function (ans) {
             updateLastCall();
-            console.log("Got some response from heartbeat");
             if (ans) {
                 console.log("Got heartbeat response " + JSON.stringify(ans))
                 document.getElementById("gameBox").style.display = "flex";
                 var connect_icons = document.getElementsByClassName("dottop");
-                console.log(connect_icons)
                 if (ans.rival_connect_status === 2) {
                     for (const icon of connect_icons)
                         icon.style.backgroundColor = "#59fb74"
@@ -945,16 +998,12 @@ $(document).ready(function () {
                 if (offeredButton.style.display != "none") {
                     changeDrawButton('enabled');
                 }
-                var array = 0;
-                if (game.isCheckmate()) {
-                    array = get_piece_positions(game, {type: "k", color: game.turn()});
-                    source = array[0];
-                    $board.find(".square-" + source).addClass("highlight-mate");
-                    game_over = true;
-                } else if (game.inCheck()) {
-                    array = get_piece_positions(game, {type: "k", color: game.turn()});
-                    source = array[0];
-                    $board.find(".square-" + source).addClass("highlight-check");
+                highlight_check_mate(source);
+
+                // handle engine move if needed
+                if (engine) {
+                    console.log('Generating engine move after move: ' + move.lan);
+                    stockfish_move(game.history({verbose: true}).map((x) => x.lan).join(' '));
                 }
             });
             return 'drop'
@@ -971,16 +1020,15 @@ $(document).ready(function () {
         if (source === undefined || target === undefined) {
             return false;
         }
-        if (!queenAutopromote && promotion_in_progress.length == 0 &&
-            ((target[1] == "1" && my_color === "black") || (target[1] == "8" && my_color === "white"))) {
+        var curr_position = Chessboard.fenToObj(game.fen());
+        var piece = curr_position[source];
+        if (!queenAutopromote && promotion_in_progress.length === 0 && (target[1] === "1" || target[1] === "8" ) && piece[1] === "P") {
             var move = game.move({
                 from: source,
                 to: target,
                 promotion: "q" // NOTE: always promote to a queen for example simplicity
             });
             if (move != null) {
-                var curr_position = Chessboard.fenToObj(the_game.position);
-                var piece = curr_position[source];
                 if (piece[1] == "P") {
                     promotion_in_progress = [source, target];
                     var pieceType = ["B", "N", "R", "Q"];
