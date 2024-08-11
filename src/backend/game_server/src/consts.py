@@ -23,6 +23,7 @@ STATUS = 'status'
 
 NAME = "name"
 RATING = "rating"
+PLAYER_TYPE = "player_type"
 RATING_DELTA = "rating_delta"
 CONNECT_STATUS = "connection_status"
 PREFERENCES = "preferences"

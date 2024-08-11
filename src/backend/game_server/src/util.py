@@ -65,3 +65,7 @@ class Outcome(Enum):
     SECOND_PLAYER_WINS = 2
     DRAW = 0
     NO_GAME = 3
+
+class PlayerType(Enum):
+    HUMAN = 0
+    ENGINE = 1

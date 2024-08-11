@@ -5,9 +5,11 @@ from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
 
 from game_server import GameServer, GameStatus, Result, EndGameInfo, get_opposite_color
-from player import Game, PlayerGameInfo
+from player import Game, PlayerGameInfo, Player
 
 import logging
+
+from util import PlayerType
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'secret!'
@@ -25,6 +27,12 @@ game_server = GameServer()
 def match(sid1, sid2):
     tc = request.json['time_control']
     player1 = game_server.get_player_session(sid1)
+    if sid2 == '@':
+        # no findings so we need to match with engine
+        engine: Player = Player(rating=player1.rating, player_type=PlayerType.ENGINE.value)
+        logging.info("Matching player - %s with engine %s", sid1, engine.sid)
+        game_server.set_player_session(engine)
+        sid2 = engine.sid
     player2 = game_server.get_player_session(sid2)
 
     p1 = PlayerGameInfo(name=player1.name, rating=player1.rating, time_remaining=tc)
@@ -51,7 +59,7 @@ def game_over():
 
 @socketio.on('/api/cancelSearch', namespace='/connect')
 def cancelSearch(payload):
-    logging.info(f"Cancellig search with payload {payload}")
+    logging.info(f"Cancelling search with payload {payload}")
     return game_server.cancel_search(payload)
 
 
@@ -61,7 +69,7 @@ def play(payload):
     response = game_server.play(payload)
     join_room(response.dst_sid)
     if "game" in response.extra_data:
-        the_dict = {'color': response.src_color, 'game':response.extra_data["game"]}
+        the_dict = {'color': response.src_color, 'game': response.extra_data["game"]}
         connection = "game"
         socketio.emit(connection, the_dict, namespace='/connect', room=response.dst_sid)
     return response.dst_sid
@@ -76,8 +84,7 @@ def heartbeat(payload):
             return {}
         elif "game" not in response.extra_data:
             return response.extra_data
-        connection = "game"
-        socketio.emit(connection, {'color': response.src_color, 'game': response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
+        socketio.emit("game", {'color': response.src_color, 'game': response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
         return {}
     except Exception as e:
         logging.error(f"Exception from heartbeat: {e}")

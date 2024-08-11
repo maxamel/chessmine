@@ -11,7 +11,8 @@ RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for d
 RUN apk add npm && npm install && apk add minify
 RUN cp /var/www/html/node_modules/chess.js/dist/cjs/chess.js /var/www/html/static/js/chess.js && \
     cp /var/www/html/node_modules/@chrisoakman/chessboardjs/dist/chessboard-1.0.0.min.css /var/www/html/static/css/chessboard-1.0.0.min.css && \
-    cp /var/www/html/node_modules/@chrisoakman/chessboardjs/dist/chessboard-1.0.0.min.js /var/www/html/static/js/chessboard-1.0.0.min.js
+    cp /var/www/html/node_modules/@chrisoakman/chessboardjs/dist/chessboard-1.0.0.min.js /var/www/html/static/js/chessboard-1.0.0.min.js && \
+    cp /var/www/html/node_modules/stockfish/src/stockfish* /var/www/html/static/js/
 RUN minify -o /var/www/html/static/js/chess.min.js /var/www/html/static/js/chess.js
 
 RUN cp /var/www/html/Caddyfile /etc/caddy/Caddyfile

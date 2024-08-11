@@ -3,22 +3,23 @@ from consts import *
 import json, uuid
 
 from server_response import EndGameInfo
+from util import PlayerType
 
 
 class Player:
-    def __init__(self, sid=None, name="Guest", rating=1500, preferences={}):
-        if sid is None:
-            sid = uuid.uuid4().hex
-        self.sid = sid
+    def __init__(self, sid: str=None, name: str="Guest", rating: int=1500, preferences=None, player_type: int=PlayerType.HUMAN.value):
+        self.sid = sid if sid else uuid.uuid4().hex
         self.name = name
         self.rating = rating
-        self.preferences = preferences
+        self.player_type = player_type
+        self.preferences = preferences if preferences is not None else dict()
 
     def to_dict(self):
         return {
             "sid": self.sid,
             "name": self.name,
             "rating": self.rating,
+            "player_type": self.player_type,
             "preferences": json.dumps(self.preferences)
         }
 
@@ -27,13 +28,17 @@ class Player:
         rating = d[RATING]
         if rating != 'None':
             rating = int(rating)
-        return Player(sid=d[SID], name=d[NAME], rating=rating, preferences=json.loads(d[PREFERENCES]))
+        player_type = d[PLAYER_TYPE]
+        if player_type != 'None':
+            player_type = int(player_type)
+        return Player(sid=d[SID], name=d[NAME], rating=rating, player_type=player_type, preferences=json.loads(d[PREFERENCES]))
 
 
 class PlayerGameInfo:
-    def __init__(self, name="Guest", rating=1500, rating_delta=None, time_remaining=None, connect_status=None):
+    def __init__(self, name="Guest", rating=1500, player_type: int=PlayerType.HUMAN.value, rating_delta=None, time_remaining=None, connect_status=None):
         self.name = name
         self.rating = rating
+        self.player_type = player_type
         self.rating_delta = rating_delta
         self.time_remaining = time_remaining
         self.connect_status = connect_status
@@ -42,6 +47,7 @@ class PlayerGameInfo:
         return {
             NAME: self.name,
             RATING: self.rating,
+            PLAYER_TYPE: self.player_type,
             RATING_DELTA: self.rating_delta,
             REMAINING_TIME: self.time_remaining,
             CONNECT_STATUS: self.connect_status
@@ -58,7 +64,7 @@ class PlayerGameInfo:
         rating_delta = d[RATING_DELTA]
         if rating_delta != 'None':
             rating_delta = int(rating_delta)
-        return PlayerGameInfo(name=d[NAME], rating=rating, rating_delta=rating_delta,
+        return PlayerGameInfo(name=d[NAME], rating=rating, player_type=int(d[PLAYER_TYPE]), rating_delta=rating_delta,
                               time_remaining=rm_time, connect_status=d[CONNECT_STATUS])
 
 
@@ -119,7 +125,7 @@ class PlayerMapping:
 
 class Game:
     def __init__(self, game_id: str, position: str, moves: list, fens: list, white: PlayerGameInfo, black: PlayerGameInfo,
-                 move_ttl: int = None, draw_offer = None, rematch_offer = None, status = None, end_game_info: EndGameInfo = None):
+                 move_ttl: int = None, draw_offer=None, rematch_offer=None, status=None, end_game_info: EndGameInfo=None, engine_sid: str=None):
         self.game_id = game_id
         self.position = position
         self.fens = fens
@@ -131,6 +137,7 @@ class Game:
         self.rematch_offer = rematch_offer
         self.status = status
         self.end_game_info = end_game_info
+        self.engine_sid = engine_sid
 
     def to_dict(self):
         return {
@@ -144,5 +151,6 @@ class Game:
             "draw_offer": self.draw_offer,
             "rematch_offer": self.rematch_offer,
             "status": self.status,
-            "end_game_info": None if self.end_game_info is None else self.end_game_info.to_dict()
+            "end_game_info": None if self.end_game_info is None else self.end_game_info.to_dict(),
+            "engine_sid": self.engine_sid
         }

@@ -10,7 +10,7 @@
     "@chrisoakman/chessboardjs": "^1.0.0",
     "chess.js": "v1.0.0-beta.8",
     "requirejs": "^2.3.7",
-    "stockfish.wasm": "^0.10.0"
+    "stockfish": "11.0.0"
   },
   "keywords": [],
   "author": "",

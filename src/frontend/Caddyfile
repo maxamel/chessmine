@@ -28,6 +28,7 @@ route {
         root * static/
         reverse_proxy @notStatic {$BE_URL}:5000
         try_files {path} {path}.html html/{path}.html
+        redir /stockfish.wasm /js/stockfish.wasm
         file_server
 
 }
