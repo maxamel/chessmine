@@ -61,6 +61,36 @@ $(document).ready(function () {
         showEndGame(ans.winner, ans.message);
         setRatings(ans)
     });
+
+    function handle_engine_init (rival, the_game, the_game_fen, rating) {
+        if (rival.player_type == 1) {   // rival is engine
+            // lazy initialization of stockfish
+            engine_sid = the_game.engine_sid
+            console.log(game.fen());
+            engine = stockfish_load(game.fen(), rating)
+            console.log(`The current position ${the_game_fen}`)
+            engine.onmessage = function (line) {
+                //console.log(line);
+                var responseWords = line.split(' ')
+                if (responseWords[0] === 'bestmove') {
+                    // make move to get full structure of chess move and then undo. This move will be processed
+                    // properly nce it goes through the server and back
+                    var preetified_engine_move = game.move(responseWords[1])
+                    game.undo()
+                    var json = {
+                        'sid': engine_sid,
+                        'move': preetified_engine_move
+                    }
+                    console.log('Sending move on behalf of engine with payload: ' + JSON.stringify(json))
+                    socket.emit('/api/move', json, function (ret) {
+                        console.log('Sent engine move ' + JSON.stringify(preetified_engine_move))
+                        console.log('Response to engine move: ' + JSON.stringify(ret))
+                    })
+                }
+            }
+        }
+    }
+
     socket.on("game", function (ans) {
         load_cookies();
         console.log(ans)
@@ -81,31 +111,6 @@ $(document).ready(function () {
         if (my_color === "black") {        // swap objects
             my_time = [rival_time, rival_time = my_time][0];
             me = [rival, rival = me][0];
-        }
-        if (rival.player_type == 1) {   // rival is engine
-            // lazy initialization of stockfish
-            engine_sid = the_game.engine_sid;
-            engine = stockfish_load(the_game_moves);
-            console.log(`The current position ${the_game_fen}`);
-            engine.onmessage = function(line) {
-                //console.log(line);
-                var responseWords = line.split(' ');
-                if (responseWords[0] === 'bestmove') {
-                    // make move to get full structure of chess move and then undo. This move will be processed
-                    // properly nce it goes through the server and back
-                    var preetified_engine_move = game.move(responseWords[1]);
-                    game.undo();
-                    var json = {
-                        "sid": engine_sid,
-                        "move": preetified_engine_move
-                    };
-                    console.log('Sending move on behalf of engine with payload: ' + JSON.stringify(json));
-                    socket.emit("/api/move", json, function (ret) {
-                        console.log('Sent engine move ' + JSON.stringify(preetified_engine_move));
-                        console.log('Response to engine move: ' + JSON.stringify(ret));
-                    });
-                }
-            };
         }
 
         the_game_moves = JSON.parse(the_game.moves);
@@ -147,6 +152,8 @@ $(document).ready(function () {
         board = Chessboard("myBoard", config);
         game = new Chess(the_game_fen);
         insertBulkMoves(the_game_moves, ttl_time);
+
+        handle_engine_init(rival, the_game, the_game_fen, me.rating)
 
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
@@ -487,7 +494,7 @@ $(document).ready(function () {
 
                     if (engine) {
                         console.log('Generating engine move after future move: ' + move.lan);
-                        stockfish_move(game.history({verbose: true}).map((x) => x.lan).join(' '));
+                        stockfish_move(game.fen());
                     }
                 });
             }
@@ -1003,7 +1010,7 @@ $(document).ready(function () {
                 // handle engine move if needed
                 if (engine) {
                     console.log('Generating engine move after move: ' + move.lan);
-                    stockfish_move(game.history({verbose: true}).map((x) => x.lan).join(' '));
+                    stockfish_move(game.fen());
                 }
             });
             return 'drop'
@@ -1082,6 +1089,7 @@ $(document).ready(function () {
             square: square,
             verbose: true
         });
+        console.log(moves);
 
         // exit if there are no moves available for this square
         if (moves.length === 0) return;

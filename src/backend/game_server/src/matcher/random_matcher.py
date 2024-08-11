@@ -49,6 +49,7 @@ class RandomMatcher(Matcher):
                              json={'time_control': get_millis_for_time_control(player.preferences['time_control'])})
             loop_round += 1
             time.sleep(1)
-        logging.info("Search yielded no results so matching with engine")
+        ret = self.redis_plug.remove_players_from_search_pool(player_sid)
+        logging.info(f"Search yielded no results so matching with engine. Removed player from search pool: {ret == 1}")
         requests.get(url="http://localhost:5000/match/" + player_sid + "/@",
-                     json={'time_control': get_millis_for_time_control('5+0')})
+                     json={'time_control': get_millis_for_time_control('30+0')})

@@ -41,11 +41,10 @@
 }
 
 .loadSettingsCanvas {
-    margin: auto;
     display: inline-block;
     top: 45%;
     position: relative;
-    left: 38%;
+    left: 43%;
 }
 
 .loadMessage {
