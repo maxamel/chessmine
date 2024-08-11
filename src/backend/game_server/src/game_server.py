@@ -83,7 +83,6 @@ class GameServer:
         self.redis.remove_game_info(game_id)
         self.redis.remove_player_mapping(white)
         self.redis.remove_player_mapping(black)
-        self.redis.remove_player_mapping()
         lgr.info("Removed info of game with id {}".format(game_id))
 
     def map_rivals(self, player1_sid, player2_sid, time_control):
