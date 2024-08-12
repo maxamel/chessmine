@@ -113,6 +113,7 @@ class RedisPlug:
         pm = PlayerMapping(sid=player, opponent=opponent, color=color, game_id=game_id,
                            time_remaining=time_control, turn_start_time=turn_start)
         self.r.hmset(key, pm.to_dict())
+        self.r.expire(key, 3600)  # expire in an hour
 
     def set_player_session_value(self, player, key, val):
         session = self.player_info + player
@@ -160,6 +161,7 @@ class RedisPlug:
     def map_game(self, game_id, white_sid, black_sid, board=chess.Board().fen(), status=GameStatus.STARTED.value):
         key = self.game + game_id
         self.r.hmset(key, {FEN: board, WHITE: white_sid, BLACK: black_sid, STATUS: status})
+        self.r.expire(key, 3600)  # expire in an hour
 
     def get_game(self, game_id):
         key = self.game + game_id
