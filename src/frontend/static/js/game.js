@@ -412,16 +412,16 @@ $(document).ready(function () {
         }
     }
 
-    function highlight_check_mate(source) {
+    function highlight_check_mate() {
         var array = 0
         if (game.isCheckmate()) {
             array = get_piece_positions(game, { type: 'k', color: game.turn() })
-            source = array[0]
+            let source = array[0]
             $board.find('.square-' + source).addClass('highlight-mate')
             game_over = true
         } else if (game.inCheck()) {
             array = get_piece_positions(game, { type: 'k', color: game.turn() })
-            source = array[0]
+            let source = array[0]
             $board.find('.square-' + source).addClass('highlight-check')
         }
     }
@@ -463,6 +463,7 @@ $(document).ready(function () {
         // handle future move
         if (futureMoveData != null) {
             if (handlePromotion(futureMoveData.from, futureMoveData.to)) {
+                futureMoveData = null;
                 return;
             }
             var move = game.move({
@@ -480,6 +481,7 @@ $(document).ready(function () {
                     if (ret == null) {      // In case this move is illegal we should abort
                         game.undo();
                         heartbeat(true);
+                        futureMoveData = null;
                         return;
                     }
                     if (ret.remaining) {
@@ -490,7 +492,7 @@ $(document).ready(function () {
                     insertMove(move);
                     changeDrawButton('enabled');
                     handleMoveOnBoard(move);
-                    highlight_check_mate(source);
+                    highlight_check_mate();
 
                     if (engine) {
                         console.log('Generating engine move after future move: ' + move.lan);
@@ -498,7 +500,6 @@ $(document).ready(function () {
                     }
                 });
             }
-
             removeHighlights("yellow");
             futureMoveData = null;
         }
@@ -594,10 +595,10 @@ $(document).ready(function () {
     function setRating(arrow, label, orient, rating, delta) {
         document.getElementById(arrow).style.display = "inline-block";
         if (orient == 'up') {
-            document.getElementById(arrow).innerHTML = "&#x2197 (+" + delta +")";
+            document.getElementById(arrow).innerHTML = "&#x2197(+" + delta +")";
             document.getElementById(arrow).style.color = "green";
         } else if (orient == 'down') {
-            document.getElementById(arrow).innerHTML = "&#x2198 (" + delta +")";
+            document.getElementById(arrow).innerHTML = "&#x2198(" + delta +")";
             document.getElementById(arrow).style.color = "crimson";
         }
         document.getElementById(label).innerHTML = rating;
@@ -799,6 +800,10 @@ $(document).ready(function () {
         $("td").removeClass("selectedCell");
         if (position_in_array < the_game_fens.length - 1) {
             cell.target.classList.add("selectedCell");
+            $("#myBoard .square-55d63").removeClass("highlight-check");
+            $("#myBoard .square-55d63").removeClass("highlight-mate");
+        } else {
+            highlight_check_mate();
         }
     }
 
@@ -833,7 +838,7 @@ $(document).ready(function () {
                 if (ans.rival_connect_status === 2) {
                     for (const icon of connect_icons)
                         icon.style.backgroundColor = "#59fb74"
-                } else if (ans.rival_connect_status === 3) {
+                } else if (ans.rival_connect_status === 3 && engine_sid != null) {
                     console.log("Rival disconnected")
                     for (const icon of connect_icons)
                         icon.style.backgroundColor = "crimson"
@@ -1005,7 +1010,7 @@ $(document).ready(function () {
                 if (offeredButton.style.display != "none") {
                     changeDrawButton('enabled');
                 }
-                highlight_check_mate(source);
+                highlight_check_mate();
 
                 // handle engine move if needed
                 if (engine) {
