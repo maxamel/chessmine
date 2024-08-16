@@ -20,7 +20,7 @@ npm install --prefix src/frontend
 ```
 ### Run all containers:
 ```
-docker compose up -d --build --force-recreate
+docker compose -f docker-compose-dev.yml up -d --build --force-recreate
 ```
 ### Build specific container:
 ```
@@ -34,7 +34,7 @@ docker compose down --rmi local
 ```
 ### Debug game server locally
 ```
-docker compose -f docker-compose-local.yml up -d --build --force-recreate
+docker compose -f docker-compose-debug-gs.yml up -d --build --force-recreate
 ```
 Next run game server from IDE with env var: REDIS_URL=localhost.
 It should be able to communicate with the containers started by the docker compose.
