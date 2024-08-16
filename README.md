@@ -1,8 +1,18 @@
+# Chessmine
+
+Simple, free, open source chess platform. 
+
+[www.chessmine.xyz](https://www.chessmine.xyz)
+
+![](https://github.com/maxamel/chessmine/blob/e65719c4bd27c27866846dbc7e3d50ce2936351e/chess.gif)
 
 
-# Local Development:
+[![buddy pipeline](https://app.buddy.works/maxamel2002/chessmine/pipelines/pipeline/502243/badge.svg?token=d2e020fd6a283d05141a0ed9fccce4c84fb103b93cc3f7559091e5ef4e6fb8cd "buddy pipeline")](https://app.buddy.works/maxamel2002/chessmine/pipelines/pipeline/502243)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+![](https://sloc.xyz/github/maxamel/chessmine)
 
-Chessmine runs in docker containers setup using docker-compose.
+
+
 
 ### Prerequisites:
 
