@@ -279,6 +279,7 @@ $(document).ready(function () {
                         gc.style.opacity = 1;
                         promote = elem.id;
                         onDrop(promotion_in_progress[0], promotion_in_progress[1]);
+                        console.log('Rerendering board position');
                         board.position(game.fen(), true);
                         promotion_in_progress = [];
                     }
@@ -757,11 +758,11 @@ $(document).ready(function () {
         cell.setAttribute("class", "timeCell");
         clearInterval(moveInterval);
         moveInterval = setInterval(function () {
+            cell.innerHTML = cell.innerHTML - 1;
             if (cell.innerHTML == 0) {
                 console.log("No move was made on time. Game abandoned.");
                 clearInterval(moveInterval);
             }
-            cell.innerHTML = cell.innerHTML - 1;
         }, 1000);
     }
 

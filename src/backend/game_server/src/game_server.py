@@ -4,6 +4,7 @@ from typing import Union, Any
 
 from elo import EloRating
 from logger import get_logger
+from matcher.redis_smart_matcher import RedisSmartMatcher
 from player import Player, PlayerMapping, Game, PlayerGameInfo
 from matcher.random_matcher import RandomMatcher
 from consts import *
@@ -21,7 +22,7 @@ class GameServer:
 
     def __init__(self):
         self.redis = RedisPlug()
-        self.matcher = RandomMatcher()
+        self.matcher = RedisSmartMatcher()
         self.th = threading.Thread(target=self.work)
         self.th.start()
         lgr.info("Initialized Game Server! {}".format("Hello World"))
@@ -145,7 +146,7 @@ class GameServer:
     def cancel_search(self, payload):
         data = payload["data"]
         sid = data["sid"]
-        return self.redis.remove_players_from_search_pool(sid)
+        return self.redis.remove_players_from_search_pool(data["time_control"].split("+")[0], sid)
 
     def func(self, sid1, sid2, time_control):
         requests.get(url="http://localhost:5000/match/" + sid1 + "/" + sid2, json={'time_control': time_control})

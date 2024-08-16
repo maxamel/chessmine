@@ -24,8 +24,8 @@ class RedisPlug:
         self.game_expire = "game_expirations"
         self.r = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, decode_responses=True, retry_on_timeout=True)
 
-    def add_players_to_search_pool(self, *player_sids):
-        self.r.sadd(self.search_pool, *player_sids)
+    def add_players_to_search_pool(self, name: str, player_sids_to_ratings: dict[str, int]):
+        return self.r.zadd(name, player_sids_to_ratings)
 
     def draw_player_from_search_pool(self) -> str:
         '''
@@ -33,12 +33,13 @@ class RedisPlug:
         '''
         return self.r.srandmember(self.search_pool)
 
-    def remove_players_from_search_pool(self, *player_sids):
+    def remove_players_from_search_pool(self, name, *player_sids):
         '''
         :param player_sids: the players to remove from search pool
-        :return: True if succeeded
+        :param search_pool: the name of search pool to remove players from
+        :return: 1 if succeeded
         '''
-        return self.r.srem(self.search_pool, *player_sids)
+        return self.r.zrem(name, *player_sids)
 
     def is_player_in_search_pool(self, player_sid):
         return self.r.sismember(self.search_pool, player_sid)
@@ -181,6 +182,9 @@ class RedisPlug:
         self.r.delete(moves)
         self.r.delete(fens)
         self.r.delete(endgame)
+
+    def register_script(self, script: str):
+        return self.r.register_script(script)
 
     def get_redis(self):
         return self.r

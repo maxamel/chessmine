@@ -1,5 +1,6 @@
 import logging
-import time, requests
+import time
+import requests
 
 from threading import Thread
 

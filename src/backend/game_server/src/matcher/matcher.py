@@ -1,3 +1,3 @@
 class Matcher:
-    def match(self):
+    def match(self, player):
         pass
