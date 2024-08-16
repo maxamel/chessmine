@@ -36,6 +36,7 @@ jobs:
         uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
         with:
           redis-version: 7.4.0
+      - name: Luacov
         run: |
           lua -lluacov test_match.lua
       - name: Test with Checkov
