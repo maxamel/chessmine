@@ -18,9 +18,10 @@ jobs:
         with:
           path: "src/backend/game_server/requirements.txt"
       - name: Prepare Lua
-      - uses: leafo/gh-actions-lua@35bcb06abec04ec87df82e08caa84d545348536e
+        uses: leafo/gh-actions-lua@35bcb06abec04ec87df82e08caa84d545348536e
         with:
           luaVersion: "5.4"
+      - name: Luarocks
       - uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
       - name: Install lua modules
         run: luarocks install luacheck redis-lua
