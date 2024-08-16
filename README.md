@@ -1,6 +1,6 @@
 # Chessmine
 
-Simple, free, open source chess platform. 
+Free and open source chess server.
 
 [www.chessmine.xyz](https://www.chessmine.xyz)
 

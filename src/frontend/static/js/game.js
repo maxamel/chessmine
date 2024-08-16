@@ -467,16 +467,12 @@ $(document).ready(function () {
                 futureMoveData = null;
                 return;
             }
-            var move = game.move({
-                from: futureMoveData.from,
-                to: futureMoveData.to,
-                promotion: promote // NOTE: always promote to a queen for simplicity
-            });
-            var json = {
-                "sid": player_id,
-                "move": move
-            };
+            var move = gameMove(futureMoveData.from, futureMoveData.to, promote);
             if (move != null) {
+                var json = {
+                    "sid": player_id,
+                    "move": move
+                };
                 socket.emit("/api/move", json, function (ret) {
                     updateLastCall();
                     if (ret == null) {      // In case this move is illegal we should abort
@@ -955,11 +951,7 @@ $(document).ready(function () {
 
     }
 
-    function onDrop(source, target) {
-        // see if the move is legal
-        if (handlePromotion(source, target)) {
-            return;
-        }
+    function gameMove(source, target, promotion) {
         var move = null;
         try {
             move = game.move({
@@ -971,6 +963,15 @@ $(document).ready(function () {
         catch (e) {
             console.log(`Detected pre-move since move is invalid:  ${JSON.stringify(move)} `);
         }
+        return move;
+    }
+
+    function onDrop(source, target) {
+        // see if the move is legal
+        if (handlePromotion(source, target)) {
+            return;
+        }
+        var move = gameMove(source, target, promote);
         removeHighlights("yellow");
         if (futureMove == true && source != target) {
             $board.find(".square-" + source).addClass("highlight-yellow");
@@ -1036,11 +1037,7 @@ $(document).ready(function () {
         var curr_position = Chessboard.fenToObj(game.fen());
         var piece = curr_position[source];
         if (!queenAutopromote && promotion_in_progress.length === 0 && (target[1] === "1" || target[1] === "8" ) && piece[1] === "P") {
-            var move = game.move({
-                from: source,
-                to: target,
-                promotion: "q" // NOTE: always promote to a queen for example simplicity
-            });
+            var move = gameMove(source, target, promote);
             if (move != null) {
                 if (piece[1] == "P") {
                     promotion_in_progress = [source, target];

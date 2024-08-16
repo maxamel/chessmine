@@ -6,7 +6,6 @@ from elo import EloRating
 from logger import get_logger
 from matcher.redis_smart_matcher import RedisSmartMatcher
 from player import Player, PlayerMapping, Game, PlayerGameInfo
-from matcher.random_matcher import RandomMatcher
 from consts import *
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
