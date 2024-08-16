@@ -12,8 +12,6 @@ Free and open source chess server.
 ![](https://sloc.xyz/github/maxamel/chessmine)
 
 
-
-
 ### Prerequisites:
 
 pip, python3.9, npm, docker-compose
