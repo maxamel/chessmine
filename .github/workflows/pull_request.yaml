@@ -29,14 +29,14 @@ jobs:
           luarocks install redis-lua
       - name: lint
         run: |
-          luacheck .
+          luacheck src/backend/game_server/src/lua/
       - name: Start Redis
         uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
         with:
           redis-version: 7.4.0
       - name: Luacov
         run: |
-          lua -lluacov test_match.lua
+          lua -lluacov src/backend/game_server/src/lua/test_match.lua
       - name: Test with Checkov
         id: checkov
         uses: bridgecrewio/checkov-action@e983355829b735cff43000af6158aac9f7b4a7da
