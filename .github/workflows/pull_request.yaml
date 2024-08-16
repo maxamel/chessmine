@@ -22,9 +22,10 @@ jobs:
         with:
           luaVersion: "5.4"
       - name: Luarocks
-      - uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
+        uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
       - name: Install lua modules
-        run: luarocks install luacheck redis-lua
+        run: |
+          luarocks install luacheck redis-lua
       - name: lint
         run: |
           for spec in $(find . -type f -name "*.rockspec"); do
