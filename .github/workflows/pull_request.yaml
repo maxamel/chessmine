@@ -26,6 +26,7 @@ jobs:
       - name: Install lua modules
         run: |
           luarocks install luacov
+          luarocks install luaunit
           luarocks install redis-lua
       - name: Start Redis
         uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
