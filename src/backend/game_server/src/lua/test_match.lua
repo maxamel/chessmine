@@ -1,6 +1,6 @@
 local luaunit = require('luaunit')
 
-require 'lua.redis_script_wrapper'
+require 'src.backend.game_server.src.lua.redis_script_wrapper'
 
 TestRedis = {}
 function TestRedis:setUp()
