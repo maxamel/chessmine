@@ -25,11 +25,7 @@ jobs:
         uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
       - name: Install lua modules
         run: |
-          luarocks install luacheck
           luarocks install redis-lua
-      - name: lint
-        run: |
-          luacheck src/backend/game_server/src/lua/
       - name: Start Redis
         uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
         with:

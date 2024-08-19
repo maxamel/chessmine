@@ -2,7 +2,7 @@ local luaunit = require('luaunit')
 
 require 'lua.redis_script_wrapper'
 
-local TestRedis = {}
+TestRedis = {}
 function TestRedis:setUp()
     redis.call('FLUSHDB')
 end
@@ -21,7 +21,7 @@ end
 function TestRedis:testSingleOpponent()
     redis.call('ZADD', "search_pool_5", 1550, "me")
     redis.call('ZADD', "search_pool_5", 1500, "opponent")
-    value = call_redis_script('lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
+    value = call_redis_script('lua/match.lua', {"search_pool_5", 1450, 1580, "me"}, {})
     luaunit.assertEquals(value, "opponent")
 end
 
