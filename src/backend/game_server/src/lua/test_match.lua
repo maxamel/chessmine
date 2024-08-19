@@ -2,7 +2,7 @@ local luaunit = require('luaunit')
 
 require 'lua.redis_script_wrapper'
 
-TestRedis = {}
+local TestRedis = {}
 function TestRedis:setUp()
     redis.call('FLUSHDB')
 end

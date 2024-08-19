@@ -6,22 +6,6 @@ $(document).ready(function () {
     load_cookies()
 
     var moveInterval = null;
-
-    var cancel = document.getElementById("cancelSearch");
-    cancel.addEventListener("click", function(evt) {
-        var json = {"data": {
-            "sid": player_id
-        }};
-        socket.emit("/api/cancelSearch", json, function (ret) {
-            if (ret === 0) {
-                evt.target.style.opacity = 0.5;
-                evt.target.style.pointerEvents = 'none';
-            } else {
-                window.location.href = "/settings";
-            }
-        });
-    });
-
     var board = null;
     var $board = $("#myBoard");
     var game = new Chess();
@@ -51,6 +35,24 @@ $(document).ready(function () {
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
     var socket = io("APP_URL/connect");
+
+    var cancel = document.getElementById("cancelSearch");
+    cancel.addEventListener("click", function(evt) {
+        var json = {
+            "data": {
+                "sid": player_id,
+                "time_control": timeControl
+            }
+        };
+        socket.emit("/api/cancelSearch", json, function (ret) {
+            if (ret === 0) {
+                evt.target.style.opacity = 0.5;
+                evt.target.style.pointerEvents = 'none';
+            } else {
+                window.location.href = "/settings";
+            }
+        });
+    });
 
     socket.on("game_over", function (ans) {
         console.log(JSON.stringify(ans))
@@ -248,10 +250,12 @@ $(document).ready(function () {
 
 
         function rematchAction(x) {
-            var json = {"data": {
-                    "sid": player_id,
-                    "flag": true
-                }};
+            const json = {
+                'data': {
+                    'sid': player_id,
+                    'flag': true
+                }
+            }
             socket.emit("/api/rematch", json, function (ret) {
                 if (ret) {
                     changeRematchButton('disabled')
@@ -409,7 +413,7 @@ $(document).ready(function () {
             board.position(game.fen(), true)
         }
         else {
-            board.move(the_move.from + '-' + the_move.to)
+            board.move(the_move.from + '-' + the_move.to, true)
         }
     }
 
@@ -1092,7 +1096,6 @@ $(document).ready(function () {
             square: square,
             verbose: true
         });
-        console.log(moves);
 
         // exit if there are no moves available for this square
         if (moves.length === 0) return;
