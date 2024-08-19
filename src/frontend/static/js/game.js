@@ -413,7 +413,7 @@ $(document).ready(function () {
             board.position(game.fen(), true)
         }
         else {
-            board.move(the_move.from + '-' + the_move.to, true)
+            board.move(the_move.from + '-' + the_move.to)
         }
     }
 
