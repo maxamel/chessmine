@@ -1,6 +1,6 @@
 local luaunit = require('luaunit')
 
-require 'lua.redis_script_wrapper'
+require 'src.backend.game_server.src.lua.redis_script_wrapper'
 
 TestRedis = {}
 function TestRedis:setUp()
@@ -8,20 +8,20 @@ function TestRedis:setUp()
 end
 
 function TestRedis:testEmpty()
-    value = call_redis_script('lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
+    value = call_redis_script('src/backend/game_server/src/lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
     luaunit.assertEquals(value, false)
 end
 
 function TestRedis:testSinglePlayer()
     redis.call('ZADD', "search_pool_5", 1550, "me")
-    value = call_redis_script('lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
+    value = call_redis_script('src/backend/game_server/src/lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
     luaunit.assertEquals(value, true)
 end
 
 function TestRedis:testSingleOpponent()
     redis.call('ZADD', "search_pool_5", 1550, "me")
     redis.call('ZADD', "search_pool_5", 1500, "opponent")
-    value = call_redis_script('lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
+    value = call_redis_script('src/backend/game_server/src/lua/match.lua', {"search_pool_5", 1450, 1580, "me"}, {})
     luaunit.assertEquals(value, "opponent")
 end
 
