@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-alpine
 
 WORKDIR /usr/app/
 
@@ -6,7 +6,7 @@ COPY src/backend/game_server .
 
 RUN pip install -r requirements.txt
 
-RUN useradd user
+RUN adduser -D user wheel
 USER user
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
 
