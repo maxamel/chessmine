@@ -37,7 +37,7 @@ def _init_logger(prefix="", debug=True):
     file_logging_level = logging.DEBUG
     log_to_file = True
     if log_to_file is True:
-        log_filename = "log"
+        log_filename = "/var/log/server.log"
         # rotator_thread = threading.Thread(target=logrotator, args=(log_filename, ))
         # rotator_thread.setDaemon(True)
         # rotator_thread.start()

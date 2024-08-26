@@ -7,10 +7,11 @@ COPY src/backend/game_server .
 RUN apk add acl
 RUN pip install -r requirements.txt
 
-RUN adduser -D user wheel
-RUN setfacl -Rdm u:user:rwx /usr/app/
-RUN chown -hR user /usr/app/ && chown -hR user /var/log/
-USER user
+RUN adduser -D game
+USER game
+RUN setfacl -Rdm u:game:rwx /usr/app/
+RUN setfacl -Rdm u:game:rwx /var/log/
+RUN chown -hR game /usr/app/ && chown -hR game /var/log/
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
 
 CMD [ "python", "./src/app.py" ]
