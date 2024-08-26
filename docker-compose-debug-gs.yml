@@ -4,17 +4,6 @@ services:
         image: "redis:alpine"
         ports:
           - 6379:6379
-    sanicfish:
-        container_name: "sanicfish"
-        environment:
-          - STOCKFISH_PATH=/
-        build:
-          context: .
-          dockerfile: ./src/backend/sanicfish/Dockerfile
-        volumes:
-          - ./src/backend/sanicfish/:/usr/app
-        ports:
-          - 8040:8040
     caddy:
         container_name: "caddy"
         build:
