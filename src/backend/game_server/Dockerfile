@@ -8,10 +8,10 @@ RUN apk add acl
 RUN pip install -r requirements.txt
 
 RUN adduser -D game
-USER game
 RUN setfacl -Rdm u:game:rwx /usr/app/
 RUN setfacl -Rdm u:game:rwx /var/log/
 RUN chown -hR game /usr/app/ && chown -hR game /var/log/
+USER game
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
 
 CMD [ "python", "./src/app.py" ]
