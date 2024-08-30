@@ -45,6 +45,11 @@ def match(sid1, sid2):
     return 'OK'
 
 
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    return 'OK'
+
+
 @app.route('/game_over', methods=['POST'])
 def game_over():
     logging.info(f"The request: {request.get_json()}")

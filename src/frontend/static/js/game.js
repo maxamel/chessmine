@@ -149,7 +149,7 @@ $(document).ready(function () {
             onDragMove: onDragMove,
             onMouseoutSquare: onMouseoutSquare,
             onMouseoverSquare: onMouseoverSquare,
-            onSnapEnd: onSnapEnd
+            onSnapEnd: onSnapEnd,
         };
         board = Chessboard("myBoard", config);
         game = new Chess(the_game_fen);
@@ -501,7 +501,7 @@ $(document).ready(function () {
                     }
                 });
             }
-            removeHighlights("yellow");
+            removeHighlights();
             futureMoveData = null;
         }
     });
@@ -881,8 +881,9 @@ $(document).ready(function () {
         $("img").css("box-shadow", "");
     }
 
-    function removeHighlights(color) {
-        $("#myBoard .square-55d63").removeClass("highlight-" + color);
+    function removeHighlights() {
+        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight1);
+        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight2);
     }
 
     function changeCursor(square, change) {
@@ -894,10 +895,10 @@ $(document).ready(function () {
                 if ($square.children()[r].tagName == "IMG")
                     isPiece = true;
                 image = $square.children()[r];
+                if (isPiece) {
+                    image.style.cursor = change;
+                 }
             }
-        }
-        if (isPiece) {
-            image.style.cursor = change;
         }
     }
 
@@ -937,10 +938,10 @@ $(document).ready(function () {
     function onDragStart(source, piece, position, orientation) {
         // do not pick up pieces if the game is over
         var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.isGameOver() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
+        removeHighlights();
+        if (game.isGameOver() || /*cut_game_fen != board.fen() ||*/ promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
-        removeHighlights("yellow");
         // record future move
         if ((game.turn() === "w" && piece.indexOf("b") !== -1) ||
             (game.turn() === "b" && piece.indexOf("w") !== -1)) {
@@ -973,18 +974,21 @@ $(document).ready(function () {
     function onDrop(source, target) {
         // see if the move is legal
         if (handlePromotion(source, target)) {
+            removeHighlights();
             return;
         }
         var move = gameMove(source, target, promote);
-        removeHighlights("yellow");
-        if (futureMove == true && source != target) {
-            $board.find(".square-" + source).addClass("highlight-yellow");
-            $board.find(".square-" + target).addClass("highlight-yellow");
+        if (futureMove === true && source !== target) {
+            //$board.find(".square-" + source).addClass("highlight-yellow");
+            //$board.find(".square-" + target).addClass("highlight-yellow");
             futureMove = false;
             futureMoveData = {from: source, to: target};
-        } else if (futureMove == true && source == target) {
+        } else if (futureMove === true && source === target) {
             futureMove = false;
             futureMoveData = null;
+            removeHighlights();
+        } else {
+            removeHighlights();
         }
         removeGreySquares();
         // illegal move
