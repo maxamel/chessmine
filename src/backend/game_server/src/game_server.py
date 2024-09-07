@@ -14,7 +14,7 @@ from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_f
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
-lgr = get_logger()
+lgr = get_logger(path="/var/log/server.log")
 
 
 class GameServer:
@@ -319,6 +319,7 @@ class GameServer:
             board = chess.Board()
         else:
             board = chess.Board(game_fen)
+
         if not board.is_legal(the_move):
             lgr.error("Illegal move {} by player {} in game {}".format(move, player_info.sid, player_info.game_id))
             return None, None
@@ -362,6 +363,9 @@ class GameServer:
 
         # Handle the move itself, board update, etc.
         moves = self.redis.get_game_moves(game_id)
+        # calculate repetition
+        fens = self.redis.get_game_fens(game_id)
+        repetitions = list(map(lambda x: x.split(' ')[0], fens)).count(board.fen().split(' ')[0])
         if len(moves) == 0:       # first move
             self.redis.set_player_mapping_value(rival_info.sid, TTL_START_TIME, curr_time)
             expire_in_future = curr_time + 30000        # 30 seconds from now
@@ -373,18 +377,18 @@ class GameServer:
 
         if len(moves) > 1:
             self.redis.set_game_status(game_id, GameStatus.PLAYING)
-        if board.is_fivefold_repetition():
-            # Draw by fivefold repetition
+        if repetitions == 2:
+            # Draw by threefold repetition
             self.redis.cancel_game_timeout(game_id=game_id)
             self.set_game_status(player_info.game_id, GameStatus.ENDED)
-            rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=sid, outcome=Outcome.DRAW)
-            egi = EndGameInfo(winner="Draw", message=f"Draw By Five-Fold Repetition",
+            rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=player_info.color, outcome=Outcome.DRAW)
+            egi = EndGameInfo(winner="Draw", message=f"Draw By Three-Fold Repetition",
                               white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                               white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
             payload["extra_data"] = egi.to_dict()
-            lgr.info("Game Over. Five-Fold Repetition - {}".format(get_turn_from_fen(board.fen())))
+            lgr.info("Game Over. Three-Fold Repetition - {}".format(get_turn_from_fen(board.fen())))
         elif board.is_game_over():
             # reset previous timeout settings due to turn switching
             self.redis.cancel_game_timeout(game_id=game_id)

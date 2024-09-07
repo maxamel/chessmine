@@ -4,7 +4,8 @@ from logging.handlers import WatchedFileHandler, RotatingFileHandler
 
 _LOGGER = None
 
-def get_logger(prefix="Default", debug=False):
+
+def get_logger(prefix="Default", debug=False, path="/var/log/server.log"):
     """
     returns initialized logger object
     :param prefix:
@@ -13,12 +14,12 @@ def get_logger(prefix="Default", debug=False):
     """
     global _LOGGER
     if _LOGGER is None:
-        _LOGGER = _init_logger(prefix="", debug=False)
+        _LOGGER = _init_logger(prefix="", debug=False, path=path)
 
     return logging.getLogger(prefix)
 
 
-def _init_logger(prefix="", debug=True):
+def _init_logger(prefix="", debug=True, path="/var/log/server.log"):
     """
     Creates logger object with specific params
     :param prefix:
@@ -29,7 +30,7 @@ def _init_logger(prefix="", debug=True):
     logger = logging.getLogger(prefix)
     # the_format = '%(asctime)s [%(threadName)s:%(thread)d] [%(levelname)s] [%(name)s] %(message)s'
 
-    the_format = '[%(asctime)s][%(thread)d][%(levelname)s][%(name)s][%(filename)s:%(lineno)d][%(funcName)s] %(message)s'
+    the_format = '[%(asctime)s] [%(thread)d] [%(levelname)s] [%(name)s] [%(filename)s:%(lineno)d] [%(funcName)s] %(message)s'
     the_json_format = '%(message)s'
     normal_formatter = logging.Formatter(the_format)
     json_formatter = logging.Formatter(the_json_format)
@@ -37,7 +38,7 @@ def _init_logger(prefix="", debug=True):
     file_logging_level = logging.DEBUG
     log_to_file = True
     if log_to_file is True:
-        log_filename = "/var/log/server.log"
+        log_filename = path
         # rotator_thread = threading.Thread(target=logrotator, args=(log_filename, ))
         # rotator_thread.setDaemon(True)
         # rotator_thread.start()
@@ -64,6 +65,7 @@ def _init_logger(prefix="", debug=True):
 
     logging.getLogger('socketio').setLevel(logging.ERROR)
     logging.getLogger('engineio').setLevel(logging.ERROR)
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
     logging.getLogger('geventwebsocket.handler').setLevel(logging.ERROR)
 
     return logger
@@ -87,8 +89,7 @@ class StdoutLogger(StreamHandler):
 
             if isinstance(the_msg, tuple):
                 the_msg = str(the_msg)
-            record.msg = json.dumps({'timestamp': record.created,
-                                     'asctime': record.asctime,
+            record.msg = json.dumps({'asctime': record.asctime,
                                      'level': record.levelname,
                                      'severity': record.levelname,
                                      'thread': record.thread,
@@ -96,8 +97,7 @@ class StdoutLogger(StreamHandler):
                                      'filename': record.filename,
                                      'lineno': record.lineno,
                                      'funcname': record.funcName,
-                                     'message': "%s" % the_msg,
-                                     **additional_params,
+                                     'message': the_msg,
                                      })
 
         super().emit(record)

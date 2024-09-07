@@ -1059,7 +1059,6 @@
       // find all the "move" animations
       for (i in pos2) {
         if (!pos2.hasOwnProperty(i)) continue
-s
         var closestPiece = findClosestPiece(pos1, pos2[i], i)
         if (closestPiece) {
           animations.push({
@@ -1195,7 +1194,7 @@ s
         trashDraggedPiece()
         return
       }
-      
+
       // animation complete
       function complete () {
         drawPositionInstant()

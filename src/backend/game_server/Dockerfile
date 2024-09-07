@@ -4,7 +4,7 @@ WORKDIR /usr/app/
 
 COPY src/backend/game_server .
 
-RUN apk add acl curl
+RUN apk add acl curl gcc python3-dev musl-dev linux-headers build-base
 RUN pip install -r requirements.txt
 
 RUN adduser -D game

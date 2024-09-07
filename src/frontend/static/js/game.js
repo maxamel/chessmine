@@ -919,18 +919,20 @@ $(document).ready(function () {
         if (isPiece) {
             image.style.boxShadow = "inset 0 0 6px 3px #fc5185";
         } else {
+            var the_square = $square.get()[0];
             var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("width", "50");
             svg.setAttribute("height", "50");
             var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttributeNS(null, "cx", 28);
-            circle.setAttributeNS(null, "cy", 28);
+            circle.setAttributeNS(null, "cx", the_square.offsetHeight/2);
+            circle.setAttributeNS(null, "cy", the_square.offsetWidth/2);
             circle.setAttributeNS(null, "r", 5);
             //circle.setAttributeNS(null, 'stroke', "red")
             //circle.setAttributeNS(null, 'stroke-width', "3")
             circle.setAttributeNS(null, "fill", "#fc5185");
+            circle.setAttributeNS(null, "align", "center");
             svg.appendChild(circle);
-            var the_square = $square.get()[0];
+
             the_square.appendChild(svg);
         }
     }
@@ -939,7 +941,7 @@ $(document).ready(function () {
         // do not pick up pieces if the game is over
         var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
         removeHighlights();
-        if (game.isGameOver() || /*cut_game_fen != board.fen() ||*/ promotion_in_progress.length > 0 || game_over) return false;
+        if (game.isGameOver() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
         // record future move
@@ -979,10 +981,23 @@ $(document).ready(function () {
         }
         var move = gameMove(source, target, promote);
         if (futureMove === true && source !== target) {
-            //$board.find(".square-" + source).addClass("highlight-yellow");
-            //$board.find(".square-" + target).addClass("highlight-yellow");
             futureMove = false;
             futureMoveData = {from: source, to: target};
+            const moves = game.moves();
+            const randomMove = moves[Math.floor(Math.random() * moves.length)];
+            game.move(randomMove);
+            try {
+                game.move(futureMoveData);
+                // undo both moves but keep the highlights as it appears to be a legal move
+                game.undo();
+                game.undo();
+            } catch (e) {
+                // this move is illegal and should not be counted as a future move
+                game.undo();    // undo the random move
+                removeHighlights();
+                futureMove = false;
+                futureMoveData = null;
+            }
         } else if (futureMove === true && source === target) {
             futureMove = false;
             futureMoveData = null;
