@@ -149,7 +149,7 @@ $(document).ready(function () {
             onDragMove: onDragMove,
             onMouseoutSquare: onMouseoutSquare,
             onMouseoverSquare: onMouseoverSquare,
-            onSnapEnd: onSnapEnd
+            onSnapEnd: onSnapEnd,
         };
         board = Chessboard("myBoard", config);
         game = new Chess(the_game_fen);
@@ -501,7 +501,7 @@ $(document).ready(function () {
                     }
                 });
             }
-            removeHighlights("yellow");
+            removeHighlights();
             futureMoveData = null;
         }
     });
@@ -881,8 +881,9 @@ $(document).ready(function () {
         $("img").css("box-shadow", "");
     }
 
-    function removeHighlights(color) {
-        $("#myBoard .square-55d63").removeClass("highlight-" + color);
+    function removeHighlights() {
+        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight1);
+        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight2);
     }
 
     function changeCursor(square, change) {
@@ -894,10 +895,10 @@ $(document).ready(function () {
                 if ($square.children()[r].tagName == "IMG")
                     isPiece = true;
                 image = $square.children()[r];
+                if (isPiece) {
+                    image.style.cursor = change;
+                 }
             }
-        }
-        if (isPiece) {
-            image.style.cursor = change;
         }
     }
 
@@ -918,18 +919,20 @@ $(document).ready(function () {
         if (isPiece) {
             image.style.boxShadow = "inset 0 0 6px 3px #fc5185";
         } else {
+            var the_square = $square.get()[0];
             var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("width", "50");
             svg.setAttribute("height", "50");
             var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttributeNS(null, "cx", 28);
-            circle.setAttributeNS(null, "cy", 28);
+            circle.setAttributeNS(null, "cx", the_square.offsetHeight/2);
+            circle.setAttributeNS(null, "cy", the_square.offsetWidth/2);
             circle.setAttributeNS(null, "r", 5);
             //circle.setAttributeNS(null, 'stroke', "red")
             //circle.setAttributeNS(null, 'stroke-width', "3")
             circle.setAttributeNS(null, "fill", "#fc5185");
+            circle.setAttributeNS(null, "align", "center");
             svg.appendChild(circle);
-            var the_square = $square.get()[0];
+
             the_square.appendChild(svg);
         }
     }
@@ -937,10 +940,10 @@ $(document).ready(function () {
     function onDragStart(source, piece, position, orientation) {
         // do not pick up pieces if the game is over
         var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
+        removeHighlights();
         if (game.isGameOver() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
         if (orientation == "white" && piece.indexOf("b") != -1) return false;
         if (orientation == "black" && piece.indexOf("w") != -1) return false;
-        removeHighlights("yellow");
         // record future move
         if ((game.turn() === "w" && piece.indexOf("b") !== -1) ||
             (game.turn() === "b" && piece.indexOf("w") !== -1)) {
@@ -973,18 +976,34 @@ $(document).ready(function () {
     function onDrop(source, target) {
         // see if the move is legal
         if (handlePromotion(source, target)) {
+            removeHighlights();
             return;
         }
         var move = gameMove(source, target, promote);
-        removeHighlights("yellow");
-        if (futureMove == true && source != target) {
-            $board.find(".square-" + source).addClass("highlight-yellow");
-            $board.find(".square-" + target).addClass("highlight-yellow");
+        if (futureMove === true && source !== target) {
             futureMove = false;
             futureMoveData = {from: source, to: target};
-        } else if (futureMove == true && source == target) {
+            const moves = game.moves();
+            const randomMove = moves[Math.floor(Math.random() * moves.length)];
+            game.move(randomMove);
+            try {
+                game.move(futureMoveData);
+                // undo both moves but keep the highlights as it appears to be a legal move
+                game.undo();
+                game.undo();
+            } catch (e) {
+                // this move is illegal and should not be counted as a future move
+                game.undo();    // undo the random move
+                removeHighlights();
+                futureMove = false;
+                futureMoveData = null;
+            }
+        } else if (futureMove === true && source === target) {
             futureMove = false;
             futureMoveData = null;
+            removeHighlights();
+        } else {
+            removeHighlights();
         }
         removeGreySquares();
         // illegal move

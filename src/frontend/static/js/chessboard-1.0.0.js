@@ -1059,7 +1059,6 @@
       // find all the "move" animations
       for (i in pos2) {
         if (!pos2.hasOwnProperty(i)) continue
-
         var closestPiece = findClosestPiece(pos1, pos2[i], i)
         if (closestPiece) {
           animations.push({
@@ -1195,8 +1194,6 @@
         trashDraggedPiece()
         return
       }
-
-      removeSquareHighlights()
 
       // animation complete
       function complete () {
@@ -1818,4 +1815,5 @@
   // expose util functions
   window['Chessboard']['fenToObj'] = fenToObj
   window['Chessboard']['objToFen'] = objToFen
+  window['Chessboard']['CSS'] = CSS
 })() // end anonymous wrapper

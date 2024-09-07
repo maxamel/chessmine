@@ -9,13 +9,13 @@ end
 
 function TestRedis:testEmpty()
     value = call_redis_script('src/backend/game_server/src/lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
-    luaunit.assertEquals(value, false)
+    luaunit.assertEquals(value, 0)
 end
 
 function TestRedis:testSinglePlayer()
     redis.call('ZADD', "search_pool_5", 1550, "me")
     value = call_redis_script('src/backend/game_server/src/lua/match.lua', {"search_pool_5", 1450, 1550, "me"}, {})
-    luaunit.assertEquals(value, true)
+    luaunit.assertEquals(value, 1)
 end
 
 function TestRedis:testSingleOpponent()

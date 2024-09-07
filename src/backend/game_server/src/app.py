@@ -1,21 +1,20 @@
-
 import chess
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
 
-from game_server import GameServer, GameStatus, Result, EndGameInfo, get_opposite_color
+from game_server import GameServer, GameStatus, Result
+from logger import get_logger
 from player import Game, PlayerGameInfo, Player
 
-import logging
-
 from util import PlayerType
+
+
+lgr = get_logger(path="/var/log/server.log")
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'secret!'
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
 socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
 
 Payload.max_decode_packets = 150
@@ -30,7 +29,7 @@ def match(sid1, sid2):
     if sid2 == '@':
         # no findings so we need to match with engine
         engine: Player = Player(rating=player1.rating, player_type=PlayerType.ENGINE.value)
-        logging.info("Matching player - %s with engine %s", sid1, engine.sid)
+        lgr.info(f"Matching player - {sid1} with engine {engine.sid}")
         game_server.set_player_session(engine)
         sid2 = engine.sid
     player2 = game_server.get_player_session(sid2)
@@ -40,16 +39,21 @@ def match(sid1, sid2):
     game_id = game_server.map_rivals(sid1, sid2, time_control=tc)
     Game(game_id=game_id, position=chess.Board().fen(), fens=[], moves=[],
                 white=p1, black=p2, status=GameStatus.STARTED.value)
-    logging.info("Matched players - %s %s", sid1, sid2)
+    lgr.info(f"Matched players - {sid1}, {sid2}")
 
+    return 'OK'
+
+
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
     return 'OK'
 
 
 @app.route('/game_over', methods=['POST'])
 def game_over():
-    logging.info(f"The request: {request.get_json()}")
+    lgr.info(f"The request: {request.get_json()}")
     payload = request.get_json()
-    logging.info(f"Game over with content: {payload}")
+    lgr.info(f"Game over with content: {payload}")
     winner: str = payload.get('winner')
     loser: str = payload.get('loser')
     socketio.emit("game_over", payload.get('extra_data'), namespace='/connect', room=winner)
@@ -59,7 +63,7 @@ def game_over():
 
 @socketio.on('/api/cancelSearch', namespace='/connect')
 def cancelSearch(payload):
-    logging.info(f"Cancelling search with payload {payload}")
+    lgr.info(f"Cancelling search with payload {payload}")
     return game_server.cancel_search(payload)
 
 
@@ -87,7 +91,7 @@ def heartbeat(payload):
         socketio.emit("game", {'color': response.src_color, 'game': response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
         return {}
     except Exception as e:
-        logging.error(f"Exception from heartbeat: {e}")
+        lgr.error(f"Exception from heartbeat: {e}")
         return None
 
 
