@@ -2,7 +2,7 @@ FROM python:3.9-alpine
 
 WORKDIR /usr/app/
 
-COPY src/backend/game_server .
+COPY . .
 
 RUN apk add acl curl gcc python3-dev musl-dev linux-headers build-base
 RUN pip install -r requirements.txt
