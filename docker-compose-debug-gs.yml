@@ -7,8 +7,8 @@ services:
     caddy:
         container_name: "caddy"
         build:
-          context: .
-          dockerfile: ./src/frontend/Dockerfile
+          context: ./src/frontend
+          dockerfile: Dockerfile
           args:
             APP_URL: http://localhost
             BE_URL: host.docker.internal

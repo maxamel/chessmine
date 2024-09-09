@@ -7,8 +7,8 @@ services:
     game_server:
         container_name: "game_server"
         build:
-          context: .
-          dockerfile: ./src/backend/game_server/Dockerfile
+          context: ./src/backend/game_server
+          dockerfile: Dockerfile
         volumes:
           - ./src/backend/game_server/:/usr/app
         ports:
@@ -18,8 +18,8 @@ services:
     caddy:
         container_name: "caddy"
         build:
-          context: .
-          dockerfile: ./src/frontend/Dockerfile
+          context: ./src/frontend
+          dockerfile: Dockerfile
           args:
             APP_URL: http://localhost
             BE_URL: game_server

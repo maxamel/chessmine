@@ -6,9 +6,13 @@ services:
           - 6379:6379
     game_server:
         container_name: "game_server"
+        image: ewr.vultrcr.com/chessmine/game_server:curr
+        pull_policy: always
         build:
-          context: .
-          dockerfile: ./src/backend/game_server/Dockerfile
+          context: ./src/backend/game_server
+          dockerfile: Dockerfile
+          tags:
+            - "game_server:curr"
         volumes:
           - ./src/backend/game_server/:/usr/app
         ports:
@@ -17,9 +21,13 @@ services:
           - redis
     caddy:
         container_name: "caddy"
+        image: ewr.vultrcr.com/chessmine/frontend:curr
+        pull_policy: always
         build:
-          context: .
-          dockerfile: ./src/frontend/Dockerfile
+          context: ./src/frontend
+          dockerfile: Dockerfile
+          tags:
+            - "frontend:curr"
           args:
             APP_URL: www.chessmine.xyz
             BE_URL: game_server
