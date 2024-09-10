@@ -55,13 +55,14 @@ $(document).ready(function () {
     });
 
     socket.on("game_over", function (ans) {
+        console.log("Game Over")
         console.log(JSON.stringify(ans))
         game_over = true;
         discardTimeInterval('all');
         disableGameButtons();
         //update_ratings(ans);
         showEndGame(ans.winner, ans.message);
-        setRatings(ans)
+        setRatings(ans);
     });
 
     function handle_engine_init (rival, the_game, the_game_fen, rating) {
@@ -572,6 +573,7 @@ $(document).ready(function () {
 
     function setRatings(dict) {
         if (my_color == "white") {      // I'm white
+            console.log("Setting ratings as white")
             if (dict.black_rating_delta > 0) {
                 console.log("RED")
                 setRating("arrowRatingA", "labelRatingA", "up", dict.black_rating, dict.black_rating_delta);
@@ -582,7 +584,7 @@ $(document).ready(function () {
                 setRating("arrowRatingA", "labelRatingA", "down", dict.black_rating, dict.black_rating_delta);
             } else console.log("PINK")
         } else {    // I'm black
-            console.log("BIBBY")
+            console.log("Setting ratings as black")
             if (dict.white_rating_delta > 0) {
                 setRating("arrowRatingA", "labelRatingA", "up", dict.white_rating, dict.white_rating_delta);
                 setRating("arrowRatingB", "labelRatingB", "down", dict.black_rating, dict.black_rating_delta);
@@ -1025,22 +1027,24 @@ $(document).ready(function () {
 
             socket.emit("/api/move", json, function (ret) {
                 updateLastCall();
-                if (ret.remaining) {
-                    discardTimeInterval('B');
-                    setTime("clockdivB", ret["other_remaining"]);
-                    initializeClock("clockdivA", ret["remaining"]);
-                }
                 insertMove(move);
-                var offeredButton = document.getElementById("drawOffer");
-                if (offeredButton.style.display != "none") {
-                    changeDrawButton('enabled');
-                }
                 highlight_check_mate();
-
-                // handle engine move if needed
-                if (engine) {
-                    console.log('Generating engine move after move: ' + move.lan);
-                    stockfish_move(game.fen());
+                if (!game_over) {
+                    if (ret.remaining) {
+                        console.log("Answer from api/move");
+                        discardTimeInterval('B');
+                        setTime("clockdivB", ret["other_remaining"]);
+                        initializeClock("clockdivA", ret["remaining"]);
+                    }
+                    var offeredButton = document.getElementById("drawOffer");
+                    if (offeredButton.style.display != "none") {
+                        changeDrawButton('enabled');
+                    }
+                    // handle engine move if needed
+                    if (engine) {
+                        console.log('Generating engine move after move: ' + move.lan);
+                        stockfish_move(game.fen());
+                    }
                 }
             });
             return 'drop'
