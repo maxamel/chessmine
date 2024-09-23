@@ -357,7 +357,7 @@ button:focus {
   position: relative;
   width: 100%;
   z-index: 999;
-  background: crimson; }
+  background: #0f2f53; }
   .header_area .navbar-brand {
     margin-right: 30px; }
   .header_area .menu_nav {
