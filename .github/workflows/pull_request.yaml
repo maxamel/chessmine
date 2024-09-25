@@ -35,6 +35,8 @@ jobs:
           redis-version: 7.4.0
       - name: Luacov
         run: lua -lluacov src/backend/game_server/src/lua/test_match.lua
+      - name: Start Game Server
+        run: python src/backend/game_server/src/app.py
       - name: Test
         run: python -m unittest discover -s src/backend/game_server/test  -p 'test_*.py'
       - name: Test with Checkov
