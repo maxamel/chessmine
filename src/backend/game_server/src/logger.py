@@ -1,4 +1,4 @@
-import logging, sys, json
+import logging, sys, json, os
 from logging import StreamHandler
 from logging.handlers import WatchedFileHandler, RotatingFileHandler
 
@@ -14,7 +14,7 @@ def get_logger(prefix="Default", debug=False, path="/var/log/server.log"):
     """
     global _LOGGER
     if _LOGGER is None:
-        _LOGGER = _init_logger(prefix="", debug=False, path=path)
+        _LOGGER = _init_logger(prefix="", debug=debug, path=os.getenv("LOG_PATH") or path)
 
     return logging.getLogger(prefix)
 
