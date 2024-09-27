@@ -34,8 +34,13 @@ jobs:
         with:
           redis-version: 7.4.0
       - name: Luacov
-        run: |
-          lua -lluacov src/backend/game_server/src/lua/test_match.lua
+        run: lua -lluacov src/backend/game_server/src/lua/test_match.lua
+      - name: Start Game Server
+        working-directory: src/backend/game_server/
+        run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &
+      - name: Test
+        working-directory: src/backend/game_server/
+        run: python -m unittest discover -s test/  -p 'test_*.py'
       - name: Test with Checkov
         id: checkov
         uses: bridgecrewio/checkov-action@e983355829b735cff43000af6158aac9f7b4a7da

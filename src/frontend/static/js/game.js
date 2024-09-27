@@ -326,7 +326,6 @@ $(document).ready(function () {
         }
 
         function resignAction(x) {
-            console.log("BLAHA " + x.target.id);
             var json = {"data": {
                     "sid": player_id
                 }};
@@ -506,6 +505,7 @@ $(document).ready(function () {
             futureMoveData = null;
         }
     });
+
     heartbeat();
     setInterval(heartbeat, 3000, false);
 

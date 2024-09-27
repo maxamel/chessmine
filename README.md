@@ -38,11 +38,11 @@ docker compose build --no-cache <container>
 ### Stop running application:
 ```
 docker rmi $(docker images -f "dangling=true" -q)
-docker compose down --rmi local
+docker compose -f docker-compose-dev.yml down --rmi local
 ```
 ### Debug game server locally
 ```
 docker compose -f docker-compose-debug-gs.yml up -d --build --force-recreate
 ```
-Next run game server from IDE with env var: REDIS_URL=localhost.
-It should be able to communicate with the containers started by the docker compose.
+Next run game server from IDE with env vars: REDIS_URL=localhost, LOG_PATH=server.log.
+It would be able to communicate with the containers started by the docker compose.

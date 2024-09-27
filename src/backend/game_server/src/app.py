@@ -71,7 +71,7 @@ def cancelSearch(payload):
 @socketio.on('/api/play', namespace='/connect')
 def play(payload):
     response = game_server.play(payload)
-    join_room(response.dst_sid)
+    join_room(room=response.dst_sid)
     if "game" in response.extra_data:
         the_dict = {'color': response.src_color, 'game': response.extra_data["game"]}
         connection = "game"
@@ -100,14 +100,15 @@ def move(payload):
     send_to, data = game_server.move(payload)
     if send_to is None:     # quitting due to game over/bad move
         return
+    origin_sid = data.pop('sid', None)
     socketio.emit("move", data, namespace='/connect', room=send_to)
     # send back to sender in case he has more than one page open
-    socketio.emit("move", data, namespace='/connect', room=payload["sid"])
+    socketio.emit("move", data, namespace='/connect', room=origin_sid)
     if "extra_data" in data:
         socketio.emit("game_over", data["extra_data"], namespace='/connect', room=send_to)
         # send back to sender to signal draw
-        socketio.emit("game_over", data["extra_data"], namespace='/connect', room=payload["sid"])
-    return data
+        socketio.emit("game_over", data["extra_data"], namespace='/connect', room=origin_sid)
+    return 'OK'
 
 
 @socketio.on('/api/draw', namespace='/connect')

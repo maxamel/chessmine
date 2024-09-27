@@ -124,7 +124,6 @@ class GameServer:
         return self.redis.get_player_session(sid)
 
     def get_player_from_cookie(self, cookie):
-        #cookie = json.loads(cookie)
         if "sid" not in cookie:
             player = Player(preferences=cookie["preferences"])
         else:
@@ -320,7 +319,8 @@ class GameServer:
         else:
             board = chess.Board(game_fen)
 
-        if not board.is_legal(the_move):
+        # Does the color of the move match the color of the player's sid, is it his turn and is the move legal?
+        if move["color"] != player_info.color[0] or get_turn_from_fen(board.fen()) != player_info.color or not board.is_legal(the_move):
             lgr.error("Illegal move {} by player {} in game {}".format(move, player_info.sid, player_info.game_id))
             return None, None
         board.push(the_move)
