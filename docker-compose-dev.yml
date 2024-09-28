@@ -1,3 +1,4 @@
+name: chessmine
 services:
     redis:
         container_name: "redis"

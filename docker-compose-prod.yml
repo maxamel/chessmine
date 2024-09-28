@@ -1,3 +1,4 @@
+name: chessmine
 services:
     redis:
         container_name: "redis"
@@ -44,7 +45,7 @@ services:
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
           - /sys:/sys:ro
-          - /var/lib/docker/:/var/lib/docker:ro
+          - /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro
         privileged: true
         depends_on:
           - caddy
