@@ -8,10 +8,12 @@
 # this machine's public IP, then replace the line below with your
 # domain name.
 
-
-#{
-#    experimental_http3
-#}
+{
+    admin :2019
+	servers {
+		metrics
+	}
+}
 
 # Remove http:// to enable TLS
 {$APP_URL}
@@ -44,3 +46,5 @@ log {
         }
         format json
 }
+
+metrics /metrics
