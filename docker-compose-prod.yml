@@ -35,6 +35,7 @@ services:
         ports:
           - 443:443
           - 80:80
+          - 2019:2019
         depends_on:
           - game_server
     cadvisor:
