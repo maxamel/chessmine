@@ -1,5 +1,6 @@
 import time, threading, chess, uuid, requests
 import logging
+from prometheus_client import Counter
 from typing import Union, Any
 
 from elo import EloRating
@@ -21,6 +22,8 @@ class GameServer:
 
     def __init__(self):
         self.redis = RedisPlug()
+        self.total_games_played = Counter('games_played', 'Total Games Played')
+        self.total_moves_played = Counter('moves_played', 'Total Moves Played')
         self.matcher = RedisSmartMatcher()
         self.th = threading.Thread(target=self.work)
         self.th.start()
@@ -109,6 +112,7 @@ class GameServer:
         self.redis.set_game_status(game_id=game_id, status=status)
 
     def set_game_endgame(self, game_id, end_game_info: EndGameInfo):
+        self.total_games_played.inc()
         self.redis.set_game_endgame(game_id=game_id, end_game=end_game_info)
 
     def get_game_endgame(self, game_id):
@@ -327,6 +331,7 @@ class GameServer:
 
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
         lgr.info("Move {} played by player {} in game {}".format(move, player_info.sid, player_info.game_id))
+        self.total_moves_played.inc()
         if player_info.ttl_start_time != 'None':
             self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None')
         if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
