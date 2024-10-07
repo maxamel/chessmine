@@ -6,7 +6,10 @@ if next(players) ~= nil then
     for _, v in pairs(players) do
       if v ~= KEYS[4] then
         -- found suitable opponent
-        redis.call('ZREM', KEYS[1], KEYS[4])
+        local self = redis.call('ZREM', KEYS[1], KEYS[4])
+        if self ~= 1 then
+            return 0
+        end
         redis.call('ZREM', KEYS[1], v)
         -- redis.log(redis.LOG_WARNING, string.format("returning = %s", v))
         return v

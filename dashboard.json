@@ -357,7 +357,14 @@
       ],
       "yaxis": {
         "align": false
-      }
+      },
+      "transformations": [
+        {
+            "id": "calculateField",
+            "options": {
+            }
+        }
+      ]
     },
     {
       "aliasColors": {},
@@ -454,7 +461,14 @@
       ],
       "yaxis": {
         "align": false
-      }
+      },
+      "transformations": [
+        {
+            "id": "calculateField",
+            "options": {
+            }
+        }
+      ]
     },
     {
     "type": "timeseries",
@@ -558,96 +572,181 @@
     }
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "fillGradient": 0,
-      "grid": {},
+      "type": "timeseries",
+      "title": "Server moves/sec",
       "gridPos": {
-        "h": 7,
-        "w": 12,
         "x": 12,
-        "y": 17
+        "y": 17,
+        "w": 12,
+        "h": 8
       },
-      "hiddenSeries": false,
-      "id": 4,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
+      "datasource": {
+        "default": true,
+        "uid": "P1809F7CD0C75ACF3",
+        "type": "prometheus"
       },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "10.0.2",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "id": 9,
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "irate(container_network_transmit_bytes_total{container_label_com_docker_compose_project=\"chessmine\"}[5m])",
-          "intervalFactor": 2,
-          "legendFormat": "{{name}}",
           "refId": "A",
-          "step": 20
+          "expr": "rate(moves_played_total{job=\"game_server\"}[1m])",
+          "range": true,
+          "instant": false,
+          "editorMode": "builder",
+          "legendFormat": "{{name}}",
+          "useBackend": false,
+          "disableTextWrap": false,
+          "fullMetaSearch": false,
+          "includeNullMetadata": true
         }
       ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Network Tx",
-      "tooltip": {
-        "msResolution": false,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "Bps",
-          "logBase": 1,
-          "show": true
+      "options": {
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
         },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
         }
-      ],
-      "yaxis": {
-        "align": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          }
+        },
+        "overrides": []
       }
+    },
+    {
+  "datasource": {
+    "default": true,
+    "uid": "P1809F7CD0C75ACF3",
+    "type": "prometheus"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      },
+      "color": {
+        "mode": "thresholds"
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 28
+  },
+  "id": 10,
+  "options": {
+    "reduceOptions": {
+      "values": false,
+      "calcs": [
+        "lastNotNull"
+      ],
+      "fields": ""
+    },
+    "orientation": "auto",
+    "textMode": "auto",
+    "wideLayout": true,
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto",
+    "showPercentChange": false,
+    "percentChangeColorMode": "standard"
+  },
+  "pluginVersion": "11.2.0",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "disableTextWrap": false,
+      "editorMode": "builder",
+      "expr": "games_played_total{job=\"game_server\"}",
+      "fullMetaSearch": false,
+      "includeNullMetadata": true,
+      "instant": false,
+      "legendFormat": "__auto",
+      "range": true,
+      "refId": "A",
+      "useBackend": false
     }
+  ],
+  "title": "Games Played",
+  "type": "stat",
+  "transparent": true
+}
   ],
   "refresh": "10s",
   "schemaVersion": 38,
@@ -688,7 +787,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Docker Monitoring Test",
+  "title": "Chessmine Monitoring",
   "uid": "ee75b6b8-f1c6-4ef1-9d39-fe50cc55a274",
   "version": 1,
   "weekStart": ""

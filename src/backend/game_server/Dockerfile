@@ -4,7 +4,7 @@ WORKDIR /usr/app/
 
 COPY . .
 
-RUN apk add acl curl gcc python3-dev musl-dev linux-headers build-base
+RUN apk add acl curl
 RUN pip install -r requirements.txt
 
 RUN adduser -D game

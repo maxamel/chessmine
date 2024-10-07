@@ -25,6 +25,12 @@ function TestRedis:testSingleOpponent()
     luaunit.assertEquals(value, "opponent")
 end
 
+function TestRedis:testSearchPlayerNotExists()
+    redis.call('ZADD', "search_pool_5", 1500, "opponent")
+    value = call_redis_script('src/backend/game_server/src/lua/match.lua', {"search_pool_5", 1450, 1580, "me"}, {})
+    luaunit.assertEquals(value, 0)
+end
+
 function TestRedis:tearDown()
     redis.call('FLUSHDB')
 end

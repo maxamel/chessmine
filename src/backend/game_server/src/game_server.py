@@ -1,12 +1,18 @@
-import time, threading, chess, uuid, requests
+import chess
 import logging
+import requests
+import threading
+import time
+import uuid
 from typing import Union, Any
 
+from prometheus_client import Counter
+
+from consts import *
 from elo import EloRating
 from logger import get_logger
 from matcher.redis_smart_matcher import RedisSmartMatcher
 from player import Player, PlayerMapping, Game, PlayerGameInfo
-from consts import *
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, Result, \
@@ -21,6 +27,8 @@ class GameServer:
 
     def __init__(self):
         self.redis = RedisPlug()
+        self.total_games_played = Counter('games_played', 'Total Games Played')
+        self.total_moves_played = Counter('moves_played', 'Total Moves Played')
         self.matcher = RedisSmartMatcher()
         self.th = threading.Thread(target=self.work)
         self.th.start()
@@ -109,6 +117,7 @@ class GameServer:
         self.redis.set_game_status(game_id=game_id, status=status)
 
     def set_game_endgame(self, game_id, end_game_info: EndGameInfo):
+        self.total_games_played.inc()
         self.redis.set_game_endgame(game_id=game_id, end_game=end_game_info)
 
     def get_game_endgame(self, game_id):
@@ -327,6 +336,7 @@ class GameServer:
 
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
         lgr.info("Move {} played by player {} in game {}".format(move, player_info.sid, player_info.game_id))
+        self.total_moves_played.inc()
         if player_info.ttl_start_time != 'None':
             self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None')
         if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':

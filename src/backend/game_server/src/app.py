@@ -2,6 +2,7 @@ import chess
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
+from prometheus_client import start_http_server
 
 from game_server import GameServer, GameStatus, Result
 from logger import get_logger
@@ -172,4 +173,5 @@ def abort(payload: dict[str, dict[str, str]]):
 
 
 if __name__ == '__main__':
+    start_http_server(5001)
     socketio.run(app, host='0.0.0.0', allow_unsafe_werkzeug=True)

@@ -16,11 +16,15 @@ class MyTestCase(unittest.TestCase):
     semaphore = threading.BoundedSemaphore(1)   # for correlating between sending moves and receiving
     redis_cli = redis.Redis(decode_responses=True)
 
-    def test_checkmate(self):
+    def test_threefold(self):
 
         with socketio.SimpleClient() as sio:
 
             sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+
+            @sio.client.on('*', namespace='*')
+            def any_event_any_namespace(data):
+                print(f"Howdy from server! {data}")
 
             @sio.client.on('move', namespace='/connect')
             def move(data):
@@ -38,20 +42,20 @@ class MyTestCase(unittest.TestCase):
             @sio.client.on('game_over', namespace='/connect')
             def game_over(data):
                 print(f"Received game_over {data}")
-                self.assertEqual(data.get('winner'), 'black')
-                self.assertEqual(data.get('message'), 'white checkmated')
-                self.assertEqual(len(self.seen_moves), 104)
+                self.assertEqual(data.get('winner'), 'Draw')
+                self.assertEqual(data.get('message'), 'Draw By Three-Fold Repetition')
+                self.assertEqual(len(self.seen_moves), 148)
 
                 # Assert the state in redis at end of game
                 game_id = self.redis_cli.hget(f'player_mapping_{self.player_a_sid}', 'game_id')
-                self.assertEqual(self.redis_cli.llen(f'game_fens_{game_id}'), 104)
-                self.assertEqual(self.redis_cli.llen(f'game_moves_{game_id}'), 104)
-                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'winner'), 'black')
-                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'message'), 'white checkmated')
+                self.assertEqual(self.redis_cli.llen(f'game_fens_{game_id}'), 148)
+                self.assertEqual(self.redis_cli.llen(f'game_moves_{game_id}'), 148)
+                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'winner'), 'Draw')
+                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'message'), 'Draw By Three-Fold Repetition')
 
                 game_mapping = self.redis_cli.hgetall(f'game_mapping_{game_id}')
                 self.assertEqual(game_mapping.get('status'), "3")
-                self.assertEqual(game_mapping.get('fen'), "1R6/2P5/8/1p6/1k3p2/3P1np1/5r2/5K2 w - - 1 53")
+                self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P3K3/6B1/3k1P2/Q7 w - - 15 75")
 
             @sio.client.on('game', namespace='/connect')
             def game(data):
@@ -107,7 +111,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(player_b_session.get('preferences'), "{\"time_control\": \"5+0\"}")
 
             white_sid = game_mapping.get('white')
-            f = open('resources/checkmate.json', 'r')
+            f = open('resources/threefold.json', 'r')
             lines = tuple(f)
             current_sid = white_sid
             for line in lines:
