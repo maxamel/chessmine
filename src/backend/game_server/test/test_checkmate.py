@@ -107,7 +107,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(player_b_session.get('preferences'), "{\"time_control\": \"5+0\"}")
 
             white_sid = game_mapping.get('white')
-            f = open('test/resources/checkmate.json', 'r')
+            f = open('resources/checkmate.json', 'r')
             lines = tuple(f)
             current_sid = white_sid
             for line in lines:
