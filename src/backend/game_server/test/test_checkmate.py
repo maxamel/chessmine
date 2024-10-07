@@ -22,10 +22,6 @@ class MyTestCase(unittest.TestCase):
 
             sio.connect(url='http://localhost:5000/connect', namespace='/connect')
 
-            @sio.client.on('*', namespace='*')
-            def any_event_any_namespace(data):
-                print(f"Howdy from server! {data}")
-
             @sio.client.on('move', namespace='/connect')
             def move(data):
                 # Assert we got back the move we're supposed to get

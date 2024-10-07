@@ -357,7 +357,14 @@
       ],
       "yaxis": {
         "align": false
-      }
+      },
+      "transformations": [
+        {
+            "id": "calculateField",
+            "options": {
+            }
+        }
+      ]
     },
     {
       "aliasColors": {},
@@ -454,11 +461,18 @@
       ],
       "yaxis": {
         "align": false
-      }
+      },
+      "transformations": [
+        {
+            "id": "calculateField",
+            "options": {
+            }
+        }
+      ]
     },
     {
     "type": "timeseries",
-    "title": "Caddy req/min",
+    "title": "Caddy req/sec",
     "gridPos": {
       "x": 0,
       "y": 17,
@@ -559,7 +573,7 @@
     },
     {
       "type": "timeseries",
-      "title": "moves/min",
+      "title": "Server moves/sec",
       "gridPos": {
         "x": 12,
         "y": 17,

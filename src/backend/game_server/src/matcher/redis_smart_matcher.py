@@ -48,7 +48,7 @@ class RedisSmartMatcher(Matcher):
                 elif rival_sid == 1:  # Own player found. Keep trying
                     lgr.info("No match found. Yet...")
                 else:
-                    lgr.info(f"The match returned {rival_sid}")
+                    lgr.info(f"The match returned {rival_sid} for {player.sid}")
                     res = requests.get(url="http://localhost:5000/match/" + player.sid + "/" + rival_sid,
                                        json={'time_control': get_millis_for_time_control(player.preferences['time_control'])})
                     lgr.info(f"Sending match resulted in: {res.text}")

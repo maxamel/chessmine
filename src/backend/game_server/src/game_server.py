@@ -1,13 +1,18 @@
-import time, threading, chess, uuid, requests
+import chess
 import logging
-from prometheus_client import Counter
+import requests
+import threading
+import time
+import uuid
 from typing import Union, Any
 
+from prometheus_client import Counter
+
+from consts import *
 from elo import EloRating
 from logger import get_logger
 from matcher.redis_smart_matcher import RedisSmartMatcher
 from player import Player, PlayerMapping, Game, PlayerGameInfo
-from consts import *
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, Result, \
