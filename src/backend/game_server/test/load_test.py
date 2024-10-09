@@ -6,7 +6,7 @@ import redis
 
 import socketio
 
-NUM_PLAYERS = 100
+NUM_PLAYERS = 150
 GAMES_PER_PLAYER = 2
 
 
@@ -36,8 +36,7 @@ def test(results: list, index: int):
 
                 util = UtilityHelper()
 
-                sio.connect(url='http://localhost:80/connect', namespace='/connect')
-
+                sio.connect(url='http://localhost:5000/connect', namespace='/connect')
                 f = open('test/resources/checkmate.json', 'r')
                 lines = tuple(f)
                 f.close()
@@ -48,7 +47,6 @@ def test(results: list, index: int):
                     if isinstance(data, dict):
                         move_hash = hash(json.dumps(data.get('move')))
                         if move_hash not in util.seen_moves and util.color != data.get('move').get('color') and util.line_index < len(lines):
-                            #print(f"Received new move {data}")
                             util.seen_moves.add(move_hash)
                             sio.client.emit('/api/heartbeat', {'checkin': True,
                                                                'data': {'sid': util.player_sid, 'preferences': {'time_control': '5+0'}}},
@@ -59,7 +57,7 @@ def test(results: list, index: int):
 
                 @sio.client.on('game_over', namespace='/connect')
                 def game_over(data):
-                    print(f"Received game_over {data}")
+                    print(f"Received game_over {data} for sid {util.player_sid}")
                     aborted = 'aborted' in data.get('message')
                     if aborted:
                         results[index][1] += 1
@@ -91,11 +89,6 @@ def test(results: list, index: int):
                     sio.client.emit('/api/move', {'sid': util.player_sid, 'move': json.loads(lines[util.line_index])},
                                     namespace='/connect', callback=move)
                     util.line_index += 2
-
-                # assert player mappings
-                player_a_mapping = util.redis_cli.hgetall(f'player_mapping_{util.player_sid}')
-                # assert player sessions
-                player_a_session = util.redis_cli.hgetall(f'player_session_{util.player_sid}')
 
                 while not util.game_over:
                     time.sleep(1)

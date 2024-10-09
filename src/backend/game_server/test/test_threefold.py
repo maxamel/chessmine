@@ -11,6 +11,7 @@ class MyTestCase(unittest.TestCase):
     player_a_sid = None
     player_b_sid = None
     last_move_made = None
+    game_over = False
     seen_moves = set()
     lock = threading.Lock()                     # for internal locking of move method so every time a single move is processed
     semaphore = threading.BoundedSemaphore(1)   # for correlating between sending moves and receiving
@@ -21,10 +22,6 @@ class MyTestCase(unittest.TestCase):
         with socketio.SimpleClient() as sio:
 
             sio.connect(url='http://localhost:5000/connect', namespace='/connect')
-
-            @sio.client.on('*', namespace='*')
-            def any_event_any_namespace(data):
-                print(f"Howdy from server! {data}")
 
             @sio.client.on('move', namespace='/connect')
             def move(data):
@@ -56,6 +53,7 @@ class MyTestCase(unittest.TestCase):
                 game_mapping = self.redis_cli.hgetall(f'game_mapping_{game_id}')
                 self.assertEqual(game_mapping.get('status'), "3")
                 self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P3K3/6B1/3k1P2/Q7 w - - 15 75")
+                self.game_over = True
 
             @sio.client.on('game', namespace='/connect')
             def game(data):
@@ -126,6 +124,7 @@ class MyTestCase(unittest.TestCase):
             f.close()
 
             time.sleep(5)
+            self.assertTrue(self.game_over)
             sio.disconnect()
 
 
