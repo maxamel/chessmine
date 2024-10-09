@@ -27,7 +27,6 @@ class RedisSmartMatcher(Matcher):
             lgr.info(f"Player {player.sid} already exists in pool {search_pool_name}")
         thread = Thread(target=self.search, args=(player,))
         thread.start()
-        thread.join()
 
     def search(self, player: Player):
         loop_round = 0

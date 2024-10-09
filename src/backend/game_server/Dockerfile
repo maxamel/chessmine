@@ -4,7 +4,7 @@ WORKDIR /usr/app/
 
 COPY . .
 
-RUN apk add acl curl
+RUN apk add acl curl python3-dev libffi-dev gcc musl-dev make
 RUN pip install -r requirements.txt
 
 RUN adduser -D game
