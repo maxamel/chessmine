@@ -14,7 +14,7 @@ def get_logger(prefix="Default", debug=False, path="/var/log/server.log"):
     """
     global _LOGGER
     if _LOGGER is None:
-        _LOGGER = _init_logger(prefix="", debug=debug, path=os.getenv("LOG_PATH") or path)
+        _LOGGER = _init_logger(prefix="", debug=os.getenv("LOG_DEBUG") or debug, path=os.getenv("LOG_PATH") or path)
 
     return logging.getLogger(prefix)
 
@@ -27,6 +27,7 @@ def _init_logger(prefix="", debug=True, path="/var/log/server.log"):
     :return:
     """
     my_log_level = logging.DEBUG if debug is True else logging.INFO
+    print(f"The damn log level is {my_log_level}, while the debug param is {debug}")
     logger = logging.getLogger(prefix)
     # the_format = '%(asctime)s [%(threadName)s:%(thread)d] [%(levelname)s] [%(name)s] %(message)s'
 
@@ -35,14 +36,14 @@ def _init_logger(prefix="", debug=True, path="/var/log/server.log"):
     normal_formatter = logging.Formatter(the_format)
     json_formatter = logging.Formatter(the_json_format)
 
-    file_logging_level = logging.DEBUG
+    file_logging_level = my_log_level
     log_to_file = True
     if log_to_file is True:
         log_filename = path
         # rotator_thread = threading.Thread(target=logrotator, args=(log_filename, ))
         # rotator_thread.setDaemon(True)
         # rotator_thread.start()
-        print("Logging to file: %s " % log_filename)
+        print("Logging to file: %s : %s" % (log_filename, my_log_level))
         fh = WatchedFileHandler(log_filename)
         fh.setLevel(file_logging_level)
         fh.setFormatter(normal_formatter)
@@ -61,12 +62,11 @@ def _init_logger(prefix="", debug=True, path="/var/log/server.log"):
     stdout_logger.stream = sys.stdout
     logger.addHandler(stdout_logger)
 
-    logger.setLevel(file_logging_level)
-
-    logging.getLogger('socketio').setLevel(logging.ERROR)
-    logging.getLogger('engineio').setLevel(logging.ERROR)
-    logging.getLogger('werkzeug').setLevel(logging.ERROR)
-    logging.getLogger('geventwebsocket.handler').setLevel(logging.ERROR)
+    logger.setLevel(my_log_level)
+    logging.getLogger('socketio').setLevel(my_log_level)
+    logging.getLogger('engineio').setLevel(my_log_level)
+    logging.getLogger('werkzeug').setLevel(my_log_level)
+    logging.getLogger('geventwebsocket.handler').setLevel(my_log_level)
 
     return logger
 

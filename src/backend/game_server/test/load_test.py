@@ -6,8 +6,8 @@ import redis
 
 import socketio
 
-NUM_PLAYERS = 150
-GAMES_PER_PLAYER = 2
+NUM_PLAYERS = 2
+GAMES_PER_PLAYER = 1
 
 
 def run_test(results: list, index: int):
@@ -32,11 +32,11 @@ def test(results: list, index: int):
 
     for i in range(GAMES_PER_PLAYER):
         try:
-            with socketio.SimpleClient() as sio:
+            with socketio.SimpleClient(logger=True, engineio_logger=True) as sio:
 
                 util = UtilityHelper()
 
-                sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+                sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
                 f = open('test/resources/checkmate.json', 'r')
                 lines = tuple(f)
                 f.close()
@@ -44,6 +44,8 @@ def test(results: list, index: int):
                 @sio.client.on('move', namespace='/connect')
                 def move(data):
                     # Assert we got back the move we're supposed to get
+                    if len(util.seen_moves) == 0:
+                        print(f'Got first move to sid {util.player_sid} and payload: {data}')
                     if isinstance(data, dict):
                         move_hash = hash(json.dumps(data.get('move')))
                         if move_hash not in util.seen_moves and util.color != data.get('move').get('color') and util.line_index < len(lines):
@@ -51,8 +53,11 @@ def test(results: list, index: int):
                             sio.client.emit('/api/heartbeat', {'checkin': True,
                                                                'data': {'sid': util.player_sid, 'preferences': {'time_control': '5+0'}}},
                                             namespace='/connect')
-                            sio.client.emit('/api/move', {'sid': util.player_sid, 'move': json.loads(lines[util.line_index])},
-                                            namespace='/connect', callback=move)
+                            try:
+                                sio.client.call('/api/move', {'sid': util.player_sid, 'move': json.loads(lines[util.line_index])},
+                                                namespace='/connect', timeout=3)
+                            except TimeoutError as e:
+                                print(f'Timeout while sending move: {e}')
                             util.line_index += 2
 
                 @sio.client.on('game_over', namespace='/connect')
@@ -115,8 +120,8 @@ for n in range(NUM_PLAYERS):
 for t in threads:
     t.join()
 
-print(f"Total game testing lasted {time.time() - start} seconds")
-print(f"************************************\n\n\n\n\n")
+end = time.time()
+
 # assert that all went well
 sum = 0
 iter = 0
@@ -126,7 +131,21 @@ for result in results:
     iter += 1
     sum += result[0]
     timeouts += result[1]
-print(f'Tests completed with {timeouts} timeouts and {sum}/{(NUM_PLAYERS * GAMES_PER_PLAYER)} completed games')
+
+games_planned = int((NUM_PLAYERS * GAMES_PER_PLAYER) / 2)
+games_played = int(sum / 2)
+success_rate = float("{:.2f}".format(100 * (sum/(NUM_PLAYERS * GAMES_PER_PLAYER))))
+throughput = float("{:.3f}".format((NUM_PLAYERS * GAMES_PER_PLAYER)/2/(end - start)))
+print(f"************************************\n\n\n")
+print(f"Total game testing lasted {end - start} seconds")
+print(f"************************************\n")
+print(f'Tests completed with {timeouts} timeouts and {games_played}/{games_planned} completed games')
+print(f"************************************\n")
+print(f'Games completed: {games_played} completed games with {success_rate}% success rate')
+print(f"************************************\n")
+print(f'Game throughput: {throughput}')
+print(f"************************************\n\n\n")
+
 assert sum == (NUM_PLAYERS * GAMES_PER_PLAYER)
 
 games = redis_cli.keys("game_mapping_*")

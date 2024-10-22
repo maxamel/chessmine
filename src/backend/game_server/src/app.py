@@ -1,3 +1,4 @@
+
 import chess
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room
@@ -9,8 +10,7 @@ from logger import get_logger
 from player import Game, PlayerGameInfo, Player
 
 from util import PlayerType
-
-lgr = get_logger(path="/var/log/server.log", debug=True)
+lgr = get_logger(path="/var/log/server.log")
 
 app = Flask(__name__, template_folder='.')
 
