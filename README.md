@@ -46,3 +46,16 @@ docker compose -f docker-compose-debug-gs.yml up -d --build --force-recreate
 ```
 Next run game server from IDE with env vars: REDIS_URL=localhost, LOG_PATH=server.log.
 It would be able to communicate with the containers started by the docker compose.
+
+### Run caddy from master
+
+Build caddy image with dockerfile that builds from source:
+```
+docker build -f DockerfileCaddyMaster --build-arg APP_URL=http://localhost --build-arg BE_URL=host.docker.internal .
+```
+Next run the docker compose which spins all containers but caddy:
+```
+docker compose -f docker-compose-debug-caddy.yml up -d --build --force-recreate
+```
+Finally run the image we built for caddy and expose port 80:
+docker run -p 80:80 -it <<image_id>> caddy/cmd/caddy/caddy run --config Caddyfile

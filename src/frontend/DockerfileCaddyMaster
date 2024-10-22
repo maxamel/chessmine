@@ -1,0 +1,32 @@
+FROM golang:1.23.2-alpine3.20
+
+WORKDIR /var/www/html/
+ARG APP_URL
+ARG BE_URL
+ENV APP_URL=$APP_URL
+ENV BE_URL=$BE_URL
+COPY . /var/www/html/
+
+RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/settings.js  # for dynamic config of url
+RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for dynamic config of url
+
+# install su-exec if need to perform operations as root and enable the su-exec command with RUN chmod u+s /sbin/su-exec
+RUN apk add npm minify acl curl goaccess git && npm install
+
+RUN mkdir /etc/caddy && mkdir /data/ && mkdir /data/caddy/ && mkdir /config/ && mkdir /config/caddy/
+RUN git -c http.sslVerify=false clone "https://github.com/caddyserver/caddy.git" && cd caddy/cmd/caddy/ && go build
+
+RUN cp /var/www/html/node_modules/chess.js/dist/cjs/chess.js /var/www/html/static/js/chess.js && \
+    cp /var/www/html/node_modules/stockfish/src/stockfish* /var/www/html/static/js/
+RUN minify -o /var/www/html/static/js/chess.min.js /var/www/html/static/js/chess.js && \
+    minify -o /var/www/html/static/js/chessboard-1.0.0.min.js /var/www/html/static/js/chessboard-1.0.0.js
+RUN cp /var/www/html/Caddyfile /etc/caddy/Caddyfile
+
+
+RUN adduser -D user wheel
+RUN setfacl -Rdm u:user:rwx /etc/caddy/ && setfacl -Rdm u:user:rwx /data/caddy/ && setfacl -Rdm u:user:rwx /config/caddy/
+RUN chown -hR user /etc/caddy/ && chown -hR user /data/caddy/ && chown -hR user /config/caddy/ && chown -hR user /var/log/
+USER user
+HEALTHCHECK CMD curl --fail $APP_URL || exit 1
+RUN cd /var/www/html/
+CMD ["caddy/cmd/caddy/caddy run --config Caddyfile"]
