@@ -6,7 +6,7 @@ import redis
 
 import socketio
 
-NUM_PLAYERS = 2
+NUM_PLAYERS = 100
 GAMES_PER_PLAYER = 1
 
 
@@ -32,11 +32,11 @@ def test(results: list, index: int):
 
     for i in range(GAMES_PER_PLAYER):
         try:
-            with socketio.SimpleClient(logger=True, engineio_logger=True) as sio:
+            with socketio.SimpleClient(logger=False, engineio_logger=False) as sio:
 
                 util = UtilityHelper()
 
-                sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
+                sio.connect(url='http://localhost/connect', namespace='/connect', transports=['polling'])
                 f = open('test/resources/checkmate.json', 'r')
                 lines = tuple(f)
                 f.close()
