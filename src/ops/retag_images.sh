@@ -1,0 +1,10 @@
+#retag images
+docker rmi ewr.vultrcr.com/chessmine/game_server:prev
+docker pull ewr.vultrcr.com/chessmine/game_server:prev
+docker tag ewr.vultrcr.com/chessmine/game_server:prev ewr.vultrcr.com/chessmine/game_server:curr
+docker push ewr.vultrcr.com/chessmine/game_server:curr
+
+docker rmi ewr.vultrcr.com/chessmine/frontend:prev
+docker pull ewr.vultrcr.com/chessmine/frontend:prev
+docker tag ewr.vultrcr.com/chessmine/frontend:prev ewr.vultrcr.com/chessmine/frontend:curr
+docker push ewr.vultrcr.com/chessmine/frontend:curr

@@ -17,7 +17,7 @@ class MyTestCase(unittest.TestCase):
     semaphore = threading.BoundedSemaphore(1)   # for correlating between sending moves and receiving
     redis_cli = redis.Redis(decode_responses=True)
 
-    def test_agreed_draw(self):
+    def test_resign(self):
 
         with socketio.SimpleClient() as sio:
 
@@ -36,26 +36,25 @@ class MyTestCase(unittest.TestCase):
                         self.semaphore.release()  # allow next move to be sent
                     self.lock.release()
 
-            @sio.client.on('draw', namespace='/connect')
+            @sio.client.on('resign', namespace='/connect')
             def draw(data):
                 # Assert we got back the move we're supposed to get
-                print(f'Received  draw offer {data}')
-                if isinstance(data, dict):
-                    sio.client.emit('/api/draw', {'data': {'sid': self.player_a_sid, 'flag': 1}}, namespace='/connect')
+                print(f'Received resign {data}')
+                self.assertEqual(data, True)
 
             @sio.client.on('game_over', namespace='/connect')
             def game_over(data):
                 print(f"Received game_over {data}")
-                self.assertEqual(data.get('winner'), 'Draw')
-                self.assertEqual(data.get('message'), 'Draw By Agreement')
+                self.assertEqual(data.get('winner'), 'black')
+                self.assertEqual(data.get('message'), 'white resigned')
                 self.assertEqual(len(self.seen_moves), 146)
 
                 # Assert the state in redis at end of game
                 game_id = self.redis_cli.hget(f'player_mapping_{self.player_a_sid}', 'game_id')
                 self.assertEqual(self.redis_cli.llen(f'game_fens_{game_id}'), 146)
                 self.assertEqual(self.redis_cli.llen(f'game_moves_{game_id}'), 146)
-                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'winner'), 'Draw')
-                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'message'), 'Draw By Agreement')
+                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'winner'), 'black')
+                self.assertEqual(self.redis_cli.hget(f'game_endgame_{game_id}', 'message'), 'white resigned')
 
                 game_mapping = self.redis_cli.hgetall(f'game_mapping_{game_id}')
                 self.assertEqual(game_mapping.get('status'), "3")
@@ -130,7 +129,7 @@ class MyTestCase(unittest.TestCase):
                     current_sid = self.player_a_sid
             f.close()
 
-            sio.client.emit('/api/draw', {'data': {'sid': self.player_b_sid, 'flag': "1"}},
+            sio.client.emit('/api/resign', {'data': {'sid': self.player_b_sid, 'flag': "1"}},
                             namespace='/connect', callback=draw)
 
             time.sleep(5)

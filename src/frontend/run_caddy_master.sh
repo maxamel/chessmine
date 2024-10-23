@@ -1,0 +1,2 @@
+docker build -f DockerfileCaddyMaster -t caddy_master --build-arg APP_URL=http://localhost --build-arg BE_URL=host.docker.internal .
+docker run -p 80:80 -it caddy_master caddy/cmd/caddy/caddy run --config Caddyfile

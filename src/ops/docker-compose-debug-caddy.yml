@@ -1,20 +1,22 @@
+name: chessmine
 services:
     redis:
         container_name: "redis"
         image: "redis:alpine"
         ports:
           - 6379:6379
-    caddy:
-        container_name: "caddy"
+    game_server:
+        container_name: "game_server"
         build:
-          context: ./src/frontend
+          context: ../backend/game_server
           dockerfile: Dockerfile
-          args:
-            APP_URL: http://localhost
-            BE_URL: host.docker.internal
+        volumes:
+          - ../backend/game_server/:/usr/app
         ports:
-          - 443:443
-          - 80:80
+          - 5000:5000
+          - 5001:5001
+        depends_on:
+          - redis
     cadvisor:
         container_name: "cadvisor"
         image: "gcr.io/cadvisor/cadvisor:latest"
@@ -26,7 +28,7 @@ services:
           - /var/lib/docker/:/var/lib/docker:ro
         privileged: true
         depends_on:
-          - caddy
+          - game_server
     prometheus:
         container_name: "prometheus"
         image: "prom/prometheus:latest"
