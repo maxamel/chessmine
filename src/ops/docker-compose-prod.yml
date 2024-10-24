@@ -10,12 +10,12 @@ services:
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
         build:
-          context: ./src/backend/game_server
+          context: ../backend/game_server
           dockerfile: Dockerfile
           tags:
             - "game_server:curr"
         volumes:
-          - ./src/backend/game_server/:/usr/app
+          - ../backend/game_server/:/usr/app
         ports:
           - 5000:5000
           - 5001:5001
@@ -26,7 +26,7 @@ services:
         image: ewr.vultrcr.com/chessmine/frontend:curr
         pull_policy: always
         build:
-          context: ./src/frontend
+          context: ../frontend
           dockerfile: Dockerfile
           tags:
             - "frontend:curr"
