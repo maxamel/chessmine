@@ -6,9 +6,15 @@ services:
         ports:
           - 6379:6379
     game_server:
-        container_name: "game_server"
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
+        deploy:
+          replicas: 1
+          endpoint_mode: dnsrr
+          resources:
+            limits:
+              cpus: '0.40'
+              memory: 300M
         build:
           context: ../backend/game_server
           dockerfile: Dockerfile
@@ -16,9 +22,6 @@ services:
             - "game_server:curr"
         volumes:
           - ../backend/game_server/:/usr/app
-        ports:
-          - 5000:5000
-          - 5001:5001
         depends_on:
           - redis
     caddy:
@@ -36,14 +39,11 @@ services:
         ports:
           - 443:443
           - 80:80
-          - 2019:2019
         depends_on:
           - game_server
     cadvisor:
         container_name: "cadvisor"
         image: "gcr.io/cadvisor/cadvisor:latest"
-        ports:
-          - 8080:8080
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
           - /sys:/sys:ro
@@ -54,8 +54,6 @@ services:
     prometheus:
         container_name: "prometheus"
         image: "prom/prometheus:latest"
-        ports:
-          - 9090:9090
         volumes:
           - ./prometheus.yml:/etc/prometheus/prometheus.yml
         privileged: true

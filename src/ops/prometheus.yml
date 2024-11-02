@@ -18,4 +18,4 @@ scrape_configs:
 
   - job_name: game_server
     static_configs:
-      - targets: ['game_server:5001']
+      - targets: ['game_server:2019']

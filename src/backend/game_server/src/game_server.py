@@ -6,7 +6,7 @@ import time
 import uuid
 from typing import Union, Any
 
-from prometheus_client import Counter
+from prometheus_client import Counter, Histogram
 
 from consts import *
 from elo import EloRating
@@ -27,8 +27,9 @@ class GameServer:
 
     def __init__(self):
         self.redis = RedisPlug()
-        self.total_games_played = Counter('games_played', 'Total Games Played')
-        self.total_moves_played = Counter('moves_played', 'Total Moves Played')
+        self.metric_total_games_played = Counter('games_played', 'Total Games Played')
+        self.metric_total_moves_played = Counter('moves_played', 'Total Moves Played')
+        self.metric_move_time = Histogram('move_time', 'Move Time')
         self.matcher = RedisSmartMatcher()
         self.th = threading.Thread(target=self.work)
         self.th.start()
@@ -96,9 +97,9 @@ class GameServer:
     def map_rivals(self, player1_sid, player2_sid, time_control):
         game_id = uuid.uuid4().hex
         lgr.info("Mapping rivals with args: {}, {}, {}, {}".format(player1_sid, player2_sid, game_id, time_control))
-        self.redis.map_player(player=player1_sid, opponent=player2_sid, game_id=game_id, color=WHITE, time_control=time_control)
-        self.redis.map_player(player=player2_sid, opponent=player1_sid, game_id=game_id, color=BLACK, time_control=time_control)
-        self.redis.map_game(game_id=game_id, white_sid=player1_sid, black_sid=player2_sid)
+        self.redis.set_player_mapping(player=player1_sid, opponent=player2_sid, game_id=game_id, color=WHITE, time_control=time_control)
+        self.redis.set_player_mapping(player=player2_sid, opponent=player1_sid, game_id=game_id, color=BLACK, time_control=time_control)
+        self.redis.set_game_mapping(game_id=game_id, white_sid=player1_sid, black_sid=player2_sid)
         return game_id
 
     def get_game_fen(self, game_id):
@@ -117,7 +118,7 @@ class GameServer:
         self.redis.set_game_status(game_id=game_id, status=status)
 
     def set_game_endgame(self, game_id, end_game_info: EndGameInfo):
-        self.total_games_played.inc()
+        self.metric_total_games_played.inc()
         self.redis.set_game_endgame(game_id=game_id, end_game=end_game_info)
 
     def get_game_endgame(self, game_id):
@@ -309,6 +310,7 @@ class GameServer:
         :param payload: the move as recorded by user
         :return: sid of the player to send this move to and the move data slightly changed
         '''
+        start = time.time()
         sid = payload["sid"]
         player_info: PlayerMapping = self.redis.get_player_mapping(sid)
         if self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
@@ -336,7 +338,7 @@ class GameServer:
 
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
         lgr.info("Move {} played by player {} in game {}".format(move, player_info.sid, player_info.game_id))
-        self.total_moves_played.inc()
+        self.metric_total_moves_played.inc()
         if player_info.ttl_start_time != 'None':
             self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None')
         if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
@@ -411,6 +413,8 @@ class GameServer:
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
             payload["extra_data"] = egi.to_dict()
             lgr.info("Game Over. {} checkmated".format(rival_info.color))
+        end = time.time()
+        self.metric_move_time.observe(end-start)
         return rival, payload
 
     def play(self, payload):

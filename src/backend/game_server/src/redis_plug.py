@@ -66,6 +66,7 @@ class RedisPlug:
     def set_player_session(self, player: Player):
         key = self.player_info + player.sid
         self.r.hmset(key, player.to_dict())
+        self.r.expire(key, 86400)  # expire in one day
 
     def get_player_session(self, sid):
         key = self.player_info + sid
@@ -77,10 +78,12 @@ class RedisPlug:
     def add_move_to_game(self, game_id, move):
         key = self.game_moves + game_id
         self.r.rpush(key, move)
+        self.r.expire(key, 3600)  # expire in one hour
 
     def add_fen_to_game(self, game_id, fen):
         key = self.game_fens + game_id
         self.r.rpush(key, fen)
+        self.r.expire(key, 3600)  # expire in one hour
 
     def get_game_moves(self, game_id) -> list:
         key = self.game_moves + game_id
@@ -109,12 +112,12 @@ class RedisPlug:
         key = self.game + game_id
         self.r.hset(key, STATUS, status.value)
 
-    def map_player(self, player, opponent, color, game_id, time_control=None, turn_start=None):
+    def set_player_mapping(self, player, opponent, color, game_id, time_control=None, turn_start=None):
         key = self.player + player
         pm = PlayerMapping(sid=player, opponent=opponent, color=color, game_id=game_id,
                            time_remaining=time_control, turn_start_time=turn_start)
         self.r.hmset(key, pm.to_dict())
-        self.r.expire(key, 3600)  # expire in an hour
+        self.r.expire(key, 3600)  # expire in one hour
 
     def set_player_session_value(self, player, key, val):
         session = self.player_info + player
@@ -159,7 +162,7 @@ class RedisPlug:
         key = self.game_expire
         return self.r.zrem(key, game_id)
 
-    def map_game(self, game_id, white_sid, black_sid, board=chess.Board().fen(), status=GameStatus.STARTED.value):
+    def set_game_mapping(self, game_id, white_sid, black_sid, board=chess.Board().fen(), status=GameStatus.STARTED.value):
         key = self.game + game_id
         self.r.hmset(key, {FEN: board, WHITE: white_sid, BLACK: black_sid, STATUS: status})
         self.r.expire(key, 3600)  # expire in an hour
