@@ -10,7 +10,7 @@ from logger import get_logger
 from player import Game, PlayerGameInfo, Player
 
 from util import PlayerType
-lgr = get_logger(path="/var/log/server.log")
+lgr = get_logger(prefix="app", path="/var/log/server.log")
 
 app = Flask(__name__, template_folder='.')
 

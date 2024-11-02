@@ -8,7 +8,7 @@ from player import Player
 from redis_plug import RedisPlug
 from util import get_millis_for_time_control
 
-lgr = get_logger(path="/var/log/server.log")
+lgr = get_logger(prefix="RedisSmartMatcher", path="/var/log/server.log")
 
 
 class RedisSmartMatcher(Matcher):
