@@ -1,7 +1,7 @@
 import unittest
 import socketio
 
-from src.backend.game_server.test.base_test_case import BaseTestCase
+from base_test_case import BaseTestCase
 
 
 class AgreedDrawTestCase(BaseTestCase):

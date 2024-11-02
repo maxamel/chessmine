@@ -1,12 +1,8 @@
-import json
-import time
 import unittest
-import redis
-
 import socketio
-import threading
 
-from src.backend.game_server.test.base_test_case import BaseTestCase
+
+from base_test_case import BaseTestCase
 
 
 class StalemateTestCase(BaseTestCase):
