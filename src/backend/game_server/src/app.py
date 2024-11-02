@@ -16,7 +16,7 @@ app = Flask(__name__, template_folder='.')
 
 app.config['SECRET_KEY'] = 'secret!'
 
-socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent', logger=lgr, engineio_logger=lgr)
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent', logger=False, engineio_logger=False)
 
 Payload.max_decode_packets = 150
 
@@ -173,5 +173,5 @@ def abort(payload: dict[str, dict[str, str]]):
 
 
 if __name__ == '__main__':
-    start_http_server(5001)
+    start_http_server(2019)
     socketio.run(app, host='0.0.0.0')

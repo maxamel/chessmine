@@ -1,3 +1,5 @@
+import os
+from socketio.exceptions import TimeoutError as TE
 from threading import Thread
 
 import json
@@ -8,6 +10,11 @@ import socketio
 
 NUM_PLAYERS = 100
 GAMES_PER_PLAYER = 1
+
+
+ERROR = 2
+COMPLETED = 0
+TIMEOUT = 1
 
 
 def run_test(results: list, index: int):
@@ -24,7 +31,9 @@ class UtilityHelper:
         self.line_index = 0
         self.color = 'w'
         self.seen_moves = set()
-        self.redis_cli = redis.Redis(decode_responses=True)
+        self.redis_cli = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"),
+                                     port=int(os.getenv("REDIS_PORT", 6379)),
+                                     decode_responses=True)
         self.game_over = False
 
 
@@ -36,7 +45,7 @@ def test(results: list, index: int):
 
                 util = UtilityHelper()
 
-                sio.connect(url='http://localhost/connect', namespace='/connect', transports=['polling'])
+                sio.connect(url=os.getenv("ENDPOINT", "https://www.chessmine.xyz/"), namespace='/connect', transports=['websocket'])
                 f = open('test/resources/checkmate.json', 'r')
                 lines = tuple(f)
                 f.close()
@@ -50,29 +59,35 @@ def test(results: list, index: int):
                         move_hash = hash(json.dumps(data.get('move')))
                         if move_hash not in util.seen_moves and util.color != data.get('move').get('color') and util.line_index < len(lines):
                             util.seen_moves.add(move_hash)
-                            sio.client.emit('/api/heartbeat', {'checkin': True,
-                                                               'data': {'sid': util.player_sid, 'preferences': {'time_control': '5+0'}}},
-                                            namespace='/connect')
+
                             try:
+                                sio.client.call('/api/heartbeat', {'checkin': True,
+                                                                   'data': {'sid': util.player_sid,
+                                                                            'preferences': {'time_control': '5+0'}}},
+                                                namespace='/connect', timeout=3)
                                 sio.client.call('/api/move', {'sid': util.player_sid, 'move': json.loads(lines[util.line_index])},
                                                 namespace='/connect', timeout=3)
-                            except TimeoutError as e:
-                                print(f'Timeout while sending move: {e}')
+                            except TE as exc:
+                                results[index][ERROR] += 1
+                                print(f'Connection error while sending move: {exc}')
+                                return
                             util.line_index += 2
 
                 @sio.client.on('game_over', namespace='/connect')
                 def game_over(data):
                     print(f"Received game_over {data} for sid {util.player_sid}")
-                    aborted = 'aborted' in data.get('message')
-                    if aborted:
-                        results[index][1] += 1
+                    timeout = 'aborted' in data.get('message') or 'ran out of time' in data.get('message')
+                    if timeout:
+                        results[index][TIMEOUT] += 1
+                    elif 'white checkmated' in data.get('message'):
+                        results[index][COMPLETED] += 1
                     else:
-                        results[index][0] += 1
+                        results[index][ERROR] += 1
                     util.game_over = True
 
                 @sio.client.on('game', namespace='/connect')
                 def game(data):
-                    #print(f"Received game data: {data}")
+                    print(f"Received game data: {data}")
                     if isinstance(data, str):
                         util.player_sid = data
 
@@ -101,12 +116,14 @@ def test(results: list, index: int):
                 sio.disconnect()
         except Exception as e:
             print(f'Got exception of {e}')
-            results[index][2] += 1
+            results[index][ERROR] += 1
 
 
 threads = []
 results = []
-redis_cli = redis.Redis(decode_responses=True)
+redis_cli = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"),
+                        port=int(os.getenv("REDIS_PORT", 6379)),
+                        decode_responses=True)
 redis_cli.flushdb()
 start = time.time()
 
@@ -118,7 +135,7 @@ for n in range(NUM_PLAYERS):
 
 # Wait all threads to finish.
 for t in threads:
-    t.join()
+    t.join(600)     # 10 min. timeout
 
 end = time.time()
 
@@ -127,7 +144,7 @@ sum = 0
 iter = 0
 timeouts = 0
 for result in results:
-    print(f'Test #{iter} completed with {result[2]} errors, {result[1]} timeouts and {result[0]} completed games')
+    print(f'Test #{iter} completed with {result[ERROR]} errors, {result[TIMEOUT]} timeouts and {result[COMPLETED]} completed games')
     iter += 1
     sum += result[0]
     timeouts += result[1]
