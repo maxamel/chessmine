@@ -63,10 +63,11 @@ def _init_logger(prefix="", debug=True, path="/var/log/server.log"):
     logger.addHandler(stdout_logger)
 
     logger.setLevel(my_log_level)
-    logging.getLogger('socketio').setLevel(my_log_level)
-    logging.getLogger('engineio').setLevel(my_log_level)
-    logging.getLogger('werkzeug').setLevel(my_log_level)
-    logging.getLogger('geventwebsocket.handler').setLevel(my_log_level)
+    if my_log_level == logging.DEBUG:
+        logging.getLogger('socketio').setLevel(my_log_level)
+        logging.getLogger('engineio').setLevel(my_log_level)
+        logging.getLogger('werkzeug').setLevel(my_log_level)
+        logging.getLogger('geventwebsocket.handler').setLevel(my_log_level)
 
     return logger
 

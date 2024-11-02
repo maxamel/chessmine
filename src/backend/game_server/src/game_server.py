@@ -20,7 +20,7 @@ from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_f
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
-lgr = get_logger(path="/var/log/server.log")
+lgr = get_logger(prefix="game_server", path="/var/log/server.log")
 
 
 class GameServer:
@@ -389,19 +389,24 @@ class GameServer:
 
         if len(moves) > 1:
             self.redis.set_game_status(game_id, GameStatus.PLAYING)
-        if repetitions == 2:
-            # Draw by threefold repetition
+        if repetitions == 2 or board.is_stalemate() or board.is_insufficient_material():
+            # Draw by rule
             self.redis.cancel_game_timeout(game_id=game_id)
+            message = "Three-Fold Repetition"
+            if board.is_stalemate():
+                message = "Stalemate"
+            elif board.is_insufficient_material():
+                message = "Insufficient Material"
             self.set_game_status(player_info.game_id, GameStatus.ENDED)
             rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=player_info.color, outcome=Outcome.DRAW)
-            egi = EndGameInfo(winner="Draw", message=f"Draw By Three-Fold Repetition",
+            egi = EndGameInfo(winner="Draw", message=f"Draw By {message}",
                               white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                               white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
             payload["extra_data"] = egi.to_dict()
-            lgr.info("Game Over. Three-Fold Repetition - {}".format(get_turn_from_fen(board.fen())))
-        elif board.is_game_over():
+            lgr.info(f"Game Over. {message} - {get_turn_from_fen(board.fen())})" )
+        elif board.is_game_over():      # checkmated
             # reset previous timeout settings due to turn switching
             self.redis.cancel_game_timeout(game_id=game_id)
             self.set_game_status(player_info.game_id, GameStatus.ENDED)
