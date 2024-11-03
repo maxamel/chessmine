@@ -102,8 +102,8 @@ class BaseTestCase(unittest.TestCase):
                 current_sid = self.player_a_sid
         f.close()
 
-        aux_func()
-
+        time.sleep(5)
+        aux_func(white_sid)
         time.sleep(5)
         self.assertTrue(self.game_over)
         sio.disconnect()

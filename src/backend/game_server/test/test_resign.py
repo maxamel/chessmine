@@ -9,7 +9,7 @@ class ResignTestCase(BaseTestCase):
     def test_resign(self):
 
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('resign', namespace='/connect')
         def resign(data):
@@ -35,9 +35,8 @@ class ResignTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P2K4/6B1/4kP2/Q7 w - - 13 74")
             self.game_over = True
 
-        def aux_func():
-            sio.client.emit('/api/resign', {'data': {'sid': self.player_b_sid, 'flag': "1"}},
-                            namespace='/connect', callback=resign)
+        def aux_func(sid):
+            sio.client.emit('/api/resign', {'data': {'sid': sid, 'flag': "1"}}, namespace='/connect', callback=resign)
 
         self.base(sio, "partial", aux_func)
 

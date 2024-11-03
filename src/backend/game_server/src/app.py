@@ -1,3 +1,4 @@
+import os
 
 import chess
 
@@ -24,7 +25,10 @@ app.config['SECRET_KEY'] = 'secret!'
 from gevent import monkey
 monkey.patch_all()
 
-socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent', message_queue='redis://redis:6379', logger=False, engineio_logger=False)
+redis_url = os.getenv('REDIS_URL', "redis")
+redis_port = os.getenv('REDIS_PORT', "6379")
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent',
+                    message_queue=f'redis://{redis_url}:{redis_port}', logger=False, engineio_logger=False)
 
 Payload.max_decode_packets = 150
 

@@ -10,7 +10,7 @@ class TimeRunOutTestCase(BaseTestCase):
     def test_time_run_out(self):
 
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('game_over', namespace='/connect')
         def game_over(data):
@@ -31,7 +31,7 @@ class TimeRunOutTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P2K4/6B1/4kP2/Q7 w - - 13 74")
             self.game_over = True
 
-        def aux_func():
+        def aux_func(sid):
             time.sleep(60)
 
         self.base(sio, "partial", aux_func)

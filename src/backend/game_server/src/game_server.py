@@ -217,7 +217,7 @@ class GameServer:
         player_info = self.redis.get_player_mapping(sid)
         if player_info is None or self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
             if player_info is not None:
-                lgr.error("Got draw command for an ended or non-existent game. Player: {}".format(sid))
+                lgr.error(f"Got draw command for an ended or non-existent game. Player:{sid}, Game status: {self.get_game_status(player_info.game_id)}")
             return None
         curr_time = current_milli_time()
         # Update player last seen

@@ -10,7 +10,7 @@ class CheckmateTestCase(BaseTestCase):
     def test_checkmate(self):
 
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('game_over', namespace='/connect')
         def game_over(data):
@@ -31,7 +31,7 @@ class CheckmateTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "1R6/2P5/8/1p6/1k3p2/3P1np1/5r2/5K2 w - - 1 53")
             self.game_over = True
 
-        self.base(sio, "checkmate", lambda: None)
+        self.base(sio, "checkmate", lambda x: None)
 
 
 if __name__ == '__main__':
