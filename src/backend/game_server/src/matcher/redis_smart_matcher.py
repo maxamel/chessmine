@@ -42,7 +42,7 @@ class RedisSmartMatcher(Matcher):
                                         client=self.redis_plug.r)
 
                 if rival_sid == 0:   # Own player not found. Already matched
-                    lgr.info("Someone else matched our player. We can safely abandon search")
+                    lgr.info(f"Someone else matched our player {player.sid}. We can safely abandon search")
                     return None
                 elif rival_sid == 1:  # Own player found. Keep trying
                     lgr.info("No match found. Yet...")

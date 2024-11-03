@@ -1,5 +1,4 @@
 import os
-from socketio.exceptions import TimeoutError as TE
 from threading import Thread
 
 import json
@@ -8,9 +7,26 @@ import redis
 
 import socketio
 
-NUM_PLAYERS = 100
+NUM_PLAYERS = 400
 GAMES_PER_PLAYER = 1
 
+import logging
+import sys
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Create a file handler to log messages to a file
+file_handler = logging.FileHandler('test_report.log', mode='w')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(formatter)
+
+root.addHandler(console_handler)
+root.addHandler(file_handler)
 
 ERROR = 2
 COMPLETED = 0
@@ -18,10 +34,10 @@ TIMEOUT = 1
 
 
 def run_test(results: list, index: int):
-    print(f"Running test number {index}")
+    logging.info(f"Running test number {index}")
     start = time.time()
     test(results, index)
-    print(f"Test #{index} lasted {time.time() - start} seconds")
+    logging.info(f"Test #{index} lasted {time.time() - start} seconds")
 
 
 class UtilityHelper:
@@ -31,6 +47,7 @@ class UtilityHelper:
         self.line_index = 0
         self.color = 'w'
         self.seen_moves = set()
+        self.last_heartbeat = None
         self.redis_cli = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"),
                                      port=int(os.getenv("REDIS_PORT", 6379)),
                                      decode_responses=True)
@@ -54,28 +71,30 @@ def test(results: list, index: int):
                 def move(data):
                     # Assert we got back the move we're supposed to get
                     if len(util.seen_moves) == 0:
-                        print(f'Got first move to sid {util.player_sid} and payload: {data}')
+                        logging.debug(f'Got first move to sid {util.player_sid} and payload: {data}')
                     if isinstance(data, dict):
                         move_hash = hash(json.dumps(data.get('move')))
                         if move_hash not in util.seen_moves and util.color != data.get('move').get('color') and util.line_index < len(lines):
                             util.seen_moves.add(move_hash)
 
                             try:
-                                sio.client.call('/api/heartbeat', {'checkin': True,
-                                                                   'data': {'sid': util.player_sid,
-                                                                            'preferences': {'time_control': '5+0'}}},
-                                                namespace='/connect', timeout=3)
+                                if not util.last_heartbeat or time.time() - util.last_heartbeat > 3:
+                                    # heartbeat only in case of no prior heartbeats or previous heartbeat was over 3 seconds ago
+                                    sio.client.call('/api/heartbeat', {'checkin': True,
+                                                                       'data': {'sid': util.player_sid,
+                                                                                'preferences': {'time_control': '5+0'}}},
+                                                    namespace='/connect', timeout=2)
+                                    util.last_heartbeat = time.time()
                                 sio.client.call('/api/move', {'sid': util.player_sid, 'move': json.loads(lines[util.line_index])},
-                                                namespace='/connect', timeout=3)
-                            except TE as exc:
+                                                namespace='/connect', timeout=2)
+                            except Exception as exc:
                                 results[index][ERROR] += 1
-                                print(f'Connection error while sending move: {exc}')
-                                return
+                                logging.error(f'Connection error while sending move: {exc.__class__.__name__} - {exc.__class__}')
                             util.line_index += 2
 
                 @sio.client.on('game_over', namespace='/connect')
                 def game_over(data):
-                    print(f"Received game_over {data} for sid {util.player_sid}")
+                    logging.info(f"Received game_over {data} for sid {util.player_sid}")
                     timeout = 'aborted' in data.get('message') or 'ran out of time' in data.get('message')
                     if timeout:
                         results[index][TIMEOUT] += 1
@@ -87,11 +106,10 @@ def test(results: list, index: int):
 
                 @sio.client.on('game', namespace='/connect')
                 def game(data):
-                    print(f"Received game data: {data}")
                     if isinstance(data, str):
                         util.player_sid = data
 
-                util.player_sid = sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '5+0', }}},
+                util.player_sid = sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '3+0', }}},
                                                   namespace='/connect', callback=game)
 
                 # Allow time for matching
@@ -115,7 +133,7 @@ def test(results: list, index: int):
 
                 sio.disconnect()
         except Exception as e:
-            print(f'Got exception of {e}')
+            logging.error(f'Got exception of {e}')
             results[index][ERROR] += 1
 
 
@@ -133,7 +151,7 @@ for n in range(NUM_PLAYERS):
     t.start()
     threads.append(t)
 
-# Wait all threads to finish.
+# Wait for all threads to finish.
 for t in threads:
     t.join(600)     # 10 min. timeout
 
@@ -143,25 +161,27 @@ end = time.time()
 sum = 0
 iter = 0
 timeouts = 0
+errors = 0
 for result in results:
-    print(f'Test #{iter} completed with {result[ERROR]} errors, {result[TIMEOUT]} timeouts and {result[COMPLETED]} completed games')
+    logging.info(f'Test #{iter} completed with {result[ERROR]} errors, {result[TIMEOUT]} timeouts and {result[COMPLETED]} completed games')
     iter += 1
-    sum += result[0]
-    timeouts += result[1]
+    sum += result[COMPLETED]
+    timeouts += result[TIMEOUT]
+    errors += result[ERROR]
 
 games_planned = int((NUM_PLAYERS * GAMES_PER_PLAYER) / 2)
 games_played = int(sum / 2)
 success_rate = float("{:.2f}".format(100 * (sum/(NUM_PLAYERS * GAMES_PER_PLAYER))))
 throughput = float("{:.3f}".format((NUM_PLAYERS * GAMES_PER_PLAYER)/2/(end - start)))
-print(f"************************************\n\n\n")
-print(f"Total game testing lasted {end - start} seconds")
-print(f"************************************\n")
-print(f'Tests completed with {timeouts} timeouts and {games_played}/{games_planned} completed games')
-print(f"************************************\n")
-print(f'Games completed: {games_played} completed games with {success_rate}% success rate')
-print(f"************************************\n")
-print(f'Game throughput: {throughput}')
-print(f"************************************\n\n\n")
+logging.info(f"************************************\n\n\n")
+logging.info(f"Total game testing lasted {end - start} seconds")
+logging.info(f"************************************\n")
+logging.info(f'Tests completed with {timeouts} timeouts, {errors} errors and {games_played}/{games_planned} completed games')
+logging.info(f"************************************\n")
+logging.info(f'Games completed: {games_played} completed games with {success_rate}% success rate')
+logging.info(f"************************************\n")
+logging.info(f'Game throughput: {throughput}')
+logging.info(f"************************************\n\n\n")
 
 assert sum == (NUM_PLAYERS * GAMES_PER_PLAYER)
 
