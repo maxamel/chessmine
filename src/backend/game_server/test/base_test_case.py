@@ -28,7 +28,6 @@ class BaseTestCase(unittest.TestCase):
                 move_hash = hash(json.dumps(data.get('move')))
                 self.lock.acquire()
                 if move_hash not in self.seen_moves:
-                    print(f"Received new move {data}")
                     self.assertEqual(data.get('move'), self.last_move_made)
                     self.seen_moves.add(move_hash)
                     self.semaphore.release()  # allow next move to be sent
