@@ -10,7 +10,7 @@ class StalemateTestCase(BaseTestCase):
     def test_stalemate(self):
 
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('game_over', namespace='/connect')
         def game_over(data):
@@ -31,7 +31,7 @@ class StalemateTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "5R2/6k1/8/5Q2/1P3Q2/7P/5P2/6K1 b - - 2 48")
             self.game_over = True
 
-        self.base(sio, "stalemate", lambda: None)
+        self.base(sio, "stalemate", lambda x: None)
 
 
 if __name__ == '__main__':

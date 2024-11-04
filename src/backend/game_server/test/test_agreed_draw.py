@@ -6,16 +6,19 @@ from base_test_case import BaseTestCase
 
 class AgreedDrawTestCase(BaseTestCase):
 
+    draw = False
+
     def test_agreed_draw(self):
 
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('draw', namespace='/connect')
         def draw(data):
             # Assert we got back the move we're supposed to get
             print(f'Received draw offer {data}')
-            if isinstance(data, dict):
+            if isinstance(data, dict) and not self.draw:
+                self.draw = True
                 sio.client.emit('/api/draw', {'data': {'sid': self.player_a_sid, 'flag': 1}}, namespace='/connect')
 
         @sio.client.on('game_over', namespace='/connect')
@@ -37,11 +40,12 @@ class AgreedDrawTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P2K4/6B1/4kP2/Q7 w - - 13 74")
             self.game_over = True
 
-        def aux_func():
+        def aux_func(sid):
             sio.client.emit('/api/draw', {'data': {'sid': self.player_b_sid, 'flag': "1"}},
                             namespace='/connect', callback=draw)
 
         self.base(sio, "partial", aux_func)
+        self.assertTrue(self.draw)
 
 
 if __name__ == '__main__':

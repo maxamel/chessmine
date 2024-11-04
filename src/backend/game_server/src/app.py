@@ -1,5 +1,10 @@
+import os
 
 import chess
+
+from gevent import monkey
+monkey.patch_all()
+
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
@@ -10,13 +15,20 @@ from logger import get_logger
 from player import Game, PlayerGameInfo, Player
 
 from util import PlayerType
+
 lgr = get_logger(prefix="app", path="/var/log/server.log")
 
 app = Flask(__name__, template_folder='.')
 
 app.config['SECRET_KEY'] = 'secret!'
 
-socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent', logger=False, engineio_logger=False)
+from gevent import monkey
+monkey.patch_all()
+
+redis_url = os.getenv('REDIS_URL', "redis")
+redis_port = os.getenv('REDIS_PORT', "6379")
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent',
+                    message_queue=f'redis://{redis_url}:{redis_port}', logger=False, engineio_logger=False)
 
 Payload.max_decode_packets = 150
 

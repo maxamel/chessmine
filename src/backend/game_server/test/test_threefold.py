@@ -10,7 +10,7 @@ class ThreeFoldTestCase(BaseTestCase):
     def test_threefold(self):
 
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect')
+        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('game_over', namespace='/connect')
         def game_over(data):
@@ -31,7 +31,7 @@ class ThreeFoldTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P3K3/6B1/3k1P2/Q7 w - - 15 75")
             self.game_over = True
 
-        self.base(sio, "threefold", lambda: None)
+        self.base(sio, "threefold", lambda x: None)
 
 
 if __name__ == '__main__':

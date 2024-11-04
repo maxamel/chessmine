@@ -18,6 +18,8 @@ jobs:
         uses: py-actions/py-dependency-install@30aa0023464ed4b5b116bd9fbdab87acf01a484e
         with:
           path: "src/backend/game_server/requirements.txt"
+      - name: Additional Dependencies
+        run: pip install websocket-client
       - name: Prepare Lua
         uses: leafo/gh-actions-lua@35bcb06abec04ec87df82e08caa84d545348536e
         with:
@@ -40,7 +42,7 @@ jobs:
         run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &
       - name: Test
         working-directory: src/backend/game_server/test/
-        run: python -m unittest discover -s ./  -p 'test_*.py'
+        run: python -m unittest discover -v -s ./  -p 'test_*.py'
       - name: Test with Checkov
         id: checkov
         uses: bridgecrewio/checkov-action@e983355829b735cff43000af6158aac9f7b4a7da

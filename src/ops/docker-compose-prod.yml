@@ -9,7 +9,7 @@ services:
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
         deploy:
-          replicas: 1
+          replicas: 2
           endpoint_mode: dnsrr
           resources:
             limits:
