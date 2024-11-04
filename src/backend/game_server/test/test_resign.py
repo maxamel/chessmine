@@ -6,6 +6,8 @@ from base_test_case import BaseTestCase
 
 class ResignTestCase(BaseTestCase):
 
+    resign = False
+
     def test_resign(self):
 
         sio = socketio.SimpleClient()
@@ -15,6 +17,7 @@ class ResignTestCase(BaseTestCase):
         def resign(data):
             print(f'Received resign {data}')
             self.assertEqual(data, True)
+            self.resign = True
 
         @sio.client.on('game_over', namespace='/connect')
         def game_over(data):
@@ -39,6 +42,7 @@ class ResignTestCase(BaseTestCase):
             sio.client.emit('/api/resign', {'data': {'sid': sid, 'flag': "1"}}, namespace='/connect', callback=resign)
 
         self.base(sio, "partial", aux_func)
+        self.assertTrue(self.resign)
 
 
 if __name__ == '__main__':

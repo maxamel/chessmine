@@ -6,6 +6,8 @@ from base_test_case import BaseTestCase
 
 class AgreedDrawTestCase(BaseTestCase):
 
+    draw = False
+
     def test_agreed_draw(self):
 
         sio = socketio.SimpleClient()
@@ -15,7 +17,8 @@ class AgreedDrawTestCase(BaseTestCase):
         def draw(data):
             # Assert we got back the move we're supposed to get
             print(f'Received draw offer {data}')
-            if isinstance(data, dict):
+            if isinstance(data, dict) and not self.draw:
+                self.draw = True
                 sio.client.emit('/api/draw', {'data': {'sid': self.player_a_sid, 'flag': 1}}, namespace='/connect')
 
         @sio.client.on('game_over', namespace='/connect')
@@ -42,6 +45,7 @@ class AgreedDrawTestCase(BaseTestCase):
                             namespace='/connect', callback=draw)
 
         self.base(sio, "partial", aux_func)
+        self.assertTrue(self.draw)
 
 
 if __name__ == '__main__':
