@@ -77,10 +77,10 @@ class GameServer:
                         self.set_game_endgame(game_id=game_id, end_game_info=egi)
 
                         self.redis.set_player_mapping_value(loser_sid, REMAINING_TIME, 0)
+                        self.set_game_status(game_id, GameStatus.ENDED)
                         payload = {'winner': winner_sid, 'loser': loser_sid, 'extra_data': egi.to_dict()}
                         ans = requests.post("http://localhost:5000/game_over", json=payload)
                         logging.info(f"Response from game_over request: {ans.status_code}: {ans.reason}")
-                        self.set_game_status(game_id, GameStatus.ENDED)
                         #self.cleanup(game_id=game_id)
         except Exception as e:
             lgr.error("Error in worker {}".format(e))
