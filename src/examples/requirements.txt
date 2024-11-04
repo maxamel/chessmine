@@ -1,0 +1,5 @@
+flask-socketio==5.4.1
+flask==3.0.3
+websocket-client==1.8.0
+gevent==24.2.1
+gevent-websocket==0.10.1
