@@ -9,12 +9,12 @@ services:
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
         deploy:
-          replicas: 2
+          replicas: 4
           endpoint_mode: dnsrr
           resources:
             limits:
-              cpus: '0.40'
-              memory: 300M
+              cpus: '0.20'
+              memory: 200M
         build:
           context: ../backend/game_server
           dockerfile: Dockerfile
@@ -56,6 +56,7 @@ services:
         image: "prom/prometheus:latest"
         volumes:
           - ./prometheus.yml:/etc/prometheus/prometheus.yml
+          - ./targets.json:/etc/prometheus/targets.json
         privileged: true
         depends_on:
           - cadvisor

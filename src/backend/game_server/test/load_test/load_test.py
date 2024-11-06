@@ -1,4 +1,3 @@
-import os
 from threading import Thread
 
 import json
@@ -7,66 +6,47 @@ import redis
 
 import socketio
 
-NUM_PLAYERS = 400
-GAMES_PER_PLAYER = 1
+from report import Report
 
-import logging
-import sys
-
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# Create a file handler to log messages to a file
-file_handler = logging.FileHandler('test_report.log', mode='w')
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
-
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.DEBUG)
-console_handler.setFormatter(formatter)
-
-root.addHandler(console_handler)
-root.addHandler(file_handler)
-
-ERROR = 2
 COMPLETED = 0
 TIMEOUT = 1
+ERROR = 2
 ABORTED = 3
 TIMERUNOUT = 4
 
+LOGGER = None
 
-def run_test(results: list, index: int):
-    logging.info(f"Running test number {index}")
+
+def run_test(results: list, index: int, games_per_player: int, endpoint: str, redis_host: str, redis_port: int):
+    LOGGER.info(f"Running test number {index}")
     start = time.time()
-    test(results, index)
-    logging.info(f"Test #{index} lasted {time.time() - start} seconds")
+    test(results, index, games_per_player, endpoint, redis_host, redis_port)
+    LOGGER.info(f"Test #{index} lasted {time.time() - start} seconds")
 
 
 class UtilityHelper:
 
-    def __init__(self):
+    def __init__(self, redis_host: str, redis_port: int):
         self.player_sid = None
         self.line_index = 0
         self.color = 'w'
         self.ready = False
         self.seen_moves = set()
         self.last_heartbeat = None
-        self.redis_cli = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"),
-                                     port=int(os.getenv("REDIS_PORT", 6379)),
-                                     decode_responses=True)
+        self.redis_cli = redis.Redis(redis_host, redis_port, decode_responses=True)
         self.game_over = False
 
 
-def test(results: list, index: int):
+def test(results: list, index: int, games_per_player: int, endpoint: str, redis_host: str, redis_port: int):
 
-    for i in range(GAMES_PER_PLAYER):
+    for i in range(games_per_player):
         try:
             with socketio.SimpleClient(logger=False, engineio_logger=False) as sio:
 
-                util = UtilityHelper()
+                util = UtilityHelper(redis_host, redis_port)
 
-                sio.connect(url=os.getenv("ENDPOINT", "https://www.chessmine.xyz/"), namespace='/connect', transports=['websocket'])
-                f = open('test/resources/checkmate.json', 'r')
+                sio.connect(url=endpoint, namespace='/connect', transports=['websocket'])
+                f = open('../resources/checkmate.json', 'r')
                 lines = tuple(f)
                 f.close()
 
@@ -78,7 +58,7 @@ def test(results: list, index: int):
                         while not util.ready:
                             time.sleep(2)
                     if isinstance(data, dict):
-                        logging.debug(f'Got move for sid {util.player_sid} and payload: {data}')
+                        #LOGGER.debug(f'Got move for sid {util.player_sid} and payload: {data}')
                         move_hash = hash(json.dumps(data.get('move')))
                         if move_hash not in util.seen_moves and util.color != data.get('move').get('color') and util.line_index < len(lines):
                             util.seen_moves.add(move_hash)
@@ -103,7 +83,7 @@ def test(results: list, index: int):
                                                 namespace='/connect', timeout=2)
                             except Exception as exc:
                                 results[index][TIMEOUT] += 1
-                                logging.error(f'Connection error {exc.__class__.__name__} while sending move: '
+                                LOGGER.error(f'Connection error {exc.__class__.__name__} while sending move: '
                                               f'{json.loads(lines[util.line_index])} for sid {util.player_sid}')
                                 # retry without the timeout limit in case the move wasn't registered
                                 sio.client.call('/api/move',
@@ -113,7 +93,7 @@ def test(results: list, index: int):
 
                 @sio.client.on('game_over', namespace='/connect')
                 def game_over(data):
-                    logging.info(f"Received game_over {data} for sid {util.player_sid}")
+                    LOGGER.info(f"Received game_over {data} for sid {util.player_sid}")
                     msg = data.get('message')
                     if 'ran out of time' in msg:
                         results[index][TIMERUNOUT] += 1
@@ -156,78 +136,85 @@ def test(results: list, index: int):
 
                 sio.disconnect()
         except Exception as e:
-            logging.error(f'Got exception of {e}')
+            LOGGER.error(f'Got exception of {e}')
             results[index][ERROR] += 1
 
 
-threads = []
-results = []
-redis_cli = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"),
-                        port=int(os.getenv("REDIS_PORT", 6379)),
-                        decode_responses=True)
-redis_cli.flushdb()
-start = time.time()
+def main(player_count, logger, games_per_player=1, endpoint="https://www.chessmine.xyz/",
+         redis_host="localhost", redis_port=6379) -> Report:
+    global LOGGER
+    LOGGER = logger
+    threads = []
+    results = []
+    redis_cli = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+    redis_cli.flushdb()
+    start = time.time()
 
-for n in range(NUM_PLAYERS):
-    results.append([0, 0, 0, 0, 0])
-    t = Thread(target=run_test, args=(results, n))
-    t.start()
-    threads.append(t)
+    for n in range(player_count):
+        results.append([0, 0, 0, 0, 0])
+        t = Thread(target=run_test, args=(results, n, games_per_player, endpoint, redis_host, redis_port))
+        t.start()
+        threads.append(t)
 
-# Wait for all threads to finish.
-for t in threads:
-    t.join(300)     # 10 min. timeout
+    # Wait for all threads to finish.
+    for t in threads:
+        t.join(300)     # 5 min. timeout
 
-end = time.time()
+    end = time.time()
 
-# assert that all went well
-sum = 0
-iter = 0
-timeouts = 0
-errors = 0
-aborts = 0
-timerunouts = 0
-for result in results:
-    logging.info(f'Test #{iter} completed with {result[ERROR]} errors, {result[TIMEOUT]} timeouts and {result[COMPLETED]} completed games')
-    iter += 1
-    sum += result[COMPLETED]
-    timeouts += result[TIMEOUT]
-    errors += result[ERROR]
-    aborts += result[ABORTED]
-    timerunouts += result[TIMERUNOUT]
+    # assert that all went well
+    completed = 0
+    iter = 0
+    timeouts = 0
+    errors = 0
+    aborts = 0
+    timerunouts = 0
+    success = True
 
+    for result in results:
+        LOGGER.info(f'Test #{iter} completed with {result[ERROR]} errors, {result[TIMEOUT]} timeouts and {result[COMPLETED]} completed games')
+        iter += 1
+        completed += result[COMPLETED]
+        timeouts += result[TIMEOUT]
+        errors += result[ERROR]
+        aborts += result[ABORTED]
+        timerunouts += result[TIMERUNOUT]
 
-games_planned = int((NUM_PLAYERS * GAMES_PER_PLAYER) / 2)
-games_played = int(sum / 2)
-success_rate = float("{:.2f}".format(100 * (sum/(NUM_PLAYERS * GAMES_PER_PLAYER))))
-throughput = float("{:.3f}".format((NUM_PLAYERS * GAMES_PER_PLAYER)/2/(end - start)))
-logging.info(f"************************************\n\n\n")
-logging.info(f"Total game testing lasted {end - start} seconds")
-logging.info(f"************************************\n")
-logging.info(f'Tests completed with {timeouts} timeouts, {errors} errors, {aborts} aborts, {timerunouts} timerunouts and {games_played}/{games_planned} completed games')
-logging.info(f"************************************\n")
-logging.info(f'Games completed: {games_played} completed games with {success_rate}% success rate')
-logging.info(f"************************************\n")
-logging.info(f'Game throughput: {throughput}')
-logging.info(f"************************************\n\n\n")
+    games_planned = int((player_count * games_per_player) / 2)
+    games_played = int(completed / 2)
 
-assert sum == (NUM_PLAYERS * GAMES_PER_PLAYER)
+    success_rate = float("{:.2f}".format(100 * (completed/(player_count * games_per_player))))
+    throughput = float("{:.3f}".format(games_planned/(end - start)))
+    LOGGER.info(f"************************************\n\n\n")
+    LOGGER.info(f"Total game testing lasted {end - start} seconds")
+    LOGGER.info(f"************************************\n")
+    LOGGER.info(f'Tests completed with {timeouts} timeouts, {errors} errors, {aborts} aborts, {timerunouts} timerunouts and {games_played}/{games_planned} completed games')
+    LOGGER.info(f"************************************\n")
+    LOGGER.info(f'Games completed: {games_played} completed games with {success_rate}% success rate')
+    LOGGER.info(f"************************************\n")
+    LOGGER.info(f'Game throughput: {throughput}')
+    LOGGER.info(f"************************************\n\n\n")
 
-games = redis_cli.keys("game_mapping_*")
-assert len(games) == (NUM_PLAYERS * GAMES_PER_PLAYER)/2
+    success = success and completed == (player_count * games_per_player)
 
-endgames = redis_cli.keys("game_endgame_*")
-assert len(endgames) == (NUM_PLAYERS * GAMES_PER_PLAYER)/2
+    games = redis_cli.keys("game_mapping_*")
+    success = success and len(games) == games_planned
 
-sessions = redis_cli.keys("player_session_*")
-assert len(sessions) == NUM_PLAYERS * GAMES_PER_PLAYER
+    endgames = redis_cli.keys("game_endgame_*")
+    success = success and len(endgames) == games_planned
 
-mappings = redis_cli.keys("player_mapping_*")
-assert len(mappings) == NUM_PLAYERS * GAMES_PER_PLAYER
+    sessions = redis_cli.keys("player_session_*")
+    success = success and len(sessions) == player_count * games_per_player
 
-players = set()
-for game in games:
-    game_mapping = redis_cli.hgetall(game)
-    players.add(game_mapping.get('white'))
-    players.add(game_mapping.get('black'))
-assert len(players) == NUM_PLAYERS * GAMES_PER_PLAYER
+    mappings = redis_cli.keys("player_mapping_*")
+    success = success and len(mappings) == player_count * games_per_player
+
+    players = set()
+    for game in games:
+        game_mapping = redis_cli.hgetall(game)
+        players.add(game_mapping.get('white'))
+        players.add(game_mapping.get('black'))
+    success = success and len(players) == player_count * games_per_player
+
+    return Report(test_duration=end - start, throughput=throughput, games_played=games_played, games_planned=games_planned,
+                  timeouts=timeouts, aborts=aborts, success=success, errors=errors, timerunouts=timerunouts)

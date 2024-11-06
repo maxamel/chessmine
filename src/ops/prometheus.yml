@@ -17,5 +17,6 @@ scrape_configs:
       - targets: ['caddy:2019']
 
   - job_name: game_server
-    static_configs:
-      - targets: ['game_server:2019']
+    file_sd_configs:
+      - files:
+          - 'targets.json'

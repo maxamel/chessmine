@@ -1,0 +1,8 @@
+{
+  "players": 400,
+  "rounds_per_player": 1,
+  "cycles": 4,
+  "endpoint": "http://localhost:4000",
+  "redis_port": 6379,
+  "redis_host": "localhost"
+}
