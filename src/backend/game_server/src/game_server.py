@@ -324,7 +324,7 @@ class GameServer:
             the_move.promotion = piece
 
         game_fen = self.redis.get_game_fen(player_info.game_id)
-        lgr.info(f'Got move {the_move} and fen {game_fen}')
+        lgr.info(f'Got move {the_move} by player {player_info.sid} and fen {game_fen}')
         if game_fen is None:
             board = chess.Board()
         else:

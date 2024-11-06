@@ -30,7 +30,13 @@
 		}
 	}
 
+	handle /healthcheck {
+	    @block client_ip private_ranges
+        respond 200
+    }
+
 	handle /metrics {
+	    @block client_ip private_ranges
 		metrics
 	}
 

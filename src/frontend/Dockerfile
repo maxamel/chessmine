@@ -20,4 +20,4 @@ RUN adduser -D user wheel
 RUN setfacl -Rdm u:user:rwx /etc/caddy/ && setfacl -Rdm u:user:rwx /data/caddy/ && setfacl -Rdm u:user:rwx /config/caddy/
 RUN chown -hR user /etc/caddy/ && chown -hR user /data/caddy/ && chown -hR user /config/caddy/ && chown -hR user /var/log/
 USER user
-HEALTHCHECK CMD curl --fail $APP_URL || exit 1
+HEALTHCHECK CMD curl --fail $APP_URL/healthcheck || exit 1
