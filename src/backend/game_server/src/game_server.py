@@ -15,7 +15,7 @@ from matcher.redis_smart_matcher import RedisSmartMatcher
 from player import Player, PlayerMapping, Game, PlayerGameInfo
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
-from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, Result, \
+from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, GameStatusDetail, \
     piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType
 
 current_milli_time = lambda: int(round(time.time() * 1000))
@@ -187,25 +187,25 @@ class GameServer:
                                              get_millis_for_time_control(session.preferences['time_control'])))
                 my_thread.start()
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color, dst_color=rival_info.color,
-                                     result=Result.REMATCH_AGREED)
+                                     game_status_detail=GameStatusDetail.REMATCH_AGREED)
                 lgr.info("Rematch agreed between players {},{}".format(sid1, sid2))
                 return res
             else:       # decline
                 self.redis.set_player_mapping_value(player=rival_info.sid, key=REMATCH_OFFER, val=0)
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
-                                     dst_color=rival_info.color, result=Result.REMATCH_DECLINED)
+                                     dst_color=rival_info.color, game_status_detail=GameStatusDetail.REMATCH_DECLINED)
                 lgr.info("Rematch offer declined by {}".format(player_info.sid))
                 return res
         else:
             val = 0
-            result = Result.REMATCH_DECLINED
+            result = GameStatusDetail.REMATCH_DECLINED
             if flag:
                 val = 1
-                result =Result.REMATCH_OFFERED
+                result =GameStatusDetail.REMATCH_OFFERED
                 lgr.info("Rematch offered by {}".format(player_info.sid))
             self.redis.set_player_mapping_value(player=sid, key=REMATCH_OFFER, val=val)
             res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
-                                 dst_color=rival_info.color, result=result)
+                                 dst_color=rival_info.color, game_status_detail=result)
             return res
 
     def draw(self, payload):
@@ -234,24 +234,24 @@ class GameServer:
                                   black_rating_delta=rating_dict[BLACK].get(RATING_DELTA), winner="Draw")
                 self.set_game_endgame(game_id=game_id, end_game_info=egi)
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
-                                     dst_color=rival_info.color, end_game_info=egi, result=Result.DRAW_AGREED)
+                                     dst_color=rival_info.color, end_game_info=egi, game_status_detail=GameStatusDetail.DRAW_AGREED)
                 lgr.info("Draw agreed between players {},{} for game {}".format(player_info.sid, rival_info.sid, player_info.game_id))
                 return res
             else:       # decline
                 self.redis.set_player_mapping_value(player=rival_info.sid, key=DRAW_OFFER, val=0)
-                res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, result=Result.DRAW_DECLINED,
+                res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, game_status_detail=GameStatusDetail.DRAW_DECLINED,
                                      src_color=player_info.color, dst_color=rival_info.color)
                 lgr.debug("Draw declined by player {} for game {}".format(player_info.sid, player_info.game_id))
                 return res
         else:
             val = 0
-            result = Result.DRAW_DECLINED
+            result = GameStatusDetail.DRAW_DECLINED
             if flag:
                 val = 1
-                result = Result.DRAW_OFFERED
+                result = GameStatusDetail.DRAW_OFFERED
                 lgr.info("Draw offered by {} for game {}".format(player_info.sid, player_info.game_id))
             self.redis.set_player_mapping_value(player=sid, key=DRAW_OFFER, val=val)
-            res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, result=result,
+            res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, game_status_detail=result,
                                  src_color=player_info.color, dst_color=rival_info.color)
             return res
 
@@ -269,7 +269,7 @@ class GameServer:
                           white_rating_delta=rating_dict[WHITE].get(RATING_DELTA), black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
         self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
         res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
-                             dst_color=rival_info.color, end_game_info=egi, result=Result.RESIGN)
+                             dst_color=rival_info.color, end_game_info=egi, game_status_detail=GameStatusDetail.RESIGN)
         self.redis.cancel_game_timeout(game_id=player_info.game_id)
         lgr.info("Player {} resigned game {}".format(player_info.sid, player_info.game_id))
         return res
@@ -300,7 +300,7 @@ class GameServer:
                           white_rating_delta=rating_dict[WHITE].get(RATING_DELTA), black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
         self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
         res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
-                             dst_color=rival_info.color, end_game_info=egi, result=Result.ABORT)
+                             dst_color=rival_info.color, end_game_info=egi, game_status_detail=GameStatusDetail.ABORT)
         self.redis.cancel_game_timeout(game_id=player_info.game_id)
         lgr.info("Player {} aborted game {}".format(player_info.sid, player_info.game_id))
         return res
@@ -422,7 +422,7 @@ class GameServer:
         self.metric_move_time.observe(end-start)
         return rival, payload
 
-    def play(self, payload):
+    def play(self, payload) -> ServerResponse:
         '''
         :param payload: the cookie as sent by player
         :return: sid of recepient player and the data to send
@@ -484,7 +484,7 @@ class GameServer:
         else:       # We don't have a mapping yet. Probably waiting for match
             return ServerResponse(dst_sid=player.sid)
 
-    def _get_player_game(self, player: Player):
+    def _get_player_game(self, player: Player) -> ServerResponse:
         mapping = self.get_player_mapping(player.sid)
         if not self.redis.is_game_mapping_exists(mapping.game_id):      # Rematch scheduled - game hasn't been started yet but previous one is deleted
             return ServerResponse(dst_sid=player.sid)
@@ -531,11 +531,11 @@ class GameServer:
             elif white_turn_start_time != 'None' and white_turn_start_time > 0:
                 elapsed = curr_time - white_turn_start_time
                 white_time -= elapsed
-            result = Result.GAME_IN_PROGRESS
+            game_status_detail = GameStatusDetail.GAME_IN_PROGRESS
         elif status == GameStatus.STARTED.value:
-            result = Result.GAME_STARTED
+            game_status_detail = GameStatusDetail.GAME_STARTED
         elif status == GameStatus.ENDED.value:
-            result = Result.GAME_ENDED
+            game_status_detail = GameStatusDetail.GAME_ENDED
             egi = self.get_game_endgame(game_id=mapping.game_id)
             move_ttl = 0
         else:
@@ -555,7 +555,7 @@ class GameServer:
                     end_game_info=egi,
                     engine_sid=rival.sid if rival.player_type == PlayerType.ENGINE.value else None
                     )
-        return ServerResponse(dst_sid=player.sid, src_color=mapping.color, result=result, extra_data={'game': game.to_dict()})
+        return ServerResponse(dst_sid=player.sid, src_color=mapping.color, game_status_detail=game_status_detail, extra_data={'game': game.to_dict()})
 
     def _update_ratings(self, sid1: str, sid2: str, winner_color: Union[BLACK, WHITE], outcome: Outcome):
         # returns rating, delta for sid1 and rating, delta for sid2

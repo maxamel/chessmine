@@ -24,7 +24,11 @@
 
 	@notStatic path /api/* /socket.io/*
 	handle @notStatic {
-		reverse_proxy {$BE_URL}:5000 {
+		reverse_proxy {
+            dynamic a {
+                name {$BE_URL}
+                port 5000
+            }
 			flush_interval -1
 			lb_policy query sid
 		}

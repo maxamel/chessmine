@@ -28,6 +28,7 @@ services:
         container_name: "caddy"
         image: ewr.vultrcr.com/chessmine/frontend:curr
         pull_policy: always
+        init: true  # to teardown zombie healthcheck processes
         build:
           context: ../frontend
           dockerfile: Dockerfile

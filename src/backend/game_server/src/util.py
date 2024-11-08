@@ -11,16 +11,19 @@ def get_turn_from_fen(fen: str) -> str:
         return WHITE
     return BLACK
 
+
 def get_millis_for_time_control(time_control: str) -> int:
     array = time_control.split('+')
     mins = int(array[0])
     return mins*1000*60
+
 
 def get_opposite_color(color: str):
     if color == BLACK:
         return WHITE
     if color == WHITE:
         return BLACK
+
 
 def piece_symbol_to_obj(param):
     if param == 'p':
@@ -40,12 +43,14 @@ class GameStatus(Enum):
     PLAYING = 2
     ENDED = 3
 
+
 class ConnectStatus(Enum):
     CONNECTING = 1
     CONNECTED = 2
     DISCONNECTED = 3
 
-class Result(Enum):
+
+class GameStatusDetail(Enum):
     DRAW_OFFERED = 1
     DRAW_AGREED = 2
     DRAW_DECLINED = 3
@@ -60,11 +65,13 @@ class Result(Enum):
     GAME_STARTED = 10
     GAME_ENDED = 11
 
+
 class Outcome(Enum):
     FIRST_PLAYER_WINS = 1
     SECOND_PLAYER_WINS = 2
     DRAW = 0
     NO_GAME = 3
+
 
 class PlayerType(Enum):
     HUMAN = 0
