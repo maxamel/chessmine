@@ -10,7 +10,7 @@ from flask_socketio import SocketIO, join_room
 from engineio.payload import Payload
 from prometheus_client import start_http_server
 
-from game_server import GameServer, GameStatus, Result
+from game_server import GameServer, GameStatus, GameStatusDetail
 from logger import get_logger
 from player import Game, PlayerGameInfo, Player
 
@@ -81,15 +81,10 @@ def cancelSearch(payload):
 
 
 # First connection of a player - returns the details of user as known by the server
-@socketio.on('/api/play', namespace='/connect')
-def play(payload):
-    response = game_server.play(payload)
-    join_room(room=response.dst_sid)
-    if "game" in response.extra_data:
-        the_dict = {'color': response.src_color, 'game': response.extra_data["game"]}
-        connection = "game"
-        socketio.emit(connection, the_dict, namespace='/connect', room=response.dst_sid)
-    return response.dst_sid
+@app.route('/api/play', methods=['POST'])
+def play():
+    response = game_server.play(request.get_json())
+    return response.to_dict()
 
 
 @socketio.on('/api/heartbeat', namespace='/connect')
@@ -129,12 +124,12 @@ def draw(payload):
     response = game_server.draw(payload)
     if response is None:     # quitting due to game over/bad move
         return False
-    if response.result == Result.DRAW_AGREED:       # draw by agreement
+    if response.game_status_detail == GameStatusDetail.DRAW_AGREED:       # draw by agreement
         socketio.emit("game_over", response.end_game_info.to_dict(), namespace='/connect', room=response.dst_sid)
         # send back to sender to signal draw
         socketio.emit("game_over", response.end_game_info.to_dict(), namespace='/connect', room=response.src_sid)
     else:
-        response_dict = {"color": response.src_color, "flag": response.result.value}
+        response_dict = {"color": response.src_color, "flag": response.game_status_detail.value}
         socketio.emit("draw", response_dict, namespace='/connect', room=response.dst_sid)
         # send back to sender in case he has more than one page open
         socketio.emit("draw", response_dict, namespace='/connect', room=response.src_sid)
@@ -147,9 +142,9 @@ def rematch(payload):
     if response is None:     # quitting due to game over/bad move
         return False
     else:
-        socketio.emit("rematch", {"color": response.src_color, "flag": response.result.value}, namespace='/connect', room=response.dst_sid)
+        socketio.emit("rematch", {"color": response.src_color, "flag": response.game_status_detail.value}, namespace='/connect', room=response.dst_sid)
         # send back to sender in case he has more than one page open
-        socketio.emit("rematch", {"color": response.src_color, "flag": response.result.value}, namespace='/connect', room=response.src_sid)
+        socketio.emit("rematch", {"color": response.src_color, "flag": response.game_status_detail.value}, namespace='/connect', room=response.src_sid)
     return True
 
 

@@ -128,17 +128,7 @@ $(document).ready(function () {
 
     var cookie_data = localStorage.getItem("user_session");
     var prefs = localStorage.getItem("user_prefs");
-    var socket = io("APP_URL/connect");
-
-    socket.on("connection_id", function (ans) {
-        load_cookies();
-        var data = ans.user;
-        prefs = data.preferences;
-        delete data.preferences;
-        var user_data = JSON.stringify(data);
-        localStorage.setItem("user_session", user_data);
-        cookie_data = user_data;
-    });
+    //var socket = io("APP_URL/connect");
 
     function load_cookies() {
         cookie_data = localStorage.getItem("user_session");
@@ -346,17 +336,23 @@ $(document).ready(function () {
             };
             cookie_data.preferences = prefs;
             localStorage.setItem("user_prefs", JSON.stringify(prefs));
-            var res = socket.emit("/api/play", {"data": cookie_data}, function (ans) {
-                // Save my sid
-                cookie_data.sid = ans;
-                localStorage.setItem("user_session", JSON.stringify(cookie_data));
-                window.location.href = "/game";
-                //document.getElementById("settingsBox").style.display = "none";
-                //document.getElementById("gameBox").style.display = "flex";
+            $.ajax({
+                url: "/api/play",
+                type: 'POST',
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({"data": cookie_data}),
+                success: function (ans) {
+                    //alert("Got data back " + JSON.parse(obj));
+                    cookie_data.sid = ans.dst_sid;
+                    localStorage.setItem("user_session", JSON.stringify(cookie_data));
+                    window.location.href = "/game";
+                },
+                error: function(ans) {
+                    console.log("Error in API play " + ans);
+                }
             });
-
         });
-
     }
 
     initSettings();

@@ -34,7 +34,13 @@ $(document).ready(function () {
 
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
-    var socket = io("APP_URL/connect");
+    var socket = io("APP_URL/connect", {
+        transports: ["websocket", "polling"],
+        rememberUpgrade: true,
+        timestampParam: "timestamp",
+        retries: 2,
+        tryAllTransports: true
+    });
 
     var cancel = document.getElementById("cancelSearch");
     cancel.addEventListener("click", function(evt) {

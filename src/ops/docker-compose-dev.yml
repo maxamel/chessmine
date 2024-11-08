@@ -7,7 +7,7 @@ services:
           - 6379:6379
     game_server:
         deploy:
-          replicas: 4
+          replicas: 1
           endpoint_mode: dnsrr
           resources:
             limits:
@@ -22,15 +22,15 @@ services:
           - redis
     caddy:
         container_name: "caddy"
+        init: true  # to teardown zombie healthcheck processes
         build:
           context: ../frontend
           dockerfile: Dockerfile
           args:
-            APP_URL: http://localhost
+            APP_URL: http://localhost:1443
             BE_URL: game_server
         ports:
-          - 443:443
-          - 80:80
+          - 1443:1443
         depends_on:
           - game_server
     cadvisor:
