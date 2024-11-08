@@ -128,7 +128,7 @@ $(document).ready(function () {
 
     var cookie_data = localStorage.getItem("user_session");
     var prefs = localStorage.getItem("user_prefs");
-    //var socket = io("APP_URL/connect");
+    var socket = io("APP_URL/connect");
 
     function load_cookies() {
         cookie_data = localStorage.getItem("user_session");
