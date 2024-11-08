@@ -5,6 +5,8 @@ import redis
 
 import threading
 
+import requests
+
 
 class BaseTestCase(unittest.TestCase):
 
@@ -24,6 +26,7 @@ class BaseTestCase(unittest.TestCase):
         @sio.client.on('move', namespace='/connect')
         def move(data):
             # Assert we got back the move we're supposed to get
+            #print(f"Got move data {data}")
             if isinstance(data, dict):
                 move_hash = hash(json.dumps(data.get('move')))
                 self.lock.acquire()
@@ -42,11 +45,11 @@ class BaseTestCase(unittest.TestCase):
                 elif self.player_b_sid is None:
                     self.player_b_sid = data
 
-        sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
-                        namespace='/connect', callback=game)
-        sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
-                        namespace='/connect', callback=game)
+        self.player_a_sid = requests.post(url="http://localhost:5000/api/play", json={'data': {'preferences': {'time_control': '1+0', }}}).json()["dst_sid"]
+        self.player_b_sid = requests.post(url="http://localhost:5000/api/play", json={'data': {'preferences': {'time_control': '1+0', }}}).json()["dst_sid"]
 
+        print(self.player_a_sid)
+        print(self.player_b_sid)
         # Allow time for matching
         time.sleep(10)
 
@@ -91,7 +94,8 @@ class BaseTestCase(unittest.TestCase):
         lines = tuple(f)
         current_sid = white_sid
         for line in lines:
-            self.semaphore.acquire(timeout=5)
+            acquired = self.semaphore.acquire(timeout=5)
+            self.assertTrue(acquired)
             sio.client.emit('/api/move', {'sid': current_sid, 'move': json.loads(line)},
                             namespace='/connect', callback=move)
             self.last_move_made = json.loads(line)
