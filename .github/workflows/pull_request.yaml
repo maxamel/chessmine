@@ -48,9 +48,10 @@ jobs:
         with:
           node-version: '20.x'
       - name: Install NPM dependencies
+        working-directory: src/frontend/
         run: npm install
       - name: Test Client Connection
-        working-directory: src/frontend/test/
+        working-directory: src/frontend/
         run: npm test
       - name: Test Backend
         working-directory: src/backend/game_server/test/
