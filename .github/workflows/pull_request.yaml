@@ -40,9 +40,6 @@ jobs:
       - name: Start Game Server
         working-directory: src/backend/game_server/
         run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &
-      - name: Start Game Server
-        working-directory: src/backend/game_server/
-        run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:

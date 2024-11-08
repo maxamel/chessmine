@@ -336,6 +336,15 @@ $(document).ready(function () {
             };
             cookie_data.preferences = prefs;
             localStorage.setItem("user_prefs", JSON.stringify(prefs));
+            var res = socket.emit("/api/play", {"data": cookie_data}, function (ans) {
+                // Save my sid
+                cookie_data.sid = ans;
+                localStorage.setItem("user_session", JSON.stringify(cookie_data));
+                window.location.href = "/game";
+                //document.getElementById("settingsBox").style.display = "none";
+                //document.getElementById("gameBox").style.display = "flex";
+            });
+            /*
             $.ajax({
                 url: "/api/play",
                 type: 'POST',
@@ -352,6 +361,7 @@ $(document).ready(function () {
                     console.log("Error in API play " + ans);
                 }
             });
+            */
         });
     }
 

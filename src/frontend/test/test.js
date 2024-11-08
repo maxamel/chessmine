@@ -37,16 +37,11 @@ describe('test websocket connectivity', () => {
 
     socket.on("connect", () => {
       console.log("Connected"); // true
-      fetch("http://localhost:5000/api/play", {
-        method: "POST",
-        body: JSON.stringify({ 'data': { 'preferences': { 'time_control': '30+0', } } }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((value) => value.json()).then(data => {
-        console.log("play api called" + JSON.stringify(data))
+      const play = { 'data': { 'preferences': { 'time_control': '30+0', } } } ;
+      socket.emit("/api/play", play, (response) => {
+        console.log("play api called " + response)
         setTimeout(() => {
-          const json = { "data": { "sid": data.dst_sid, "checkin": true } };
+          const json = { "data": { "sid": response, "checkin": true } };
           socket.emit("/api/heartbeat", json, (response) => {
             console.log("heartbeat api called " + JSON.stringify(response));
             assert.deepEqual(response, {"rival_connect_status":2});
@@ -55,7 +50,7 @@ describe('test websocket connectivity', () => {
             done();
           });
         }, 8000);
-      }).catch(done);
+      });
     });
     setTimeout(() => {
       assert.strictEqual(completed, true);

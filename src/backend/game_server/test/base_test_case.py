@@ -45,11 +45,10 @@ class BaseTestCase(unittest.TestCase):
                 elif self.player_b_sid is None:
                     self.player_b_sid = data
 
-        self.player_a_sid = requests.post(url="http://localhost:5000/api/play", json={'data': {'preferences': {'time_control': '1+0', }}}).json()["dst_sid"]
-        self.player_b_sid = requests.post(url="http://localhost:5000/api/play", json={'data': {'preferences': {'time_control': '1+0', }}}).json()["dst_sid"]
-
-        print(self.player_a_sid)
-        print(self.player_b_sid)
+        sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
+                        namespace='/connect', callback=game)
+        sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
+                        namespace='/connect', callback=game)
         # Allow time for matching
         time.sleep(10)
 

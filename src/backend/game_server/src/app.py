@@ -81,10 +81,20 @@ def cancelSearch(payload):
 
 
 # First connection of a player - returns the details of user as known by the server
-@app.route('/api/play', methods=['POST'])
+@app.route('/play', methods=['POST'])
 def play():
     response = game_server.play(request.get_json())
     return response.to_dict()
+
+
+@socketio.on('/api/play', namespace='/connect')
+def play(payload):
+    response = game_server.play(payload)
+    join_room(room=response.dst_sid)
+    if "game" in response.extra_data:
+        the_dict = {'color': response.src_color, 'game': response.extra_data["game"]}
+        socketio.emit("game", the_dict, namespace='/connect', room=response.dst_sid)
+    return response.dst_sid
 
 
 @socketio.on('/api/heartbeat', namespace='/connect')
