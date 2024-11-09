@@ -30,7 +30,7 @@
                 port 5000
             }
 			flush_interval -1
-			lb_policy query sid
+			lb_policy query nonce
 		}
 	}
 

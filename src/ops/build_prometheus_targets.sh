@@ -27,4 +27,9 @@ do
 done
 targets=$(sed 's/.\{1\}$/]/' <<< "$targets")
 #echo $targets
-sed -i  "s/\"targets.*/$targets/g" targets.json
+if [[ $OSTYPE == 'darwin'* ]]; then
+  gsed -i  "s/\"targets.*/$targets/g" targets.json
+else
+  sed -i  "s/\"targets.*/$targets/g" targets.json
+fi
+
