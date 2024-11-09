@@ -35,11 +35,12 @@ $(document).ready(function () {
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
     var socket = io("APP_URL/connect", {
-        transports: ["websocket", "polling"],
-        rememberUpgrade: true,
+        transports: [ "polling", "websocket"],
         timestampParam: "timestamp",
-        retries: 2,
-        tryAllTransports: true
+        tryAllTransports: true,
+        query: {
+            nonce: (Math.random() + 1).toString(36).substring(8)
+        }
     });
 
     var cancel = document.getElementById("cancelSearch");
