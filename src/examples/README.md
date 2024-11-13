@@ -6,11 +6,15 @@ Running a playground environment with minimal components to test out websocket c
 
 pip, python3.9+, docker
 
+In case using dedicated machine to run this playground, transfer the files from examples/ to the remote machine:
+scp -r . user@domain:~/
+
 ### Install and run docker
 
 This step assumes a fresh alpine linux machine but similar commands should apply for other flavours.
 
 ```
+apk add --update py-pip
 apk add docker
 service docker start
 ```
