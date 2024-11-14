@@ -39,7 +39,7 @@ class RedisSmartMatcher(Matcher):
                                               player.sid
                                               ],
                                         args=[],
-                                        client=self.redis_plug.r)
+                                        client=self.redis_plug.redis)
 
                 if rival_sid == 0:   # Own player not found. Already matched
                     lgr.info(f"Someone else matched our player {player.sid}. We can safely abandon search")

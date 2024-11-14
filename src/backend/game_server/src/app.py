@@ -38,14 +38,14 @@ game_server = GameServer()
 @app.route('/match/<sid1>/<sid2>')
 def match(sid1, sid2):
     tc = request.json['time_control']
-    player1 = game_server.get_player_session(sid1)
+    player1 = game_server.redis.get_player_session(sid1)
     if sid2 == '@':
         # no findings so we need to match with engine
         engine: Player = Player(rating=player1.rating, player_type=PlayerType.ENGINE.value)
         lgr.info(f"Matching player - {sid1} with engine {engine.sid}")
-        game_server.set_player_session(engine)
+        game_server.redis.set_player_session(player=engine)
         sid2 = engine.sid
-    player2 = game_server.get_player_session(sid2)
+    player2 = game_server.redis.get_player_session(sid2)
 
     p1 = PlayerGameInfo(name=player1.name, rating=player1.rating, time_remaining=tc)
     p2 = PlayerGameInfo(name=player2.name, rating=player2.rating, time_remaining=tc)

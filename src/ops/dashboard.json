@@ -670,7 +670,7 @@
     },
     {
       "refId": "B",
-      "expr": "avg(rate(moves_played_total[1m]))",
+      "expr": "sum(rate(moves_played_total[1m]))",
       "range": true,
       "instant": false,
       "datasource": {
@@ -679,7 +679,7 @@
       },
       "hide": false,
       "editorMode": "builder",
-      "legendFormat": "average",
+      "legendFormat": "Total",
       "useBackend": false,
       "disableTextWrap": false,
       "fullMetaSearch": false,

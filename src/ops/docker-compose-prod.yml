@@ -5,15 +5,20 @@ services:
         image: "redis:alpine"
         ports:
           - 6379:6379
+        deploy:
+          resources:
+            limits:
+              cpus: '0.10'
+              memory: 100M
     game_server:
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
         deploy:
-          replicas: 4
+          replicas: 3
           endpoint_mode: dnsrr
           resources:
             limits:
-              cpus: '0.20'
+              cpus: '0.30'
               memory: 200M
         build:
           context: ../backend/game_server
@@ -24,6 +29,14 @@ services:
           - ../backend/game_server/:/usr/app
         depends_on:
           - redis
+    redis_exporter:
+      container_name: "redis_exporter"
+      image: "oliver006/redis_exporter:alpine"
+      privileged: true
+      environment:
+        REDIS_ADDR: "redis"
+      depends_on:
+        - redis
     caddy:
         container_name: "caddy"
         image: ewr.vultrcr.com/chessmine/frontend:curr
@@ -72,6 +85,7 @@ services:
         volumes:
           - ./datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
           - ./dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+          - ./redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
           - ./default.yml:/etc/grafana/provisioning/dashboards/default.yml
         privileged: true
         depends_on:

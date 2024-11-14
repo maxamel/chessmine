@@ -35,12 +35,14 @@
 	}
 
 	handle /healthcheck {
-	    @block client_ip private_ranges
+	    @denied not client_ip private_ranges
+	    abort @denied
         respond 200
     }
 
 	handle /metrics {
-	    @block client_ip private_ranges
+	    @denied not client_ip private_ranges
+	    abort @denied
 		metrics
 	}
 

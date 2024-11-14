@@ -7,6 +7,7 @@ import uuid
 from typing import Union, Any
 
 from prometheus_client import Counter, Histogram
+from redis.client import Pipeline
 
 from consts import *
 from elo import EloRating
@@ -54,7 +55,7 @@ class GameServer:
                             # The move function should check that it's been made past the time and quit the game
                             lgr.info("A move has been made and we weren't fast enough to complete the removal operation")
                             continue
-                        lgr.info("Ending game " + game_id)
+                        lgr.info("Ending game due to expiration" + game_id)
                         game = self.redis.get_game(game_id)
                         fen = game[FEN]
                         turn = get_turn_from_fen(fen)
@@ -77,7 +78,7 @@ class GameServer:
                         self.set_game_endgame(game_id=game_id, end_game_info=egi)
 
                         self.redis.set_player_mapping_value(loser_sid, REMAINING_TIME, 0)
-                        self.set_game_status(game_id, GameStatus.ENDED)
+                        self.redis.set_game_status(game_id=game_id, status=GameStatus.ENDED)
                         payload = {'winner': winner_sid, 'loser': loser_sid, 'extra_data': egi.to_dict()}
                         ans = requests.post("http://localhost:5000/game_over", json=payload)
                         logging.info(f"Response from game_over request: {ans.status_code}: {ans.reason}")
@@ -97,41 +98,18 @@ class GameServer:
     def map_rivals(self, player1_sid, player2_sid, time_control):
         game_id = uuid.uuid4().hex
         lgr.info("Mapping rivals with args: {}, {}, {}, {}".format(player1_sid, player2_sid, game_id, time_control))
-        self.redis.set_player_mapping(player=player1_sid, opponent=player2_sid, game_id=game_id, color=WHITE, time_control=time_control)
-        self.redis.set_player_mapping(player=player2_sid, opponent=player1_sid, game_id=game_id, color=BLACK, time_control=time_control)
-        self.redis.set_game_mapping(game_id=game_id, white_sid=player1_sid, black_sid=player2_sid)
+        pipeline: Pipeline = self.redis.get_pipeline()
+        self.redis.set_player_mapping(player=player1_sid, opponent=player2_sid, game_id=game_id, color=WHITE,
+                                      time_control=time_control, pipeline=pipeline)
+        self.redis.set_player_mapping(player=player2_sid, opponent=player1_sid, game_id=game_id, color=BLACK,
+                                      time_control=time_control, pipeline=pipeline)
+        self.redis.set_game_mapping(game_id=game_id, white_sid=player1_sid, black_sid=player2_sid, pipeline=pipeline)
+        pipeline.execute()
         return game_id
 
-    def get_game_fen(self, game_id):
-        return self.redis.get_game_fen(game_id=game_id)
-
-    def get_game_moves(self, game_id):
-        return self.redis.get_game_moves(game_id=game_id)
-
-    def get_game_fens(self, game_id):
-        return self.redis.get_game_fens(game_id=game_id)
-
-    def get_game_status(self, game_id):
-        return self.redis.get_game_status(game_id=game_id)
-
-    def set_game_status(self, game_id, status):
-        self.redis.set_game_status(game_id=game_id, status=status)
-
-    def set_game_endgame(self, game_id, end_game_info: EndGameInfo):
+    def set_game_endgame(self, game_id, end_game_info: EndGameInfo, pipeline: Pipeline = None):
         self.metric_total_games_played.inc()
-        self.redis.set_game_endgame(game_id=game_id, end_game=end_game_info)
-
-    def get_game_endgame(self, game_id):
-        return self.redis.get_game_endgame(game_id=game_id)
-
-    def get_player_mapping(self, sid) -> PlayerMapping:
-        return self.redis.get_player_mapping(sid)
-
-    def set_player_session(self, player: Player) -> None:
-        self.redis.set_player_session(player=player)
-
-    def get_player_session(self, sid) -> Player:
-        return self.redis.get_player_session(sid)
+        self.redis.set_game_endgame(game_id=game_id, end_game=end_game_info, pipeline=pipeline)
 
     def get_player_from_cookie(self, cookie):
         if "sid" not in cookie:
@@ -139,12 +117,12 @@ class GameServer:
         else:
             sid = cookie["sid"]
             preferences = cookie["preferences"]
-            player = self.get_player_session(sid=sid)
+            player = self.redis.get_player_session(sid)
             if player is None:       # First time we see this player
                 player = Player(preferences=preferences)
             else:
                 player = Player(sid=sid, name=player.name, rating=player.rating, preferences=preferences)
-        self.set_player_session(player=player)
+        self.redis.set_player_session(player=player)
         lgr.debug("Set player session: {}".format(player.to_dict()))
         return player
 
@@ -166,16 +144,18 @@ class GameServer:
         sid = data["sid"]
         flag = data["flag"]
         player_info = self.redis.get_player_mapping(sid)
-        if self.get_game_status(player_info.game_id) != GameStatus.ENDED.value:
+        if self.redis.get_game_status(game_id=player_info.game_id) != GameStatus.ENDED.value:
             lgr.error("Got rematch command for a game in progress. Game id: {}. Player: {}".format(player_info.game_id, player_info.sid))
             return None
         game_id = player_info.game_id
         rival_info = self.redis.get_player_mapping(player_info.opponent)
         if rival_info.rematch_offer == 1:
             if flag:    # rematch agreed
-                self.redis.cancel_game_timeout(game_id=game_id)
-                self.redis.set_player_mapping_value(player=sid, key=REMATCH_OFFER, val=1)
-                self.redis.remove_game_info(game_id)
+                pipeline: Pipeline = self.redis.get_pipeline()
+                self.redis.cancel_game_timeout(game_id=game_id, pipeline=pipeline)
+                self.redis.set_player_mapping_value(player=sid, key=REMATCH_OFFER, val=1, pipeline=pipeline)
+                self.redis.remove_game_info(game_id, pipeline)
+                pipeline.execute()
                 #self.cleanup(game_id=game_id)
                 session = self.redis.get_player_session(player_info.sid)
                 sid1 = player_info.sid
@@ -203,6 +183,8 @@ class GameServer:
                 val = 1
                 result =GameStatusDetail.REMATCH_OFFERED
                 lgr.info("Rematch offered by {}".format(player_info.sid))
+            else:
+                lgr.info("Rematch declined by {}".format(player_info.sid))
             self.redis.set_player_mapping_value(player=sid, key=REMATCH_OFFER, val=val)
             res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
                                  dst_color=rival_info.color, game_status_detail=result)
@@ -215,34 +197,33 @@ class GameServer:
         sid = data["sid"]
         flag = data["flag"]
         player_info = self.redis.get_player_mapping(sid)
-        if player_info is None or self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
+        if player_info is None or self.redis.get_game_status(game_id=player_info.game_id) == GameStatus.ENDED.value:
             if player_info is not None:
-                lgr.error(f"Got draw command for an ended or non-existent game. Player:{sid}, Game status: {self.get_game_status(player_info.game_id)}")
+                lgr.error(f"Got draw command for an ended or non-existent game. Player:{sid}, Game status: {self.redis.get_game_status(game_id=player_info.game_id)}")
             return None
         curr_time = current_milli_time()
         # Update player last seen
-        self.redis.set_player_mapping_value(player_info.sid, LAST_SEEN, curr_time)
         game_id = player_info.game_id
         rival_info = self.redis.get_player_mapping(player_info.opponent)
+        pipeline: Pipeline = self.redis.get_pipeline()
+        self.redis.set_player_mapping_value(player_info.sid, LAST_SEEN, curr_time, pipeline)
         if rival_info.draw_offer == 1:
             if flag:    # draw by agreement
-                self.redis.cancel_game_timeout(game_id=game_id)
-                self.set_game_status(player_info.game_id, GameStatus.ENDED)
+                self.redis.cancel_game_timeout(game_id=game_id, pipeline=pipeline)
+                self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED, pipeline=pipeline)
                 rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.DRAW)
                 egi = EndGameInfo(message="Draw By Agreement", white_rating=rating_dict[WHITE].get(RATING),
                                   black_rating=rating_dict[BLACK].get(RATING), white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                                   black_rating_delta=rating_dict[BLACK].get(RATING_DELTA), winner="Draw")
-                self.set_game_endgame(game_id=game_id, end_game_info=egi)
+                self.set_game_endgame(game_id=game_id, end_game_info=egi, pipeline=pipeline)
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
                                      dst_color=rival_info.color, end_game_info=egi, game_status_detail=GameStatusDetail.DRAW_AGREED)
                 lgr.info("Draw agreed between players {},{} for game {}".format(player_info.sid, rival_info.sid, player_info.game_id))
-                return res
             else:       # decline
-                self.redis.set_player_mapping_value(player=rival_info.sid, key=DRAW_OFFER, val=0)
+                self.redis.set_player_mapping_value(player=rival_info.sid, key=DRAW_OFFER, val=0, pipeline=pipeline)
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, game_status_detail=GameStatusDetail.DRAW_DECLINED,
                                      src_color=player_info.color, dst_color=rival_info.color)
                 lgr.debug("Draw declined by player {} for game {}".format(player_info.sid, player_info.game_id))
-                return res
         else:
             val = 0
             result = GameStatusDetail.DRAW_DECLINED
@@ -250,20 +231,21 @@ class GameServer:
                 val = 1
                 result = GameStatusDetail.DRAW_OFFERED
                 lgr.info("Draw offered by {} for game {}".format(player_info.sid, player_info.game_id))
-            self.redis.set_player_mapping_value(player=sid, key=DRAW_OFFER, val=val)
+            self.redis.set_player_mapping_value(player=sid, key=DRAW_OFFER, val=val, pipeline=pipeline)
             res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, game_status_detail=result,
                                  src_color=player_info.color, dst_color=rival_info.color)
-            return res
+        pipeline.execute()
+        return res
 
     def resign(self, payload):
         data = payload["data"]
         sid = data["sid"]
         player_info = self.redis.get_player_mapping(sid)
-        if self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
+        if self.redis.get_game_status(game_id=player_info.game_id) == GameStatus.ENDED.value:
             return
         rival_info = self.redis.get_player_mapping(player_info.opponent)
         rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.SECOND_PLAYER_WINS)
-        self.set_game_status(player_info.game_id, GameStatus.ENDED)
+        self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED)
         egi = EndGameInfo(winner=rival_info.color, message=f"{player_info.color} resigned",
                           white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                           white_rating_delta=rating_dict[WHITE].get(RATING_DELTA), black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
@@ -285,7 +267,7 @@ class GameServer:
         data = payload["data"]
         sid = data["sid"]
         player_info = self.redis.get_player_mapping(sid)
-        if self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
+        if self.redis.get_game_status(game_id=player_info.game_id) == GameStatus.ENDED.value:
             lgr.info("Illegal attempt by player {} to abort game {} which is already ended".format(player_info.sid, player_info.game_id))
             return
         rival_info = self.redis.get_player_mapping(player_info.opponent)
@@ -294,7 +276,7 @@ class GameServer:
             lgr.info("Illegal attempt by player {} to abort game {} which is already in progress".format(player_info.sid, player_info.game_id))
             return None
         rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.NO_GAME)
-        self.set_game_status(player_info.game_id, GameStatus.ENDED)
+        self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED)
         egi = EndGameInfo(winner="Abort", message=f"{player_info.color} aborted",
                           white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                           white_rating_delta=rating_dict[WHITE].get(RATING_DELTA), black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
@@ -313,7 +295,7 @@ class GameServer:
         start = time.time()
         sid = payload["sid"]
         player_info: PlayerMapping = self.redis.get_player_mapping(sid)
-        if self.get_game_status(player_info.game_id) == GameStatus.ENDED.value:
+        if self.redis.get_game_status(game_id=player_info.game_id) == GameStatus.ENDED.value:
             return None, None
         game_id = player_info.game_id
 
@@ -323,7 +305,10 @@ class GameServer:
             piece = piece_symbol_to_obj(move["promotion"])
             the_move.promotion = piece
 
-        game_fen = self.redis.get_game_fen(player_info.game_id)
+        fens = self.redis.get_game_fens(game_id)
+        game_fen = None
+        if fens:
+            game_fen = fens[-1]
         lgr.info(f'Got move {the_move} by player {player_info.sid} and fen {game_fen}')
         if game_fen is None:
             board = chess.Board()
@@ -337,89 +322,92 @@ class GameServer:
         board.push(the_move)
 
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
-        lgr.info("Move {} played by player {} in game {}".format(move, player_info.sid, player_info.game_id))
-        self.metric_total_moves_played.inc()
-        if player_info.ttl_start_time != 'None':
-            self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None')
-        if canceled != 1 and player_info.turn_start_time != 0 and player_info.turn_start_time != 'None':
-            # we're in the process of timeouting the game. Just quit now and let it timeout gracefully
-            lgr.error("Move {} by player {} is not counted due to game {} termination".format(move["san"], player_info.sid, player_info.game_id))
-            return None, None
         rival = player_info.opponent
         rival_info = self.redis.get_player_mapping(rival)
-        if rival_info.draw_offer == 1:
-            # if rival proposed draw it means it's been declined
-            self.redis.set_player_mapping_value(rival_info.sid, DRAW_OFFER, 0)
-        # Handle timing updates
+        pipeline: Pipeline = self.redis.get_pipeline()
+        lgr.info("Move {} played by player {} in game {}".format(move, player_info.sid, player_info.game_id))
+        # Handle game timeouts and late moves
         curr_time = current_milli_time()
-        # Update player last seen
-        self.redis.set_player_mapping_value(sid, LAST_SEEN, curr_time)
         if player_info.turn_start_time != 'None':
             last_time = int(player_info.turn_start_time)
             elapsed = curr_time - last_time if last_time > 0 else 0
             payload["remaining"] = int(rival_info.time_remaining)
             payload["other_remaining"] = int(player_info.time_remaining) - elapsed
-            if payload["other_remaining"] <= 0:
+            if canceled != 1 and player_info.turn_start_time != 0:
+                # we're in the process of timeouting the game. Just quit now and let it timeout gracefully
+                lgr.error("Move {} by player {} is not counted due to game {} termination".format(move["san"], player_info.sid, player_info.game_id))
+                return None, None
+            elif payload["other_remaining"] <= 0:
                 # This move was too late. Timeout function was late in picking it up.
                 # But this move is illegal and we're stopping this game right now!
                 self.redis.set_game_timeout(game_id=game_id, timeout=curr_time)
                 lgr.error("Move {} by player {} in game {} recorded too late. Terminating game now.".format(move["san"], player_info.sid, player_info.game_id))
                 return None, None
             expire_in_future = curr_time + payload["remaining"]
+            lgr.info("Setting expiration time {} for {}".format(expire_in_future, game_id))
             self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
-            self.redis.set_player_mapping_value(sid, REMAINING_TIME, payload["other_remaining"])
-            self.redis.set_player_mapping_value(rival, TURN_START_TIME, curr_time)
+            self.redis.set_player_mapping_value(sid, REMAINING_TIME, payload["other_remaining"], pipeline=pipeline)
+            self.redis.set_player_mapping_value(rival, TURN_START_TIME, curr_time, pipeline=pipeline)
         else:  # game starting
-            self.redis.set_player_mapping_value(sid, TURN_START_TIME, 0)
-            self.redis.set_player_mapping_value(rival, TURN_START_TIME, 0)
+            self.redis.set_player_mapping_value(sid, TURN_START_TIME, 0, pipeline=pipeline)
+            self.redis.set_player_mapping_value(rival, TURN_START_TIME, 0, pipeline=pipeline)
 
+        if player_info.ttl_start_time != 'None':
+            self.redis.set_player_mapping_value(player_info.sid, TTL_START_TIME, 'None', pipeline=pipeline)
+        if rival_info.draw_offer == 1:
+            # if rival proposed draw it means it's been declined
+            self.redis.set_player_mapping_value(rival_info.sid, DRAW_OFFER, 0, pipeline=pipeline)
+
+        # Update player last seen
+        self.redis.set_player_mapping_value(sid, LAST_SEEN, curr_time, pipeline=pipeline)
         # Handle the move itself, board update, etc.
         moves = self.redis.get_game_moves(game_id)
         # calculate repetition
-        fens = self.redis.get_game_fens(game_id)
         repetitions = list(map(lambda x: x.split(' ')[0], fens)).count(board.fen().split(' ')[0])
         if len(moves) == 0:       # first move
-            self.redis.set_player_mapping_value(rival_info.sid, TTL_START_TIME, curr_time)
+            self.redis.set_player_mapping_value(rival_info.sid, TTL_START_TIME, curr_time, pipeline=pipeline)
             expire_in_future = curr_time + 30000        # 30 seconds from now
-            lgr.info("Setting expiration time {}".format(expire_in_future))
+            lgr.info("Setting expiration time {} for {}".format(expire_in_future, game_id))
             self.redis.set_game_timeout(game_id=game_id, timeout=expire_in_future)
-        self.redis.set_game_fen(game_id, board.fen())
-        self.redis.add_fen_to_game(game_id, board.fen())
-        self.redis.add_move_to_game(game_id, move["san"] if isinstance(move, dict) else move)   # engine produces move as string of form 'e2e4'
+        self.redis.set_game_fen(game_id, board.fen(), pipeline=pipeline)
+        self.redis.add_fen_to_game(game_id, board.fen(), pipeline=pipeline)
+        self.redis.add_move_to_game(game_id, move["san"] if isinstance(move, dict) else move, pipeline=pipeline)   # engine produces move as string of form 'e2e4'
 
-        if len(moves) > 1:
-            self.redis.set_game_status(game_id, GameStatus.PLAYING)
+        if len(moves) == 2:
+            self.redis.set_game_status(game_id, GameStatus.PLAYING, pipeline=pipeline)
         if repetitions == 2 or board.is_stalemate() or board.is_insufficient_material():
             # Draw by rule
-            self.redis.cancel_game_timeout(game_id=game_id)
             message = "Three-Fold Repetition"
             if board.is_stalemate():
                 message = "Stalemate"
             elif board.is_insufficient_material():
                 message = "Insufficient Material"
-            self.set_game_status(player_info.game_id, GameStatus.ENDED)
             rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=player_info.color, outcome=Outcome.DRAW)
             egi = EndGameInfo(winner="Draw", message=f"Draw By {message}",
                               white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                               white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
-            self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
+            self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED, pipeline=pipeline)
+            self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi, pipeline=pipeline)
+            self.redis.cancel_game_timeout(game_id=game_id, pipeline=pipeline)
             payload["extra_data"] = egi.to_dict()
-            lgr.info(f"Game Over. {message} - {get_turn_from_fen(board.fen())})" )
+            lgr.info(f"Game Over. {message} - {get_turn_from_fen(board.fen())})")
         elif board.is_game_over():      # checkmated
             # reset previous timeout settings due to turn switching
-            self.redis.cancel_game_timeout(game_id=game_id)
-            self.set_game_status(player_info.game_id, GameStatus.ENDED)
             rating_dict = self._update_ratings(sid, rival_info.sid, winner_color=player_info.color, outcome=Outcome.FIRST_PLAYER_WINS)
             egi = EndGameInfo(winner=player_info.color, message=f"{rival_info.color} checkmated",
                               white_rating=rating_dict[WHITE].get(RATING), black_rating=rating_dict[BLACK].get(RATING),
                               white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
-            self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi)
+            self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED, pipeline=pipeline)
+            self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi, pipeline=pipeline)
+            self.redis.cancel_game_timeout(game_id=game_id, pipeline=pipeline)
             payload["extra_data"] = egi.to_dict()
             lgr.info("Game Over. {} checkmated".format(rival_info.color))
         end = time.time()
+        self.metric_total_moves_played.inc()
         self.metric_move_time.observe(end-start)
+        pipeline.execute()
         return rival, payload
 
     def play(self, payload) -> ServerResponse:
@@ -429,9 +417,9 @@ class GameServer:
         '''
         cookie = payload["data"]
         player = self.get_player_from_cookie(cookie)
-        mapping = self.get_player_mapping(player.sid)
+        mapping = self.redis.get_player_mapping(player.sid)
         if mapping is not None:
-            self.set_player_session(player=player)
+            self.redis.set_player_session(player=player)
             if self.redis.is_game_mapping_exists(mapping.game_id):
                 game = self.redis.get_game(mapping.game_id)
                 if int(game[STATUS]) != GameStatus.ENDED.value:   # if game in progress return to game
@@ -439,10 +427,10 @@ class GameServer:
                 else:
                     self.redis.remove_player_mapping(player.sid)
 
-        if not self.get_player_session(sid=player.sid):
+        if not self.redis.get_player_session(player.sid):
             # We don't recognize this user. Regenerate sid
             player = Player(preferences=player.preferences)
-            self.set_player_session(player=player)
+            self.redis.set_player_session(player=player)
         lgr.info("Player {} connecting to play. Initiating match search".format(player.sid))
         self.find_match(player=player)
         ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict()})
@@ -485,16 +473,16 @@ class GameServer:
             return ServerResponse(dst_sid=player.sid)
 
     def _get_player_game(self, player: Player) -> ServerResponse:
-        mapping = self.get_player_mapping(player.sid)
+        mapping = self.redis.get_player_mapping(player.sid)
         if not self.redis.is_game_mapping_exists(mapping.game_id):      # Rematch scheduled - game hasn't been started yet but previous one is deleted
             return ServerResponse(dst_sid=player.sid)
         curr_time = current_milli_time()
-        rival = self.get_player_session(mapping.opponent)
-        rival_mapping = self.get_player_mapping(rival.sid)
-        status = self.get_game_status(mapping.game_id)
-        fen = self.get_game_fen(mapping.game_id)
-        moves = self.get_game_moves(mapping.game_id)
-        fens = self.get_game_fens(mapping.game_id)
+        rival = self.redis.get_player_session(mapping.opponent)
+        rival_mapping = self.redis.get_player_mapping(rival.sid)
+        status = self.redis.get_game_status(game_id=mapping.game_id)
+        fen = self.redis.get_game_fen(game_id=mapping.game_id)
+        moves = self.redis.get_game_moves(game_id=mapping.game_id)
+        fens = self.redis.get_game_fens(game_id=mapping.game_id)
         white = player
         black = rival
         move_ttl = mapping.ttl_start_time if mapping.ttl_start_time != 'None' else rival_mapping.ttl_start_time
@@ -536,7 +524,7 @@ class GameServer:
             game_status_detail = GameStatusDetail.GAME_STARTED
         elif status == GameStatus.ENDED.value:
             game_status_detail = GameStatusDetail.GAME_ENDED
-            egi = self.get_game_endgame(game_id=mapping.game_id)
+            egi = self.redis.get_game_endgame(game_id=mapping.game_id)
             move_ttl = 0
         else:
             raise ValueError("Unknown game status %s", status)
@@ -560,15 +548,17 @@ class GameServer:
     def _update_ratings(self, sid1: str, sid2: str, winner_color: Union[BLACK, WHITE], outcome: Outcome):
         # returns rating, delta for sid1 and rating, delta for sid2
         # In case of draw winner_color should be of sid1
-        player_session = self.get_player_session(sid1)
-        rival_session = self.get_player_session(sid2)
+        player_session = self.redis.get_player_session(sid1)
+        rival_session = self.redis.get_player_session(sid2)
         ratingA, ratingB = EloRating(player_session.rating, rival_session.rating, d=outcome.value)
 
         lgr.info("Rating calculation: Player {} - New Rating: {}({}), Old Rating: {}".format(sid1, ratingA, ratingA - player_session.rating, player_session.rating))
         lgr.info("Rating calculation: Player {} - New Rating: {}({}), Old Rating: {}".format(sid2, ratingB, ratingB - rival_session.rating, rival_session.rating))
-        self.redis.set_player_session_value(player_session.sid, RATING, ratingA)
-        self.redis.set_player_session_value(rival_session.sid, RATING, ratingB)
-        self.redis.set_player_mapping_value(player_session.sid, RATING_DELTA, ratingA - player_session.rating)
-        self.redis.set_player_mapping_value(rival_session.sid, RATING_DELTA, ratingB - rival_session.rating)
+        pipeline: Pipeline = self.redis.get_pipeline()
+        self.redis.set_player_session_value(player_session.sid, RATING, ratingA, pipeline)
+        self.redis.set_player_session_value(rival_session.sid, RATING, ratingB, pipeline)
+        self.redis.set_player_mapping_value(player_session.sid, RATING_DELTA, ratingA - player_session.rating, pipeline)
+        self.redis.set_player_mapping_value(rival_session.sid, RATING_DELTA, ratingB - rival_session.rating, pipeline)
+        pipeline.execute()
         return {winner_color: {RATING: ratingA, RATING_DELTA: ratingA - player_session.rating},
                 get_opposite_color(winner_color): {RATING: ratingB, RATING_DELTA: ratingB - rival_session.rating}}
