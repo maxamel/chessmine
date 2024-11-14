@@ -1,3 +1,5 @@
+import random
+import string
 from functools import partial
 from threading import Thread
 
@@ -69,11 +71,11 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
                         try:
                             if not util.last_heartbeat or time.time() - util.last_heartbeat > 3:
                                 # heartbeat only in case of no prior heartbeats or previous heartbeat was over 3 seconds ago
-                                sio.call('/api/heartbeat', {'checkin': True,
+                                sio.emit('/api/heartbeat', {'checkin': True,
                                                             'data': {'sid': util.player_sid,
                                                                      'preferences': {
                                                                          'time_control': '5+0'}}},
-                                         namespace='/connect', timeout=call_timeout)
+                                         namespace='/connect')
                                 util.last_heartbeat = time.time()
                             # The relation between seen_moves and line_index follow a specific formula.
                             # black: (len(seen_moves) * 2 - 1 == line_index. white: (len(seen_moves) * 2 == line_index
@@ -84,9 +86,9 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
                             while (len(util.seen_moves) * 2) - (0 if util.color == 'w' else 1) != util.line_index:
                                 time.sleep(2)
                             if util.line_index < len(lines):
-                                sio.call('/api/move',
+                                sio.emit('/api/move',
                                          {'sid': util.player_sid, 'move': json.loads(lines[util.line_index])},
-                                         namespace='/connect', timeout=call_timeout)
+                                         namespace='/connect')
                         except Exception as exc:
                             results[index][TIMEOUT] += 1
                             LOGGER.error(f'Connection error {exc.__class__.__name__} while sending move: '
@@ -98,7 +100,7 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
 
             def game_over(sid, data):
                 util = sid_to_data[sid][UTILS]
-                LOGGER.info(f"Received game_over target sid {sid} and data {data} for sid {util.player_sid}")
+                #LOGGER.info(f"Received game_over target sid {sid} and data {data} for sid {util.player_sid}")
                 msg = data.get('message')
                 if 'ran out of time' in msg:
                     results[index][TIMERUNOUT] += 1
@@ -110,7 +112,8 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
                     results[index][ERROR] += 1
                 util.game_over = True
 
-            sio.connect(url=endpoint, namespaces='/connect', transports=['websocket'])
+            nonce = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            sio.connect(url=endpoint + f"?nonce={nonce}", namespaces='/connect', transports=['websocket'])
             assert sio.sid is not None
             sid_to_data[sio.sid] = dict()
             sid_to_data[sio.sid][UTILS] = UtilityHelper(redis_host, redis_port)
