@@ -55,7 +55,7 @@ class GameServer:
                             # The move function should check that it's been made past the time and quit the game
                             lgr.info("A move has been made and we weren't fast enough to complete the removal operation")
                             continue
-                        lgr.info("Ending game " + game_id)
+                        lgr.info("Ending game due to expiration" + game_id)
                         game = self.redis.get_game(game_id)
                         fen = game[FEN]
                         turn = get_turn_from_fen(fen)
@@ -183,6 +183,8 @@ class GameServer:
                 val = 1
                 result =GameStatusDetail.REMATCH_OFFERED
                 lgr.info("Rematch offered by {}".format(player_info.sid))
+            else:
+                lgr.info("Rematch declined by {}".format(player_info.sid))
             self.redis.set_player_mapping_value(player=sid, key=REMATCH_OFFER, val=val)
             res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color,
                                  dst_color=rival_info.color, game_status_detail=result)
@@ -387,6 +389,7 @@ class GameServer:
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
             self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED, pipeline=pipeline)
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi, pipeline=pipeline)
+            self.redis.cancel_game_timeout(game_id=game_id, pipeline=pipeline)
             payload["extra_data"] = egi.to_dict()
             lgr.info(f"Game Over. {message} - {get_turn_from_fen(board.fen())})")
         elif board.is_game_over():      # checkmated
@@ -398,6 +401,7 @@ class GameServer:
                               black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
             self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED, pipeline=pipeline)
             self.set_game_endgame(game_id=player_info.game_id, end_game_info=egi, pipeline=pipeline)
+            self.redis.cancel_game_timeout(game_id=game_id, pipeline=pipeline)
             payload["extra_data"] = egi.to_dict()
             lgr.info("Game Over. {} checkmated".format(rival_info.color))
         end = time.time()

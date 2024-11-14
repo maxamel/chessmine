@@ -144,7 +144,7 @@ class RedisPlug:
         key = self.player_info + player
         return self.get_redis().exists(key)
 
-    def get_player_mapping(self, player) -> PlayerMapping | None:
+    def get_player_mapping(self, player) -> PlayerMapping:
         key = self.player + player
         if not self.get_redis().exists(key):
             return None
