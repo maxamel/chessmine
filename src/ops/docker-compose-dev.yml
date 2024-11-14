@@ -12,11 +12,11 @@ services:
               memory: 100M
     game_server:
         deploy:
-          replicas: 4
+          replicas: 3
           endpoint_mode: dnsrr
           resources:
             limits:
-              cpus: '0.20'
+              cpus: '0.30'
               memory: 200M
         build:
           context: ../backend/game_server

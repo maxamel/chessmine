@@ -14,11 +14,11 @@ services:
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
         deploy:
-          replicas: 4
+          replicas: 3
           endpoint_mode: dnsrr
           resources:
             limits:
-              cpus: '0.20'
+              cpus: '0.30'
               memory: 200M
         build:
           context: ../backend/game_server

@@ -1,7 +1,7 @@
 {
   "threads": 10,
   "players_per_thread": 80,
-  "cycles": 2,
+  "cycles": 4,
   "endpoint": "http://localhost:1443",
   "redis_port": 6379,
   "redis_host": "localhost",
