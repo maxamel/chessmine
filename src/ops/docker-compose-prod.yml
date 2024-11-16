@@ -2,7 +2,11 @@ name: chessmine
 services:
     redis:
         container_name: "redis"
-        image: "redis:alpine"
+        build:
+          context: ../redis
+          dockerfile: Dockerfile
+        volumes:
+          - ../redis/:/usr/app
         ports:
           - 6379:6379
         deploy:
@@ -10,6 +14,14 @@ services:
             limits:
               cpus: '0.10'
               memory: 100M
+    redis_exporter:
+      container_name: "redis_exporter"
+      image: "oliver006/redis_exporter:alpine"
+      privileged: true
+      environment:
+        REDIS_ADDR: "redis"
+      depends_on:
+        - redis
     game_server:
         image: ewr.vultrcr.com/chessmine/game_server:curr
         pull_policy: always
@@ -29,14 +41,17 @@ services:
           - ../backend/game_server/:/usr/app
         depends_on:
           - redis
-    redis_exporter:
-      container_name: "redis_exporter"
-      image: "oliver006/redis_exporter:alpine"
-      privileged: true
+    operator:
+      build:
+        context: ../backend/operator
+        dockerfile: Dockerfile
       environment:
+        SERVER_ADDR: "game_server"
         REDIS_ADDR: "redis"
+      volumes:
+        - ../backend/operator/:/usr/app
       depends_on:
-        - redis
+        - game_server
     caddy:
         container_name: "caddy"
         image: ewr.vultrcr.com/chessmine/frontend:curr

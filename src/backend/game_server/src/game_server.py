@@ -32,8 +32,8 @@ class GameServer:
         self.metric_total_moves_played = Counter('moves_played', 'Total Moves Played')
         self.metric_move_time = Histogram('move_time', 'Move Time')
         self.matcher = RedisSmartMatcher()
-        self.th = threading.Thread(target=self.work)
-        self.th.start()
+        #self.th = threading.Thread(target=self.work)
+        #self.th.start()
         lgr.info("Initialized Game Server! {}".format("Hello World"))
 
     def work(self):
@@ -55,7 +55,7 @@ class GameServer:
                             # The move function should check that it's been made past the time and quit the game
                             lgr.info("A move has been made and we weren't fast enough to complete the removal operation")
                             continue
-                        lgr.info("Ending game due to expiration" + game_id)
+                        lgr.info("Ending game due to expiration " + str(game_id) + " " + str(end_time))
                         game = self.redis.get_game(game_id)
                         fen = game[FEN]
                         turn = get_turn_from_fen(fen)
@@ -274,7 +274,7 @@ class GameServer:
         # turn_start_time equals None if no moves have been played, and zero in case first move has been played
         if player_info.turn_start_time != 'None' and rival_info.turn_start_time != 'None' and player_info.turn_start_time != 0 and rival_info.turn_start_time != 0:
             lgr.info("Illegal attempt by player {} to abort game {} which is already in progress".format(player_info.sid, player_info.game_id))
-            return None
+            return
         rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.NO_GAME)
         self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED)
         egi = EndGameInfo(winner="Abort", message=f"{player_info.color} aborted",

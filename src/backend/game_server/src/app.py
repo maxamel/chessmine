@@ -64,13 +64,23 @@ def healthcheck():
 
 @app.route('/game_over', methods=['POST'])
 def game_over():
-    lgr.info(f"The request: {request.get_json()}")
     payload = request.get_json()
     lgr.info(f"Game over with content: {payload}")
     winner: str = payload.get('winner')
     loser: str = payload.get('loser')
     socketio.emit("game_over", payload.get('extra_data'), namespace='/connect', room=winner)
     socketio.emit("game_over", payload.get('extra_data'), namespace='/connect', room=loser)
+    return 'OK'
+
+
+@app.route('/abort', methods=['POST'])
+def abort():
+    lgr.info(f"The request: {request.get_json()}")
+    payload = request.get_json()
+    lgr.info(f"Game aborted with content: {payload}")
+    response = game_server.abort(payload)
+    if response:
+        return response.to_dict()
     return 'OK'
 
 
@@ -117,7 +127,7 @@ def heartbeat(payload):
 def move(payload):
     send_to, data = game_server.move(payload)
     if send_to is None:     # quitting due to game over/bad move
-        return
+        return False
     origin_sid = data.pop('sid', None)
     socketio.emit("move", data, namespace='/connect', room=send_to)
     # send back to sender in case he has more than one page open
@@ -126,7 +136,7 @@ def move(payload):
         socketio.emit("game_over", data["extra_data"], namespace='/connect', room=send_to)
         # send back to sender to signal draw
         socketio.emit("game_over", data["extra_data"], namespace='/connect', room=origin_sid)
-    return 'OK'
+    return True
 
 
 @socketio.on('/api/draw', namespace='/connect')
