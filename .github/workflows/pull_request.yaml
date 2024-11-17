@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install deps
-        run: sudo apt-get install -y libcurl4-openssl-dev
+        run: sudo apt-get install -y libcurl4-gnutls-dev libffi-dev libssl-dev build-essential
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
@@ -35,7 +35,7 @@ jobs:
           luarocks install redis-lua
           luarocks install milua
           luarocks install lunajson
-          luarocks install Lua-cURL
+          luarocks install Lua-cURL CURL_INCDIR=/usr/include/aarch64-linux-gnu
       - name: Start Redis
         uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
         with:
