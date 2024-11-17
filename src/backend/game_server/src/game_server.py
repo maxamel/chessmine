@@ -39,50 +39,50 @@ class GameServer:
     def work(self):
         try:
             while True:
-                time.sleep(1)
-                res = self.redis.peek_game_timeout()
-                if not res:
-                    pass
+                expirations = self.redis.peek_game_timeout()
+                if not expirations:
+                    time.sleep(1)
                 else:
                     # Need to iterate here
-                    game_id = res[0][0]
-                    end_time = res[0][1]
-                    if current_milli_time() >= int(end_time):
-                        # game over
-                        canceled = self.redis.cancel_game_timeout(game_id)
-                        if canceled != 1:
-                            # A move has been made just in time and we weren't fast enough to handle this timeout.
-                            # The move function should check that it's been made past the time and quit the game
-                            lgr.info("A move has been made and we weren't fast enough to complete the removal operation")
-                            continue
-                        lgr.info("Ending game due to expiration " + str(game_id) + " " + str(end_time))
-                        game = self.redis.get_game(game_id)
-                        fen = game[FEN]
-                        turn = get_turn_from_fen(fen)
-                        winner = get_opposite_color(turn)
-                        loser_sid = game[turn]
-                        winner_sid = game[winner]
+                    for expiration in expirations:
+                        game_id = expiration[0]
+                        end_time = expiration[1]
+                        if current_milli_time() >= int(end_time):
+                            # game over
+                            canceled = self.redis.cancel_game_timeout(game_id)
+                            if canceled != 1:
+                                # A move has been made just in time and we weren't fast enough to handle this timeout.
+                                # The move function should check that it's been made past the time and quit the game
+                                lgr.info("A move has been made and we weren't fast enough to complete the removal operation")
+                                continue
+                            lgr.info("Ending game due to expiration " + str(game_id) + " " + str(end_time))
+                            game = self.redis.get_game(game_id)
+                            fen = game[FEN]
+                            turn = get_turn_from_fen(fen)
+                            winner = get_opposite_color(turn)
+                            loser_sid = game[turn]
+                            winner_sid = game[winner]
 
-                        count = len(self.redis.get_game_moves(game_id))
-                        if count == 1:
-                            payload: dict[str, Any] = {"data": {"sid": loser_sid}}
-                            srv_res: ServerResponse = self.abort(payload)
-                            egi = srv_res.end_game_info
-                        else:
-                            rating_dict = self._update_ratings(winner_sid, loser_sid, winner, outcome=Outcome.FIRST_PLAYER_WINS)
-                            egi = EndGameInfo(winner=winner, message=f"{turn} ran out of time",
-                                              white_rating=rating_dict[WHITE].get(RATING),
-                                              black_rating=rating_dict[BLACK].get(RATING),
-                                              white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
-                                              black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
-                        self.set_game_endgame(game_id=game_id, end_game_info=egi)
+                            count = len(self.redis.get_game_moves(game_id))
+                            if count == 1:
+                                payload: dict[str, Any] = {"data": {"sid": loser_sid}}
+                                srv_res: ServerResponse = self.abort(payload)
+                                egi = srv_res.end_game_info
+                            else:
+                                rating_dict = self._update_ratings(winner_sid, loser_sid, winner, outcome=Outcome.FIRST_PLAYER_WINS)
+                                egi = EndGameInfo(winner=winner, message=f"{turn} ran out of time",
+                                                  white_rating=rating_dict[WHITE].get(RATING),
+                                                  black_rating=rating_dict[BLACK].get(RATING),
+                                                  white_rating_delta=rating_dict[WHITE].get(RATING_DELTA),
+                                                  black_rating_delta=rating_dict[BLACK].get(RATING_DELTA))
+                            self.set_game_endgame(game_id=game_id, end_game_info=egi)
 
-                        self.redis.set_player_mapping_value(loser_sid, REMAINING_TIME, 0)
-                        self.redis.set_game_status(game_id=game_id, status=GameStatus.ENDED)
-                        payload = {'winner': winner_sid, 'loser': loser_sid, 'extra_data': egi.to_dict()}
-                        ans = requests.post("http://localhost:5000/game_over", json=payload)
-                        logging.info(f"Response from game_over request: {ans.status_code}: {ans.reason}")
-                        #self.cleanup(game_id=game_id)
+                            self.redis.set_player_mapping_value(loser_sid, REMAINING_TIME, 0)
+                            self.redis.set_game_status(game_id=game_id, status=GameStatus.ENDED)
+                            payload = {'winner': winner_sid, 'loser': loser_sid, 'extra_data': egi.to_dict()}
+                            ans = requests.post("http://localhost:5000/game_over", json=payload)
+                            logging.info(f"Response from game_over request: {ans.status_code}: {ans.reason}")
+                            #self.cleanup(game_id=game_id)
         except Exception as e:
             lgr.error("Error in worker {}".format(e))
 
