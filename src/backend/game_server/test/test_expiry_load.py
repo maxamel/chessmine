@@ -47,14 +47,18 @@ class ExpiryTestCase(unittest.TestCase):
         break_time = 150
         while len(self.redis_cli.keys("game_mapping_*")) < game_amount and time.time() - start < break_time:
             time.sleep(1)
+        end = time.time()
 
         mappings = self.redis_cli.keys("game_mapping_*")
-        print(f'broke out of first waiting loop with {len(mappings)} game mappings after {time.time() - start} seconds')
+        print(f'broke out of first waiting loop with {len(mappings)} game mappings after {end - start} seconds')
+        self.assertTrue(end - start < 40)
+
+        # emit first move for each game
         for mapping in mappings:
             white_sid = self.redis_cli.hget(mapping, 'white')
             sio.client.emit('/api/move', {'sid': white_sid, 'move': json.loads(lines[0])}, namespace='/connect')
-
         time.sleep(10)
+
         start = time.time()
         break_time = 150
         while self.redis_cli.zcard('game_expirations') > 0 and time.time() - start < break_time:
@@ -63,6 +67,7 @@ class ExpiryTestCase(unittest.TestCase):
 
         exps = self.redis_cli.zcard('game_expirations')
         print(f'broke out of second waiting loop with {exps} expirations after {end - start} seconds')
+        self.assertTrue(end - start < 40)
 
         self.assertTrue(self.redis_cli.zcard('game_expirations') == 0)
         self.assertTrue(len(self.redis_cli.keys("game_mapping_*")) == game_amount)
