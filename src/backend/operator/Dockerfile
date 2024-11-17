@@ -14,4 +14,4 @@ RUN luarocks install milua && luarocks install redis-lua && luarocks install lun
 #USER operator
 HEALTHCHECK CMD curl --fail http://localhost:8800/healthcheck || exit 1
 
-CMD [ "lua", "./src/expirer.lua" ]
+CMD [ "lua", "./src/app.lua" ]
