@@ -37,13 +37,11 @@ function update_ratings(sid1, sid2, winner_color, outcome)
 
     ratingA, ratingB = eloRating(player_session["rating"], rival_session["rating"], outcome)
 
-    client:transaction({}, function(t)
-        t:multi()
+    client:pipeline( function(t)
         t:hset('player_session_'..player_session["sid"], 'rating', ratingA)
         t:hset('player_session_'..rival_session["sid"], 'rating', ratingB)
         t:hset('player_mapping_'..player_session["sid"], 'rating_delta', ratingA - player_session["rating"])
         t:hset('player_mapping_'..rival_session["sid"], 'rating_delta', ratingB - rival_session["rating"])
-        t:exec()
     end)
     local loser_color = 'black'
     if (winner_color == 'black') then
@@ -74,8 +72,8 @@ function worker()
                                 print("Ending game "..game_id.." due to expiration at "..end_time)
                                 local game_mapping = client:hgetall('game_mapping_'..game_id)
                                 local fen = game_mapping['fen']
-                                local turn_index = string.find(fen, '.* [w|b] ')
-                                local turn = string.sub(fen, turn_index-1,turn_index)
+                                local match_begin, match_end = string.find(fen, ' [w|b] ')
+                                local turn = string.sub(fen, match_begin+1,match_end-1)
                                 local winner = 'winner'
                                 if (turn == 'w') then
                                     turn = 'white'
@@ -94,7 +92,7 @@ function worker()
                                     local payload = { ["data"] = { ["sid"] = loser_sid } }
                                     local encoded = json.encode( payload )
                                     local response = call_api(game_server..':5000/abort', encoded)
-                                    --print('response from abort call: '..response)
+                                    print('response from abort call: '..response)
                                     decoded = json.decode(response)
                                     egi = decoded["end_game_info"]
                                 else
@@ -109,8 +107,8 @@ function worker()
                                     egi = payload
                                 end
                                 client:pipeline( function(p)
-                                    for k, v in pairs(egi) do
-                                        p:hset('game_endgame_'..game_id, k, v)
+                                    for key, val in pairs(egi) do
+                                        p:hset('game_endgame_'..game_id, key, val)
                                     end
                                     p:hset('player_mapping_'..loser_sid, "time_remaining", "0")
                                     p:hset('game_mapping_'..game_id, "status", "3")
