@@ -441,15 +441,6 @@ $(document).ready(function () {
     socket.on("move", function (ans) {
         var the_move = ans.move;
         console.log('Got move data ' + JSON.stringify(ans));
-        if (game.turn() != the_move.color) {
-            return;      // Got my own move back
-        }
-        game.move(the_move.san);
-
-        handleMoveOnBoard(the_move);
-        removeCheck();
-        insertMove(the_move);
-        changeDrawButton('enabled');
         if (ans.remaining) {
             if (my_color.charAt(0) == the_move.color) {
                 other_remaining = ans.remaining;
@@ -463,6 +454,15 @@ $(document).ready(function () {
                 setTime("clockdivA", ans.other_remaining);
             }
         }
+        if (game.turn() != the_move.color) {
+            return;      // Got my own move back
+        }
+        game.move(the_move.san);
+        handleMoveOnBoard(the_move);
+        removeCheck();
+        insertMove(the_move);
+        changeDrawButton('enabled');
+
         var array = get_piece_positions(game, {type: "k", color: game.turn()});
         var source = array[0];
         if (game.isCheckmate()) {
@@ -1036,9 +1036,9 @@ $(document).ready(function () {
                 updateLastCall();
                 insertMove(move);
                 highlight_check_mate();
+                console.log("Answer from api/move " + ret);
                 if (!game_over) {
                     if (ret.remaining) {
-                        console.log("Answer from api/move");
                         discardTimeInterval('B');
                         setTime("clockdivB", ret["other_remaining"]);
                         initializeClock("clockdivA", ret["remaining"]);

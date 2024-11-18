@@ -52,7 +52,3 @@ def EloRating(Ra, Rb, d, K = 20):
                 Rb = Old_Rb - 1
 
     return int(Ra), int(Rb)
-
-
-elo = EloRating(1400, 1500, 1)
-print(elo)

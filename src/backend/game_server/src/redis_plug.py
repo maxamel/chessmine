@@ -157,7 +157,7 @@ class RedisPlug:
 
     def peek_game_timeout(self):
         key = self.game_expire
-        return self.get_redis().zrange(key, 0, 1, withscores=True)
+        return self.get_redis().zrange(key, 0, 100, withscores=True)
 
     def cancel_game_timeout(self, game_id, pipeline: Pipeline = None):
         key = self.game_expire

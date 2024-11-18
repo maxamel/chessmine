@@ -2,7 +2,11 @@ name: chessmine
 services:
     redis:
         container_name: "redis"
-        image: "redis:alpine"
+        build:
+          context: ../redis
+          dockerfile: Dockerfile
+        volumes:
+          - ../redis/:/usr/app
         ports:
           - 6379:6379
         deploy:
@@ -10,21 +14,6 @@ services:
             limits:
               cpus: '0.10'
               memory: 100M
-    game_server:
-        deploy:
-          replicas: 3
-          endpoint_mode: dnsrr
-          resources:
-            limits:
-              cpus: '0.30'
-              memory: 200M
-        build:
-          context: ../backend/game_server
-          dockerfile: Dockerfile
-        volumes:
-          - ../backend/game_server/:/usr/app
-        depends_on:
-          - redis
     redis_exporter:
       container_name: "redis_exporter"
       image: "oliver006/redis_exporter:alpine"
@@ -33,6 +22,35 @@ services:
         REDIS_ADDR: "redis"
       depends_on:
         - redis
+    game_server:
+        deploy:
+          replicas: 1
+          endpoint_mode: dnsrr
+          resources:
+            limits:
+              cpus: '0.30'
+              memory: 200M
+        ports:
+          - 5000:5000
+        build:
+          context: ../backend/game_server
+          dockerfile: Dockerfile
+        volumes:
+          - ../backend/game_server/:/usr/app
+        depends_on:
+          - redis
+    operator:
+      container_name: "operator"
+      build:
+        context: ../backend/operator
+        dockerfile: Dockerfile
+      environment:
+        SERVER_ADDR: "game_server"
+        REDIS_ADDR: "redis"
+      volumes:
+        - ../backend/operator/:/usr/app
+      depends_on:
+        - game_server
     caddy:
         container_name: "caddy"
         init: true  # to teardown zombie healthcheck processes

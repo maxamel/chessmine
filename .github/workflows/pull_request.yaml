@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install deps
+        run: |
+          sudo apt-get install -y libcurl4-gnutls-dev libffi-dev libssl-dev build-essential curl
+          find /usr -name 'curl.h'
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
@@ -31,6 +35,9 @@ jobs:
           luarocks install luacov
           luarocks install luaunit
           luarocks install redis-lua
+          luarocks install milua
+          luarocks install lunajson
+          luarocks install Lua-cURL CURL_INCDIR=/usr/include/x86_64-linux-gnu
       - name: Start Redis
         uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
         with:
@@ -40,6 +47,9 @@ jobs:
       - name: Start Game Server
         working-directory: src/backend/game_server/
         run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &
+      - name: Start Operator
+        working-directory: src/backend/operator/
+        run: lua src/app.lua &
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
