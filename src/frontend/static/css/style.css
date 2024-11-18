@@ -126,8 +126,18 @@ button:focus {
     letter-spacing: 2px;
     margin-bottom: 20px; }
 
+  .geist-mono-maxim {
+    font-family: "Geist Mono", monospace;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 35px;
+    text-align: center;
+    margin: auto;
+    color: oldlace;
+  }
   .first_title {
-    font-family: "Rajdhani", sans-serif;
+    font-family: "geist-mono-maxim", sans-serif;
     color: white;
     font-size: 40px;
     text-align: center;
@@ -144,7 +154,7 @@ button:focus {
   .fourth_title {
     font-family: monof56;
     color: white;
-    font-size: 55px;
+    font-size: 60px;
     text-align: center;
     margin: auto;
     padding: 14px;
@@ -154,7 +164,7 @@ button:focus {
     font-size: 16px;
     text-align: center;
     margin: auto;
-    padding: 20px;
+    padding: 50px;
   }
   @font-face
   {
@@ -233,6 +243,16 @@ button:focus {
   top: 0;
   height: 100%;
   width: 100%; }
+
+.newlink {
+  font-size: 22px;
+  cursor: pointer;
+  color: oldlace;
+  .newlink:hover {
+    font-size: 24px;
+    color: #fc5185;
+  }
+}
 
 /* Start Video Play css
 ============================================================================================ */

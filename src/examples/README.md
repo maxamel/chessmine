@@ -6,7 +6,7 @@ Running a playground environment with minimal components to test out websocket c
 
 pip, python3.9+, docker
 
-In case using dedicated machine to run this playground, transfer the files from examples/ to the remote machine:
+In case of using a dedicated machine to run this playground, transfer the files from examples/ to the remote machine:
 scp -r . user@domain:~/
 
 ### Install and run docker
@@ -41,6 +41,8 @@ The previous should block and wait for connection. On yet another different term
 curl http://localhost/hello
 ```
 
+In case of no error proceed to running the client:
+
 ### Invoke websocket connection from virtual env
 ```
 python3 -m venv .
@@ -51,6 +53,6 @@ python3 example_client.py
 The above commands should output Hello.
 
 If something doesn't work, the culprit could very well be the connectivity between the proxy and the server.
-Try changing the URL of the example_client.py to localhost:5000 to access the server directly. This will help
+Try changing the URL of the example_client.py to *localhost:5000* to access the server directly. This will help
 rule out an issue with the client or server. If it works, it's probably the proxy, so you should get inside the
-container and check if it host.docker.internal:5000/hello is accessible.
+container and check if it *host.docker.internal:5000/hello* is accessible.

@@ -42,6 +42,7 @@ services:
         depends_on:
           - redis
     operator:
+      image: ewr.vultrcr.com/chessmine/operator:curr
       build:
         context: ../backend/operator
         dockerfile: Dockerfile
