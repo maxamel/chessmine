@@ -12,10 +12,17 @@ docker pull ewr.vultrcr.com/chessmine/frontend:curr
 docker tag ewr.vultrcr.com/chessmine/frontend:curr ewr.vultrcr.com/chessmine/frontend:prev
 docker push ewr.vultrcr.com/chessmine/frontend:prev
 
+docker rmi ewr.vultrcr.com/chessmine/operator:curr
+docker pull ewr.vultrcr.com/chessmine/operator:curr
+docker tag ewr.vultrcr.com/chessmine/operator:curr ewr.vultrcr.com/chessmine/operator:prev
+docker push ewr.vultrcr.com/chessmine/operator:prev
+
 # tag new images
 docker tag game_server:curr ewr.vultrcr.com/chessmine/game_server:curr
 docker tag frontend:curr ewr.vultrcr.com/chessmine/frontend:curr
+docker tag operator:curr ewr.vultrcr.com/chessmine/operator:curr
 
 # push new images
 docker push ewr.vultrcr.com/chessmine/game_server:curr
 docker push ewr.vultrcr.com/chessmine/frontend:curr
+docker push ewr.vultrcr.com/chessmine/operator:curr

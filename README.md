@@ -1,6 +1,6 @@
 # Chessmine
 
-Free and open source chess server.
+Simple, minimalist, free and open source chess server.
 
 [www.chessmine.xyz](https://www.chessmine.xyz)
 
@@ -12,50 +12,20 @@ Free and open source chess server.
 ![](https://sloc.xyz/github/maxamel/chessmine)
 
 
-### Prerequisites:
+## Introduction
 
-pip, python3.9, npm, docker-compose
+The main goal of the project is to provide a lightweight, hassle-free and minimalist chess experience with basic functionality, whilst keeping it free and open for everyone. 
+This means no overload of features, no registrations or account settings, and no heavy infrastructure. Just keeping it simple and easy to use. 
+The tech stack is mainly Docker, Python, JS, Redis, Lua and Caddy.
 
-### Create python virtual environment:
-```
-python3.9 -m venv chessmine
-source chessmine/bin/activate
-```
-### Install dependencies:
-```
-pip install src/backend/game_server/requirements.txt
-npm install --prefix src/frontend
-```
+
+## Running locally
+
+The simplest way to run a minimal installation of the service is by running the script in *src/ops/spin_dev.sh* which will spin up all required dev containers. The only prerequisite for this is docker.
+
 ### Run all containers:
 ```
 docker compose -f docker-compose-dev.yml up -d --build --force-recreate
 ```
-### Build specific container:
-```
-docker compose build --no-cache <container>
-```
 
-### Stop running application:
-```
-docker rmi $(docker images -f "dangling=true" -q)
-docker compose -f docker-compose-dev.yml down --rmi local
-```
-### Debug game server locally
-```
-docker compose -f docker-compose-debug-gs.yml up -d --build --force-recreate
-```
-Next run game server from IDE with env vars: REDIS_URL=localhost, LOG_PATH=server.log.
-It would be able to communicate with the containers started by the docker compose.
-
-### Run caddy from master
-
-Build caddy image with dockerfile that builds from source:
-```
-docker build -f DockerfileCaddyMaster -t caddy_master --build-arg APP_URL=http://localhost --build-arg BE_URL=host.docker.internal .
-```
-Next run the docker compose which spins all containers but caddy:
-```
-docker compose -f docker-compose-debug-caddy.yml up -d --build --force-recreate
-```
-Finally run the image we built for caddy and expose port 80:
-docker run -p 80:80 -it caddy_master caddy/cmd/caddy/caddy run --config Caddyfile
+Navigate to localhost:1443 and voila!

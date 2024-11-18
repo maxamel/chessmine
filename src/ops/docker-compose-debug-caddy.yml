@@ -29,6 +29,18 @@ services:
           - 5000:5000
         depends_on:
           - redis
+    operator:
+      container_name: "operator"
+      build:
+        context: ../backend/operator
+        dockerfile: Dockerfile
+      environment:
+        SERVER_ADDR: "game_server"
+        REDIS_ADDR: "redis"
+      volumes:
+        - ../backend/operator/:/usr/app
+      depends_on:
+        - game_server
     cadvisor:
         container_name: "cadvisor"
         image: "gcr.io/cadvisor/cadvisor:latest"
