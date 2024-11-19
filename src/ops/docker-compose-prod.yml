@@ -43,9 +43,12 @@ services:
           - redis
     operator:
       image: ewr.vultrcr.com/chessmine/operator:curr
+      pull_policy: always
       build:
         context: ../backend/operator
         dockerfile: Dockerfile
+        tags:
+          - "operator:curr"
       environment:
         SERVER_ADDR: "game_server"
         REDIS_ADDR: "redis"
