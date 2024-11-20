@@ -10,7 +10,9 @@ RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/settings.js  # for d
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for dynamic config of url
 RUN apk add npm minify acl curl goaccess && npm install
 RUN cp /var/www/html/node_modules/chess.js/dist/cjs/chess.js /var/www/html/static/js/chess.js && \
-    cp /var/www/html/node_modules/stockfish/src/stockfish* /var/www/html/static/js/
+    cp /var/www/html/node_modules/stockfish/src/stockfish* /var/www/html/static/js/ && \
+    cp /var/www/html/node_modules/chessground/dist/chessground.min.js /var/www/html/static/js/chessground.js && \
+    cp /var/www/html/node_modules/chessground/assets/*.css /var/www/html/static/css/
 RUN minify -o /var/www/html/static/js/chess.min.js /var/www/html/static/js/chess.js && \
     minify -o /var/www/html/static/js/chessboard-1.0.0.min.js /var/www/html/static/js/chessboard-1.0.0.js
 RUN cp /var/www/html/Caddyfile /etc/caddy/Caddyfile

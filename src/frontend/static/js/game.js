@@ -1,15 +1,16 @@
 import { getPieceFuncByName, getBoardColorsByName } from './utils.js';
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move } from './stockfish_handler.js';
+import { Chessground } from './chessground.js';
 
 $(document).ready(function () {
     load_cookies()
 
     var moveInterval = null;
-    var board = null;
-    var $board = $("#myBoard");
-    var game = new Chess();
-    var futureMove = false;
+    var board = null;       // the chessground board
+    var $board = document.getElementById('myBoard')
+    var game = new Chess();     // the chess logic
+    var conf = null;            // the conf of the chessground board
     var futureMoveData = null;
     var player_id = null;
     var other_remaining = 300000;
@@ -73,7 +74,7 @@ $(document).ready(function () {
     });
 
     function handle_engine_init (rival, the_game, the_game_fen, rating) {
-        if (rival.player_type == 1) {   // rival is engine
+        if (rival.player_type === 1) {   // rival is engine
             // lazy initialization of stockfish
             engine_sid = the_game.engine_sid
             console.log(game.fen());
@@ -151,16 +152,56 @@ $(document).ready(function () {
             draggable: true,
             position: the_game_fen,
             orientation: my_color,
-            onDragStart: onDragStart,
             onDrop: onDrop,
             //onMoveEnd: onMoveEnd,
             onDragMove: onDragMove,
             onMouseoutSquare: onMouseoutSquare,
             onMouseoverSquare: onMouseoverSquare,
-            onSnapEnd: onSnapEnd,
         };
-        board = Chessboard("myBoard", config);
         game = new Chess(the_game_fen);
+        conf = {
+              fen: the_game_fen,
+              orientation: my_color,
+              turnColor: getColorFromTurn(),
+              //coordinatesOnSquares: true,
+              premovable: {
+                  enabled: true, // allow premoves for color that can not move
+                  showDests: true, // whether to add the premove-dest class on squares
+                  castle: true, // whether to allow king castle premoves
+                  events: {
+                      set: onPreMoveSet,
+                      unset: onPreMoveUnSet
+                  }
+              },
+              movable: { free: false, color: my_color, showDests: true, dests: getMovesMap(), rookCastle: true },
+              draggable: { enabled: true },
+              selectable: { enabled: true },
+              highlight: { check: true, lastMove: true },
+              events: {
+                //change?: () => void; // called after the situation changes on the board
+                // called after a piece has been moved.
+                // capturedPiece is undefined or like {color: 'white'; 'role': 'queen'}
+                move: onDrop
+                //dropNewPiece?: (piece: cg.Piece, key: cg.Key) => void;
+                //select?: (key: cg.Key) => void; // called when a square is selected
+                //insert?: (elements: cg.Elements) => void; // when the board DOM has been (re)inserted
+              },
+              drawable: {
+                enabled: true, // can draw
+                visible: true, // can view
+                defaultSnapToValidMove: false,
+                // false to keep the drawing if a movable piece is clicked.
+                // Clicking an empty square or immovable piece will clear the drawing regardless.
+                //eraseOnClick: boolean;
+                //shapes?: DrawShape[];
+                //autoShapes?: DrawShape[];
+                //brushes?: DrawBrushes;
+                //onChange?: (shapes: DrawShape[]) => void; // called after drawable shapes change
+              }
+        }
+        console.log('setting board to fen ' + the_game_fen)
+        board = Chessground($board, conf);
+        //board = Chessboard("myBoard", config);
         insertBulkMoves(the_game_moves, ttl_time);
 
         handle_engine_init(rival, the_game, the_game_fen, me.rating)
@@ -202,7 +243,7 @@ $(document).ready(function () {
             hideArrows();
             enableGameButtons();
 
-            if (my_color == draw_offer) {
+            if (my_color === draw_offer) {
                 // I offered draw
                 changeDrawButton('disabled');
             } else if (draw_offer != null){
@@ -210,7 +251,7 @@ $(document).ready(function () {
                 changeDrawButton('hidden');
             }
 
-            if (game_status == 2) {     // PLAYING
+            if (game_status === 2) {     // PLAYING
                 if (is_my_turn()) {
                     discardTimeInterval('A');
                     initializeClock("clockdivB", my_time);
@@ -218,12 +259,11 @@ $(document).ready(function () {
                     discardTimeInterval('B');
                     initializeClock("clockdivA", rival_time);
                 }
-            } else if (game_status == 1) {      // STARTED
+            } else if (game_status === 1) {      // STARTED
                 game_over = false;
                 hideEndGameBoxes();
             }
         } else {
-            console.log("BUDDY " + JSON.stringify(the_game.end_game_info));
             setRatings(the_game.end_game_info);
             disableGameButtons();
         }
@@ -250,9 +290,9 @@ $(document).ready(function () {
             });
         }
 
-        var x = window.matchMedia("(max-width: 1105px)");
-        //myFunction(x) // Call listener function at run time
-        x.addEventListener("change", boardResize); // Attach listener function on state changes
+        //var x = window.matchMedia("(max-width: 1105px)");
+        // chessground does not require resize
+        //x.addEventListener("change", boardResize); // Attach listener function on state changes
         heartbeatOK = true;
         $(".fullpage").fadeOut("slow");
 
@@ -292,7 +332,7 @@ $(document).ready(function () {
                         promote = elem.id;
                         onDrop(promotion_in_progress[0], promotion_in_progress[1]);
                         console.log('Rerendering board position');
-                        board.position(game.fen(), true);
+                        board.set(conf);
                         promotion_in_progress = [];
                     }
                     elem.style.border = "3px solid #fc5185";
@@ -356,15 +396,15 @@ $(document).ready(function () {
                 }
             });
         }
-
+        /*
         function boardResize(x) {
             console.log('called board resize');
             if (x.matches) { // If media query matches
-                board.resize();
+                board.resize;
             } else {
                 board.resize();
             }
-        }
+        }*/
     });
 
     socket.on("draw", function (ans) {
@@ -414,31 +454,39 @@ $(document).ready(function () {
         if (the_move.san === 'O-O-O' ||
           the_move.san === 'O-O' ||
           the_move.san.indexOf('=') > -1 ||
-          (the_move.san.indexOf('x') > -1 && the_move.flags == 'e')
+          (the_move.san.indexOf('x') > -1 && the_move.flags === 'e')
         ) {
             console.log('Called board positioning while move handling');
-            board.position(game.fen(), true)
+            conf.movable.dests = getMovesMap();
+            conf.turnColor = getColorFromTurn();
+            conf.fen = game.fen();
+            board.set(conf);
         }
         else {
-            board.move(the_move.from + '-' + the_move.to)
+            console.log('This is the move handled! ' + JSON.stringify(the_move));
+            board.move(the_move.from, the_move.to)
+            //var to_merge = {movable: {dests: getMovesMap()}}
+            conf.movable.dests = getMovesMap();
+            conf.turnColor = getColorFromTurn();
+            conf.fen = game.fen();
+            board.set(conf);
         }
     }
 
-    function highlight_check_mate() {
-        var array = 0
-        if (game.isCheckmate()) {
-            array = get_piece_positions(game, { type: 'k', color: game.turn() })
-            let source = array[0]
-            $board.find('.square-' + source).addClass('highlight-mate')
-            game_over = true
-        } else if (game.inCheck()) {
-            array = get_piece_positions(game, { type: 'k', color: game.turn() })
-            let source = array[0]
-            $board.find('.square-' + source).addClass('highlight-check')
-        }
+    function getMovesMap() {
+        var moves_list = game.moves({ verbose: true});
+        var map = new Map() ;
+        moves_list.forEach((move) => {
+            if (!map.has(move["from"])) {
+              map.set(move["from"], []);
+            }
+            map.get(move["from"]).push(move["to"]);
+        });
+        return map;
     }
 
     socket.on("move", function (ans) {
+        // move recieved from server considered valid
         var the_move = ans.move;
         console.log('Got move data ' + JSON.stringify(ans));
         if (ans.remaining) {
@@ -454,30 +502,38 @@ $(document).ready(function () {
                 setTime("clockdivA", ans.other_remaining);
             }
         }
-        if (game.turn() != the_move.color) {
+        if (game.turn() !== the_move.color) {
+            console.log('Got my own move back so quitting');
             return;      // Got my own move back
         }
         game.move(the_move.san);
         handleMoveOnBoard(the_move);
-        removeCheck();
+        removeCheckAndMate();
         insertMove(the_move);
         changeDrawButton('enabled');
 
         var array = get_piece_positions(game, {type: "k", color: game.turn()});
         var source = array[0];
+        highlight_check_mate();
         if (game.isCheckmate()) {
+            game_over = true;
+            return;
+        }
+        /*if (game.isCheckmate()) {
             $board.find(".square-" + source).addClass("highlight-mate");
             game_over = true;
             return;
         } else if (game.inCheck()) {
             $board.find(".square-" + source).addClass("highlight-check");
-        }
+        }*/
         // handle future move
+        console.log('the futureMoveData ' + futureMoveData);
         if (futureMoveData != null) {
             if (handlePromotion(futureMoveData.from, futureMoveData.to)) {
                 futureMoveData = null;
                 return;
             }
+            console.log('about to perform move ' + futureMoveData.from + " " + futureMoveData.to);
             var move = gameMove(futureMoveData.from, futureMoveData.to, promote);
             if (move != null) {
                 var json = {
@@ -806,15 +862,22 @@ $(document).ready(function () {
         var normalized_index = index - 1;
         var position_in_array = row * 2 + normalized_index;
         var selected_fen = the_game_fens[position_in_array];
-        board.position(selected_fen, true);
+        conf.fen = selected_fen
         $("td").removeClass("selectedCell");
         if (position_in_array < the_game_fens.length - 1) {
             cell.target.classList.add("selectedCell");
-            $("#myBoard .square-55d63").removeClass("highlight-check");
-            $("#myBoard .square-55d63").removeClass("highlight-mate");
+            removeCheckAndMate();
+            conf.highlight.lastMove = false;
+            conf.movable.dests = new Map();
+            conf.movable.color = undefined;
         } else {
+            conf.highlight.lastMove = true;
+            conf.movable.dests = getMovesMap();
+            conf.movable.color = my_color;
+            conf.turnColor = getColorFromTurn();
             highlight_check_mate();
         }
+        board.set(conf);
     }
 
     function heartbeat(force) {
@@ -879,15 +942,28 @@ $(document).ready(function () {
     }
 
     function removeGreySquares() {
-        //$('#myBoard .white-1e1d7').css('background', whiteSquare)
-        //$('#myBoard .black-3c85d').css('background', blacksquare)
         $("svg").remove();
         $("img").css("box-shadow", "");
     }
 
-    function removeCheck() {
-        $("#myBoard .square-55d63").removeClass("highlight-check");
-        $("img").css("box-shadow", "");
+    function highlight_check_mate() {
+        const positions = document.getElementsByClassName(getColorFromTurn(game.turn()) + " king");
+        if (game.isCheckmate()) {
+            positions[0].classList.add('highlight-mate');
+            game_over = true
+        } else if (game.inCheck()) {
+            positions[0].classList.add('highlight-check');
+        }
+    }
+
+    function removeCheckAndMate() {
+        let positions = document.getElementsByClassName("white king");
+        positions[0].classList.remove("highlight-check");
+        positions[0].classList.remove("highlight-mate");
+        positions = document.getElementsByClassName("black king");
+        positions[0].classList.remove("highlight-check");
+        positions[0].classList.remove("highlight-mate");
+        //$("img").css("box-shadow", "");
     }
 
     function removeHighlights() {
@@ -946,29 +1022,24 @@ $(document).ready(function () {
         }
     }
 
-    function onDragStart(source, piece, position, orientation) {
-        // do not pick up pieces if the game is over
-        var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        removeHighlights();
-        if (game.isGameOver() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
-        if (orientation == "white" && piece.indexOf("b") != -1) return false;
-        if (orientation == "black" && piece.indexOf("w") != -1) return false;
-        // record future move
-        if ((game.turn() === "w" && piece.indexOf("b") !== -1) ||
-            (game.turn() === "b" && piece.indexOf("w") !== -1)) {
-            futureMove = true;
-        }
-    }
-
     function is_my_turn() {
         var turn = game.turn();
         var mine = my_color.charAt(0);
         return turn === mine;
+    }
 
+    function getColorFromTurn() {
+        var turn = game.turn();
+        console.log('computed turn ' + turn)
+        if (turn === 'b') {
+            return 'black';
+        }
+        return 'white';
     }
 
     function gameMove(source, target, promotion) {
         var move = null;
+        console.log('Handling game move ' + source + " " + target)
         try {
             move = game.move({
                 from: source,
@@ -977,20 +1048,14 @@ $(document).ready(function () {
             });
         }
         catch (e) {
-            console.log(`Detected pre-move since move is invalid:  ${JSON.stringify(move)} `);
+            console.log(`Detected pre-move since move is invalid: ${move}`);
         }
         return move;
     }
 
-    function onDrop(source, target) {
-        // see if the move is legal
-        if (handlePromotion(source, target)) {
-            removeHighlights();
-            return;
-        }
-        var move = gameMove(source, target, promote);
-        if (futureMove === true && source !== target) {
-            futureMove = false;
+    function onPreMoveSet(source, target) {
+        console.log("PreMoveSet " + futureMoveData);
+        if (source !== target) {
             futureMoveData = {from: source, to: target};
             const moves = game.moves();
             const randomMove = moves[Math.floor(Math.random() * moves.length)];
@@ -1004,11 +1069,52 @@ $(document).ready(function () {
                 // this move is illegal and should not be counted as a future move
                 game.undo();    // undo the random move
                 removeHighlights();
-                futureMove = false;
                 futureMoveData = null;
             }
-        } else if (futureMove === true && source === target) {
-            futureMove = false;
+        } else if (source === target) {
+            futureMoveData = null;
+            removeHighlights();
+        } else {
+            removeHighlights();
+        }
+    }
+
+    function onPreMoveUnSet() {
+        console.log("PreMoveUnSet");
+        futureMoveData = null;
+        removeHighlights();
+    }
+
+    function onDrop(source, target, captured) {
+        // see if the move is legal
+        console.log('onDrop invoked with ' + source + ' ' + target)
+        if (handlePromotion(source, target)) {
+            removeHighlights();
+            return;
+        }
+        var move = gameMove(source, target, promote);
+        if (!move) {
+            // we now call onDrop for opponent moves as well so we need to skip here in this case
+            console.log('skipping onDrop due to opponent move');
+            return;
+        }
+        if (source !== target) {
+            futureMoveData = {from: source, to: target};
+            const moves = game.moves();
+            const randomMove = moves[Math.floor(Math.random() * moves.length)];
+            game.move(randomMove);
+            try {
+                game.move(futureMoveData);
+                // undo both moves but keep the highlights as it appears to be a legal move
+                game.undo();
+                game.undo();
+            } catch (e) {
+                // this move is illegal and should not be counted as a future move
+                game.undo();    // undo the random move
+                removeHighlights();
+                futureMoveData = null;
+            }
+        } else if (source === target) {
             futureMoveData = null;
             removeHighlights();
         } else {
@@ -1021,8 +1127,8 @@ $(document).ready(function () {
             "sid": player_id,
             "move": move
         };
-        if (move != null) {
-            removeCheck();
+        if (move !== null) {
+            removeCheckAndMate();
 
             if (move.san == "O-O-O" ||
                 move.san == "O-O" ||
@@ -1117,9 +1223,9 @@ $(document).ready(function () {
 
     function onMouseoverSquare(square, piece, position, orientation) {
         var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.isGameOver() || piece == false || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
-        if (orientation == "white" && piece.indexOf("b") != -1) return false;
-        if (orientation == "black" && piece.indexOf("w") != -1) return false;
+        if (game.isGameOver() || piece === false || cut_game_fen !== board.getFen() || promotion_in_progress.length > 0 || game_over) return false;
+        if (orientation === "white" && piece.indexOf("b") !== -1) return false;
+        if (orientation === "black" && piece.indexOf("w") !== -1) return false;
         changeCursor(square, "grab");
         // get list of possible moves for this square
         var moves = game.moves({
@@ -1146,16 +1252,6 @@ $(document).ready(function () {
         if (newLocation === 'offboard') {
             changeCursor(newLocation, "no-drop");
         }
-    }
-
-
-    // update the board position after the piece snap
-    // for castling, en passant, pawn promotion and illegal moves
-    function onSnapEnd(draggedPieceSource, square, draggedPiece) {
-        if (needsBoardRendering) {
-            board.position(game.fen(), true);
-        }
-        needsBoardRendering = false;
     }
 
     function updateStatus() {

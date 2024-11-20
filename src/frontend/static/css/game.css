@@ -1546,6 +1546,19 @@ th, td {
 .highlight-mate {
   box-shadow: inset 0 0 15px 0 red;
 }
+.check {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 0, 0, 1) 0%,
+    rgba(231, 0, 0, 1) 25%,
+    rgba(169, 0, 0, 0) 89%,
+    rgba(158, 0, 0, 0) 100%
+  );
+}
+
+.last-move {
+  background-color: rgba(155, 199, 0, 0.41);
+}
 
 .moveBox {
   height: 390px;
