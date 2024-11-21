@@ -90,7 +90,7 @@ $(document).ready(function () {
                 var responseWords = line.split(' ')
                 if (responseWords[0] === 'bestmove') {
                     // make move to get full structure of chess move and then undo. This move will be processed
-                    // properly nce it goes through the server and back
+                    // properly once it goes through the server and back
                     var preetified_engine_move = game.move(responseWords[1])
                     game.undo()
                     var json = {

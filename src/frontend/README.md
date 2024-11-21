@@ -1,3 +1,14 @@
+### Develop locally
+
+When changing one of the files within the _/static_ folder, you can use the *ops/update_fe_docker.sh* script to inject
+the changed file into the caddy container and then simply reload tha page in the browser to receive the updated file. 
+Make sure the caching of the browser is turned off, otherwise it may not fetch the file from the webserver.
+The script expects a single argument of the file path under the _/static_ folder. For example for changing the game.js,
+the invocation will be with the argument _js/game.js_. Here's an example configuration from PyCharm to run the script as
+External Tool:
+
+![img.png](img.png)
+
 ### Run caddy container from master
 
 Caddy runs an official image with a set version. If you want to run caddy from latest master follow the below steps.
