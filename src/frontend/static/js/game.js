@@ -68,7 +68,12 @@ $(document).ready(function () {
         game_over = true;
         discardTimeInterval('all');
         disableGameButtons();
-        //update_ratings(ans);
+        if (game.isGameOver()) {
+            conf.premovable.enabled = false;
+            conf.draggable.enabled = false;
+            conf.selectable.enabled = false;
+        }
+        board.set(conf);
         showEndGame(ans.winner, ans.message);
         setRatings(ans);
     });
@@ -146,18 +151,6 @@ $(document).ready(function () {
         setTime("clockdivA", rival_time);
         setTime("clockdivB", my_time);
 
-        var config = {
-            pieceTheme: "../img/chesspieces/" + pieceTheme + "/{piece}.png",
-            boardTheme: getBoardColorsByName(boardTheme),
-            draggable: true,
-            position: the_game_fen,
-            orientation: my_color,
-            onDrop: onDrop,
-            //onMoveEnd: onMoveEnd,
-            onDragMove: onDragMove,
-            onMouseoutSquare: onMouseoutSquare,
-            onMouseoverSquare: onMouseoverSquare,
-        };
         game = new Chess(the_game_fen);
         conf = {
               fen: the_game_fen,
@@ -165,7 +158,7 @@ $(document).ready(function () {
               turnColor: getColorFromTurn(),
               //coordinatesOnSquares: true,
               premovable: {
-                  enabled: true, // allow premoves for color that can not move
+                  enabled: game_status !== 3, // allow premoves for color that can not move
                   showDests: true, // whether to add the premove-dest class on squares
                   castle: true, // whether to allow king castle premoves
                   events: {
@@ -173,18 +166,25 @@ $(document).ready(function () {
                       unset: onPreMoveUnSet
                   }
               },
-              movable: { free: false, color: my_color, showDests: true, dests: getMovesMap(), rookCastle: true },
-              draggable: { enabled: true },
-              selectable: { enabled: true },
+              movable: {
+                  free: false,
+                  color: my_color,
+                  showDests: true,
+                  dests: getMovesMap(),
+                  rookCastle: true,
+              },
+              draggable: { enabled: game_status !== 3 },
+              selectable: { enabled: game_status !== 3 },
               highlight: { check: true, lastMove: true },
               events: {
-                //change?: () => void; // called after the situation changes on the board
-                // called after a piece has been moved.
-                // capturedPiece is undefined or like {color: 'white'; 'role': 'queen'}
-                move: onDrop
-                //dropNewPiece?: (piece: cg.Piece, key: cg.Key) => void;
-                //select?: (key: cg.Key) => void; // called when a square is selected
-                //insert?: (elements: cg.Elements) => void; // when the board DOM has been (re)inserted
+                  //change?: () => void; // called after the situation changes on the board
+                  // called after a piece has been moved.
+                  // capturedPiece is undefined or like {color: 'white'; 'role': 'queen'}
+                  move: onDrop,
+
+                  //dropNewPiece?: (piece: cg.Piece, key: cg.Key) => void;
+                  //select?: (key: cg.Key) => void; // called when a square is selected
+                  //insert?: (elements: cg.Elements) => void; // when the board DOM has been (re)inserted
               },
               drawable: {
                 enabled: true, // can draw
@@ -209,7 +209,7 @@ $(document).ready(function () {
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
 
-        if (game_status != 3) {     // NOT ENDED
+        if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
                 window.onclick = function(event) {
                   if (event.target.id != 'drawOfferedButton') {
@@ -264,6 +264,8 @@ $(document).ready(function () {
                 hideEndGameBoxes();
             }
         } else {
+            game_over = true;
+            highlight_check_mate();
             setRatings(the_game.end_game_info);
             disableGameButtons();
         }
@@ -332,7 +334,7 @@ $(document).ready(function () {
                         promote = elem.id;
                         onDrop(promotion_in_progress[0], promotion_in_progress[1]);
                         console.log('Rerendering board position');
-                        board.set(conf);
+                        resetBoard({"from": promotion_in_progress[0], "to": promotion_in_progress[1]});
                         promotion_in_progress = [];
                     }
                     elem.style.border = "3px solid #fc5185";
@@ -451,30 +453,25 @@ $(document).ready(function () {
 
     function handleMoveOnBoard(the_move) {
         // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
-        if (the_move.san === 'O-O-O' ||
-          the_move.san === 'O-O' ||
-          the_move.san.indexOf('=') > -1 ||
-          (the_move.san.indexOf('x') > -1 && the_move.flags === 'e')
-        ) {
-            console.log('Called board positioning while move handling');
-            conf.movable.dests = getMovesMap();
-            conf.turnColor = getColorFromTurn();
-            conf.fen = game.fen();
-            board.set(conf);
+        console.log('This is the move handled! ' + JSON.stringify(the_move));
+        resetBoard(the_move);
+    }
+
+    function resetBoard(last_move) {
+        conf.movable.dests = getMovesMap();
+        conf.lastMove = [last_move["from"], last_move["to"]];
+        if (game.isGameOver()) {
+            conf.premovable.enabled = false;
+            conf.draggable.enabled = false;
+            conf.selectable.enabled = false;
         }
-        else {
-            console.log('This is the move handled! ' + JSON.stringify(the_move));
-            board.move(the_move.from, the_move.to)
-            //var to_merge = {movable: {dests: getMovesMap()}}
-            conf.movable.dests = getMovesMap();
-            conf.turnColor = getColorFromTurn();
-            conf.fen = game.fen();
-            board.set(conf);
-        }
+        conf.turnColor = getColorFromTurn();
+        conf.fen = game.fen();
+        board.set(conf);
     }
 
     function getMovesMap() {
-        var moves_list = game.moves({ verbose: true});
+        var moves_list = game.isGameOver() ? [] : game.moves({ verbose: true});
         var map = new Map() ;
         moves_list.forEach((move) => {
             if (!map.has(move["from"])) {
@@ -508,24 +505,16 @@ $(document).ready(function () {
         }
         game.move(the_move.san);
         handleMoveOnBoard(the_move);
+        removeHighlights();
         removeCheckAndMate();
         insertMove(the_move);
         changeDrawButton('enabled');
 
-        var array = get_piece_positions(game, {type: "k", color: game.turn()});
-        var source = array[0];
         highlight_check_mate();
         if (game.isCheckmate()) {
             game_over = true;
             return;
         }
-        /*if (game.isCheckmate()) {
-            $board.find(".square-" + source).addClass("highlight-mate");
-            game_over = true;
-            return;
-        } else if (game.inCheck()) {
-            $board.find(".square-" + source).addClass("highlight-check");
-        }*/
         // handle future move
         console.log('the futureMoveData ' + futureMoveData);
         if (futureMoveData != null) {
@@ -533,7 +522,7 @@ $(document).ready(function () {
                 futureMoveData = null;
                 return;
             }
-            console.log('about to perform move ' + futureMoveData.from + " " + futureMoveData.to);
+            console.log('about to perform premove ' + futureMoveData.from + " " + futureMoveData.to);
             var move = gameMove(futureMoveData.from, futureMoveData.to, promote);
             if (move != null) {
                 var json = {
@@ -584,6 +573,7 @@ $(document).ready(function () {
 
         var y = document.getElementById("conty");
         y.style.display = "block";
+        y.style.opacity = "0.95";
         console.log(color_win + " " + my_color);
         var x = null;
         if (color_win === 'Draw') {
@@ -623,6 +613,49 @@ $(document).ready(function () {
                 }
             }
         }
+        dragElement(x);
+    }
+
+    // Make the DIV element draggable:
+    function dragElement(elmnt) {
+      var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      if (document.getElementById(elmnt.id + "header")) {
+        // if present, the header is where you move the DIV from:
+        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+      } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+      }
+
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+      }
+
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      }
+
+      function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
     }
 
     function updateLastCall() {
@@ -812,7 +845,7 @@ $(document).ready(function () {
             } else {
                 index = 2;
             }
-            handle_move(moves[i], index, ttl, moves.length == 1);
+            handle_move(moves[i], index, ttl, moves.length === 1);
         }
     }
 
@@ -941,18 +974,25 @@ $(document).ready(function () {
         }
     }
 
-    function removeGreySquares() {
-        $("svg").remove();
-        $("img").css("box-shadow", "");
+    function removePremoveHighlight() {
+        var collection = document.getElementsByClassName("current-premove");
+        var d = collection.length;
+        for(var i=0; i < d; i++) {
+            console.log('Removing premove highlight ' + collection[0]['cgKey'] + " " + collection[0].className);
+            collection[0].classList.remove("current-premove");
+        }
+        conf.premovable.current = null;
     }
 
     function highlight_check_mate() {
         const positions = document.getElementsByClassName(getColorFromTurn(game.turn()) + " king");
         if (game.isCheckmate()) {
-            positions[0].classList.add('highlight-mate');
+            if (positions.length > 0)
+                positions[0].classList.add('highlight-mate');
             game_over = true
         } else if (game.inCheck()) {
-            positions[0].classList.add('highlight-check');
+            if (positions.length > 0)
+                positions[0].classList.add('highlight-check');
         }
     }
 
@@ -967,8 +1007,7 @@ $(document).ready(function () {
     }
 
     function removeHighlights() {
-        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight1);
-        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight2);
+        removePremoveHighlight();
     }
 
     function changeCursor(square, change) {
@@ -987,41 +1026,6 @@ $(document).ready(function () {
         }
     }
 
-    function greySquare(square) {
-        if (!highlightMoves){
-            return
-        }
-        var $square = $("#myBoard .square-" + square);
-        var isPiece = false;
-        var image = null;
-        if ($square.children().length > 0) {
-            for (var r = 0; r < $square.children().length; r++) {
-                if ($square.children()[r].tagName == "IMG")
-                    isPiece = true;
-                image = $square.children()[r];
-            }
-        }
-        if (isPiece) {
-            image.style.boxShadow = "inset 0 0 6px 3px #fc5185";
-        } else {
-            var the_square = $square.get()[0];
-            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("width", "50");
-            svg.setAttribute("height", "50");
-            var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttributeNS(null, "cx", the_square.offsetHeight/2);
-            circle.setAttributeNS(null, "cy", the_square.offsetWidth/2);
-            circle.setAttributeNS(null, "r", 5);
-            //circle.setAttributeNS(null, 'stroke', "red")
-            //circle.setAttributeNS(null, 'stroke-width', "3")
-            circle.setAttributeNS(null, "fill", "#fc5185");
-            circle.setAttributeNS(null, "align", "center");
-            svg.appendChild(circle);
-
-            the_square.appendChild(svg);
-        }
-    }
-
     function is_my_turn() {
         var turn = game.turn();
         var mine = my_color.charAt(0);
@@ -1030,14 +1034,13 @@ $(document).ready(function () {
 
     function getColorFromTurn() {
         var turn = game.turn();
-        console.log('computed turn ' + turn)
         if (turn === 'b') {
             return 'black';
         }
         return 'white';
     }
 
-    function gameMove(source, target, promotion) {
+    function gameMove(source, target, promote) {
         var move = null;
         console.log('Handling game move ' + source + " " + target)
         try {
@@ -1054,7 +1057,6 @@ $(document).ready(function () {
     }
 
     function onPreMoveSet(source, target) {
-        console.log("PreMoveSet " + futureMoveData);
         if (source !== target) {
             futureMoveData = {from: source, to: target};
             const moves = game.moves();
@@ -1080,7 +1082,6 @@ $(document).ready(function () {
     }
 
     function onPreMoveUnSet() {
-        console.log("PreMoveUnSet");
         futureMoveData = null;
         removeHighlights();
     }
@@ -1098,29 +1099,7 @@ $(document).ready(function () {
             console.log('skipping onDrop due to opponent move');
             return;
         }
-        if (source !== target) {
-            futureMoveData = {from: source, to: target};
-            const moves = game.moves();
-            const randomMove = moves[Math.floor(Math.random() * moves.length)];
-            game.move(randomMove);
-            try {
-                game.move(futureMoveData);
-                // undo both moves but keep the highlights as it appears to be a legal move
-                game.undo();
-                game.undo();
-            } catch (e) {
-                // this move is illegal and should not be counted as a future move
-                game.undo();    // undo the random move
-                removeHighlights();
-                futureMoveData = null;
-            }
-        } else if (source === target) {
-            futureMoveData = null;
-            removeHighlights();
-        } else {
-            removeHighlights();
-        }
-        removeGreySquares();
+        removeHighlights();
         // illegal move
         updateStatus();
         var json = {
@@ -1144,6 +1123,9 @@ $(document).ready(function () {
                 highlight_check_mate();
                 console.log("Answer from api/move " + ret);
                 if (!game_over) {
+                    if (captured){
+                        resetBoard(move);
+                    }
                     if (ret.remaining) {
                         discardTimeInterval('B');
                         setTime("clockdivB", ret["other_remaining"]);
@@ -1176,33 +1158,29 @@ $(document).ready(function () {
         }
         var curr_position = Chessboard.fenToObj(game.fen());
         var piece = curr_position[source];
+        console.log('about to perform promotion, queenAutopromote:' + queenAutopromote + " target:" + target + " " + " promotion_in_progress: " + promotion_in_progress + " piece " + piece)
         if (!queenAutopromote && promotion_in_progress.length === 0 && (target[1] === "1" || target[1] === "8" ) && piece[1] === "P") {
             var move = gameMove(source, target, promote);
             if (move != null) {
-                if (piece[1] == "P") {
-                    promotion_in_progress = [source, target];
-                    var pieceType = ["B", "N", "R", "Q"];
-                    var themes = document.getElementsByClassName("promotionPieceHolder");
-                    for (var t = 0; t < themes.length; t++) {
-                        var theme = themes.item(t);
-                        var piece_theme = getPieceFuncByName(pieceTheme);
-                        my_color.charAt(0);
-                        var img = document.createElement("IMG");
-                        img.src = piece_theme(my_color.charAt(0) + pieceType[t]);
-                        img.style.maxHeight = "100%";
-                        img.style.maxWidth = "100%";
-                        theme.appendChild(img);
-                    }
-                    var promotionTab = document.getElementById("promotion");
-                    promotionTab.style.display = "flex";
-                    var gc = document.getElementById("gameBox");
-                    gc.style.opacity = 0.2;
-                    game.undo();
-                    return true;
-                } else {
-                    game.undo();
-                    return false;
+                promotion_in_progress = [source, target];
+                var pieceType = ["B", "N", "R", "Q"];
+                console.log('promotion in progress')
+                var themes = document.getElementsByClassName("promotionPieceHolder");
+                for (var t = 0; t < themes.length; t++) {
+                    var theme = themes.item(t);
+                    var piece_theme = getPieceFuncByName(pieceTheme);
+                    var img = document.createElement("IMG");
+                    img.src = piece_theme(my_color.charAt(0) + pieceType[t]);
+                    img.style.maxHeight = "100%";
+                    img.style.maxWidth = "100%";
+                    theme.appendChild(img);
                 }
+                var promotionTab = document.getElementById("promotion");
+                promotionTab.style.display = "flex";
+                var gc = document.getElementById("gameBox");
+                gc.style.opacity = 0.2;
+                game.undo();
+                return true;
             }
             return false
         }
@@ -1219,39 +1197,6 @@ $(document).ready(function () {
             const column = Math.ceil((64 - piece_index) / 8);
             return row + column;
         });
-    }
-
-    function onMouseoverSquare(square, piece, position, orientation) {
-        var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.isGameOver() || piece === false || cut_game_fen !== board.getFen() || promotion_in_progress.length > 0 || game_over) return false;
-        if (orientation === "white" && piece.indexOf("b") !== -1) return false;
-        if (orientation === "black" && piece.indexOf("w") !== -1) return false;
-        changeCursor(square, "grab");
-        // get list of possible moves for this square
-        var moves = game.moves({
-            square: square,
-            verbose: true
-        });
-
-        // exit if there are no moves available for this square
-        if (moves.length === 0) return;
-        removeGreySquares();
-        // highlight the possible squares for this piece
-        for (var i = 0; i < moves.length; i++) {
-            if (moves[i].to != "")
-                greySquare(moves[i].to);
-        }
-    }
-
-    function onMouseoutSquare(square, piece) {
-        changeCursor(square, "default");
-        removeGreySquares();
-    }
-
-    function onDragMove (newLocation, oldLocation, source, piece, position, orientation) {
-        if (newLocation === 'offboard') {
-            changeCursor(newLocation, "no-drop");
-        }
     }
 
     function updateStatus() {
