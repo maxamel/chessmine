@@ -1,4 +1,4 @@
-import { getPieceFuncByName, getBoardColorsByName } from './utils.js';
+import { getPieceFuncByName, fenToObj } from './utils.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move } from './stockfish_handler.js';
 import { Chessground } from './chessground.js';
@@ -68,12 +68,7 @@ $(document).ready(function () {
         game_over = true;
         discardTimeInterval('all');
         disableGameButtons();
-        if (game.isGameOver()) {
-            conf.premovable.enabled = false;
-            conf.draggable.enabled = false;
-            conf.selectable.enabled = false;
-        }
-        board.set(conf);
+        resetBoard(null);
         showEndGame(ans.winner, ans.message);
         setRatings(ans);
     });
@@ -459,7 +454,8 @@ $(document).ready(function () {
 
     function resetBoard(last_move) {
         conf.movable.dests = getMovesMap();
-        conf.lastMove = [last_move["from"], last_move["to"]];
+        if (last_move)
+            conf.lastMove = [last_move["from"], last_move["to"]];
         if (game.isGameOver()) {
             conf.premovable.enabled = false;
             conf.draggable.enabled = false;
@@ -1156,7 +1152,7 @@ $(document).ready(function () {
         if (source === undefined || target === undefined) {
             return false;
         }
-        var curr_position = Chessboard.fenToObj(game.fen());
+        var curr_position = fenToObj(game.fen());
         var piece = curr_position[source];
         console.log('about to perform promotion, queenAutopromote:' + queenAutopromote + " target:" + target + " " + " promotion_in_progress: " + promotion_in_progress + " piece " + piece)
         if (!queenAutopromote && promotion_in_progress.length === 0 && (target[1] === "1" || target[1] === "8" ) && piece[1] === "P") {

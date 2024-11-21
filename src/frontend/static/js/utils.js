@@ -38,4 +38,47 @@
         };
     }
 
-    export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining }
+    function fenToObj (fen) {
+        // cut off any move, castling, etc info from the end
+        // we're only interested in position information
+        fen = fen.replace(/ .+$/, '')
+        var COLUMNS = 'abcdefgh'.split('')
+        var rows = fen.split('/')
+        var position = {}
+
+        var currentRow = 8
+        for (var i = 0; i < 8; i++) {
+          var row = rows[i].split('')
+          var colIdx = 0
+
+          // loop through each character in the FEN section
+          for (var j = 0; j < row.length; j++) {
+            // number / empty squares
+            if (row[j].search(/[1-8]/) !== -1) {
+              var numEmptySquares = parseInt(row[j], 10)
+              colIdx = colIdx + numEmptySquares
+            } else {
+              // piece
+              var square = COLUMNS[colIdx] + currentRow
+              position[square] = fenToPieceCode(row[j])
+              colIdx = colIdx + 1
+            }
+          }
+
+          currentRow = currentRow - 1
+        }
+
+        return position
+    }
+
+    function fenToPieceCode (piece) {
+        // black piece
+        if (piece.toLowerCase() === piece) {
+          return 'b' + piece.toUpperCase()
+        }
+
+        // white piece
+        return 'w' + piece.toUpperCase()
+    }
+
+    export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining, fenToObj }
