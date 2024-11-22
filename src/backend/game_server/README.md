@@ -1,4 +1,4 @@
-# Run game server locally
+# Run local game server
 
 ### Prerequisites:
 

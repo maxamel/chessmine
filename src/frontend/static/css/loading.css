@@ -25,9 +25,9 @@
 }
 
 .loadButton {
-    border: 1px solid #FCBBCD;
+    border: 1px solid #ecf87f;
     border-radius: 20px;
-    color: #fc5185;
+    color: #81b622;
     position: relative;
     margin: auto;
 }
@@ -49,14 +49,14 @@
 
 .loadMessage {
     position: relative;
-    color: #fc5185;
+    color: #81b622;
     font-weight: lighter;
     margin: auto;
     padding: 20px;
 }
 
 .myloader {
-    background-color: #fc5185;
+    background-color: #81b622;
 }
 .lds-ellipsis div:nth-child(1) {
   left: 8px;

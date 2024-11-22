@@ -4,7 +4,7 @@
   padding: 30px;
   display: inline-block;
   #display: none;
-  background: #364f6b;
+  background: #59981a;
   background-size: cover;
   #position: absolute;
   width: 100%;
@@ -26,22 +26,22 @@
 
 @keyframes glowingButton{
     0% {
-    background: #fc5185;
+    background: #81b622;
   }
 
   50% {
-      #background-image: linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      #background-image: -webkit-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -webkit-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      #background-image: -moz-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -moz-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      #background-image: -ms-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -ms-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
-      #background-image: -o-linear-gradient(to right, #fc5185 0%, #FCBBCD 100%), -o-radial-gradient(circle at top left, #fc5185, #FCBBCD);
+      #background-image: linear-gradient(to right, #81b622 0%, #ecf87f 100%), radial-gradient(circle at top left, #81b622, #ecf87f);
+      #background-image: -webkit-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -webkit-radial-gradient(circle at top left, #81b622, #ecf87f);
+      #background-image: -moz-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -moz-radial-gradient(circle at top left, #81b622, #ecf87f);
+      #background-image: -ms-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -ms-radial-gradient(circle at top left, #81b622, #ecf87f);
+      #background-image: -o-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -o-radial-gradient(circle at top left, #81b622, #ecf87f);
+      #background-image: -o-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -o-radial-gradient(circle at top left, #81b622, #ecf87f);
       background: white;
-      color: #fc5185;
+      color: #81b622;
   }
 
   100% {
-    background: #fc5185;
+    background: #81b622;
   }
 }
 
@@ -95,7 +95,7 @@ td.settings {
 }
 
 .themeContainer:hover {
-    background-color: #364f6b;
+    background-color: #81b622;
     outline: none;
     cursor: pointer;
 }
@@ -130,8 +130,6 @@ td.settings {
 }
 
 .settingsWrapper {
-  #border: 1px solid #bdcad8;
-  #box-shadow: inset 0px 0px 1px 1px #fc5185;
   padding: 4px;
   width: 100%;
   height: 90%;
@@ -140,12 +138,12 @@ td.settings {
 
 .themeBox {
     width: 100%;
-    background: #0f2f53;
+    background: #2f5233;
     border-radius: 10px;
 }
 
 .checkmarkBox {
-    background: #0f2f53;
+    background: #2f5233;
     border-radius: 10px;
     padding-bottom: 15px;
     width: 100%;
@@ -190,9 +188,9 @@ td.settings {
 
 .settingsContainer {
   opacity: 1;
-  background: #364f6b;
+  background: #59981a;
   #border: 1px solid #bdcad8;
-  #box-shadow: inset 0px 0px 1px 1px #fc5185;
+  #box-shadow: inset 0px 0px 1px 1px #81b622;
   #outline: 2px solid yellowgreen;
   width: 100%;
   height: 100%;
@@ -203,10 +201,10 @@ td.settings {
   padding: 0 10px;
   height: 40px;
   width: 255px;
-  background: #364f6b;
+  background: #81b622;
   color: #bdcad8;
   font-family: "Baloo Paaji 2 SemiBold";
-  text-shadow: 1px 1px #fc5185;
+  text-shadow: 1px 1px #81b622;
   text-decoration: underline;
 }
 
@@ -251,7 +249,7 @@ td.settings {
 
 /* When the checkbox is checked, add a blue background */
 .checkContainer input:checked ~ .checkmark {
-  background-color:  #fc5185;
+  background-color:  #81b622;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */

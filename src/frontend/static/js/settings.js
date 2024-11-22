@@ -130,33 +130,33 @@ $(document).ready(function () {
         for (var c = 0; c < conts.length; c++) {
             if (cookie_data != null && cookie_data.preferences != null ) {
                 if (conts[c].parentElement.id === "settingItemBoard" && conts[c].id.includes(cookie_data.preferences.board_theme)) {
-                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.border = "3px solid #81b622";
                     conts[c].style.color = "white";
                     conts[c].style.fontWeight = "bolder";
                 }
                 if (conts[c].parentElement.id === "settingItemPiece" && conts[c].id.includes(cookie_data.preferences.piece_theme)) {
-                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.border = "3px solid #81b622";
                     conts[c].style.color = "white";
                     conts[c].style.fontWeight = "bolder";
                 }
                 if (conts[c].parentElement.id === "settingItemTimeControl" && conts[c].children[0].innerHTML.toLowerCase() === cookie_data.preferences.time_control) {
-                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.border = "3px solid #81b622";
                     conts[c].style.color = "white";
                     conts[c].style.fontWeight = "bolder";
                 }
             } else {        // load default config
                 if (conts[c].parentElement.id === "settingItemBoard" && conts[c].id.includes(boardTheme)) {
-                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.border = "3px solid #81b622";
                     conts[c].style.color = "white";
                     conts[c].style.fontWeight = "bolder";
                 }
                 if (conts[c].parentElement.id === "settingItemPiece" && conts[c].id.includes(pieceTheme)) {
-                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.border = "3px solid #81b622";
                     conts[c].style.color = "white";
                     conts[c].style.fontWeight = "bolder";
                 }
                 if (conts[c].parentElement.id === "settingItemTimeControl" && conts[c].children[0].innerHTML.toLowerCase() === timeControl) {
-                    conts[c].style.border = "3px solid #fc5185";
+                    conts[c].style.border = "3px solid #81b622";
                     conts[c].style.color = "white";
                     conts[c].style.fontWeight = "bolder";
                 }
@@ -203,7 +203,7 @@ $(document).ready(function () {
                     board.position(game.fen(), true);
                     promotion_in_progress = [];
                 }
-                elem.style.border = "3px solid #fc5185";
+                elem.style.border = "3px solid #81b622";
                 elem.style.color = "white";
                 elem.style.fontWeight = "bolder";
             }, false);
