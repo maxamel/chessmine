@@ -168,7 +168,7 @@ $(document).ready(function () {
                   dests: getMovesMap(),
                   rookCastle: true,
               },
-              draggable: { enabled: game_status !== 3 },
+              draggable: { enabled: game_status !== 3, showGhost: false },
               selectable: { enabled: game_status !== 3 },
               highlight: { check: true, lastMove: true },
               events: {
@@ -194,9 +194,10 @@ $(document).ready(function () {
                 //onChange?: (shapes: DrawShape[]) => void; // called after drawable shapes change
               }
         }
-        console.log('setting board to fen ' + the_game_fen)
+        console.log('setting board to fen ' + the_game_fen);
         board = Chessground($board, conf);
-        //board = Chessboard("myBoard", config);
+        setup_themes();
+        
         insertBulkMoves(the_game_moves, ttl_time);
 
         handle_engine_init(rival, the_game, the_game_fen, me.rating)
@@ -293,6 +294,25 @@ $(document).ready(function () {
         heartbeatOK = true;
         $(".fullpage").fadeOut("slow");
 
+        function setup_themes() {
+            var piece_func = getPieceFuncByName(pieceTheme);
+            var pieces = document.getElementsByClassName("black");
+            for (var t = 0; t < pieces.length; t++) {
+                console.log(pieces[t].className);
+                var classes = pieces[t].className.split(' ');
+                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+                pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+            }
+            var pieces = document.getElementsByClassName("white");
+            console.log('hello ' + pieces.length);
+            for (var t = 0; t < pieces.length; t++) {
+                console.log(pieces[t]);
+                var classes = pieces[t].className.split(' ');
+                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+                pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+                console.log(pieces[t].backgroundImage);
+            }
+        }
 
         function rematchAction(x) {
             const json = {
