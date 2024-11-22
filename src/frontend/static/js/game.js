@@ -1,15 +1,16 @@
-import { getPieceFuncByName, getBoardColorsByName } from './utils.js';
+import { getPieceFuncByName, fenToObj } from './utils.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move } from './stockfish_handler.js';
+import { Chessground } from './chessground.js';
 
 $(document).ready(function () {
     load_cookies()
 
     var moveInterval = null;
-    var board = null;
-    var $board = $("#myBoard");
-    var game = new Chess();
-    var futureMove = false;
+    var board = null;       // the chessground board
+    var $board = document.getElementById('myBoard')
+    var game = new Chess();     // the chess logic
+    var conf = null;            // the conf of the chessground board
     var futureMoveData = null;
     var player_id = null;
     var other_remaining = 300000;
@@ -67,13 +68,13 @@ $(document).ready(function () {
         game_over = true;
         discardTimeInterval('all');
         disableGameButtons();
-        //update_ratings(ans);
+        resetBoard(null);
         showEndGame(ans.winner, ans.message);
         setRatings(ans);
     });
 
     function handle_engine_init (rival, the_game, the_game_fen, rating) {
-        if (rival.player_type == 1) {   // rival is engine
+        if (rival.player_type === 1) {   // rival is engine
             // lazy initialization of stockfish
             engine_sid = the_game.engine_sid
             console.log(game.fen());
@@ -84,7 +85,7 @@ $(document).ready(function () {
                 var responseWords = line.split(' ')
                 if (responseWords[0] === 'bestmove') {
                     // make move to get full structure of chess move and then undo. This move will be processed
-                    // properly nce it goes through the server and back
+                    // properly once it goes through the server and back
                     var preetified_engine_move = game.move(responseWords[1])
                     game.undo()
                     var json = {
@@ -145,22 +146,58 @@ $(document).ready(function () {
         setTime("clockdivA", rival_time);
         setTime("clockdivB", my_time);
 
-        var config = {
-            pieceTheme: "../img/chesspieces/" + pieceTheme + "/{piece}.png",
-            boardTheme: getBoardColorsByName(boardTheme),
-            draggable: true,
-            position: the_game_fen,
-            orientation: my_color,
-            onDragStart: onDragStart,
-            onDrop: onDrop,
-            //onMoveEnd: onMoveEnd,
-            onDragMove: onDragMove,
-            onMouseoutSquare: onMouseoutSquare,
-            onMouseoverSquare: onMouseoverSquare,
-            onSnapEnd: onSnapEnd,
-        };
-        board = Chessboard("myBoard", config);
         game = new Chess(the_game_fen);
+        conf = {
+              fen: the_game_fen,
+              orientation: my_color,
+              turnColor: getColorFromTurn(),
+              //coordinatesOnSquares: true,
+              premovable: {
+                  enabled: game_status !== 3, // allow premoves for color that can not move
+                  showDests: true, // whether to add the premove-dest class on squares
+                  castle: true, // whether to allow king castle premoves
+                  events: {
+                      set: onPreMoveSet,
+                      unset: onPreMoveUnSet
+                  }
+              },
+              movable: {
+                  free: false,
+                  color: my_color,
+                  showDests: true,
+                  dests: getMovesMap(),
+                  rookCastle: true,
+              },
+              draggable: { enabled: game_status !== 3, showGhost: false },
+              selectable: { enabled: game_status !== 3 },
+              highlight: { check: true, lastMove: true },
+              events: {
+                  //change?: () => void; // called after the situation changes on the board
+                  // called after a piece has been moved.
+                  // capturedPiece is undefined or like {color: 'white'; 'role': 'queen'}
+                  move: onDrop,
+
+                  //dropNewPiece?: (piece: cg.Piece, key: cg.Key) => void;
+                  //select?: (key: cg.Key) => void; // called when a square is selected
+                  //insert?: (elements: cg.Elements) => void; // when the board DOM has been (re)inserted
+              },
+              drawable: {
+                enabled: true, // can draw
+                visible: true, // can view
+                defaultSnapToValidMove: false,
+                // false to keep the drawing if a movable piece is clicked.
+                // Clicking an empty square or immovable piece will clear the drawing regardless.
+                //eraseOnClick: boolean;
+                //shapes?: DrawShape[];
+                //autoShapes?: DrawShape[];
+                //brushes?: DrawBrushes;
+                //onChange?: (shapes: DrawShape[]) => void; // called after drawable shapes change
+              }
+        }
+        console.log('setting board to fen ' + the_game_fen);
+        board = Chessground($board, conf);
+        setup_themes();
+        
         insertBulkMoves(the_game_moves, ttl_time);
 
         handle_engine_init(rival, the_game, the_game_fen, me.rating)
@@ -168,7 +205,7 @@ $(document).ready(function () {
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
 
-        if (game_status != 3) {     // NOT ENDED
+        if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
                 window.onclick = function(event) {
                   if (event.target.id != 'drawOfferedButton') {
@@ -202,7 +239,7 @@ $(document).ready(function () {
             hideArrows();
             enableGameButtons();
 
-            if (my_color == draw_offer) {
+            if (my_color === draw_offer) {
                 // I offered draw
                 changeDrawButton('disabled');
             } else if (draw_offer != null){
@@ -210,7 +247,7 @@ $(document).ready(function () {
                 changeDrawButton('hidden');
             }
 
-            if (game_status == 2) {     // PLAYING
+            if (game_status === 2) {     // PLAYING
                 if (is_my_turn()) {
                     discardTimeInterval('A');
                     initializeClock("clockdivB", my_time);
@@ -218,12 +255,13 @@ $(document).ready(function () {
                     discardTimeInterval('B');
                     initializeClock("clockdivA", rival_time);
                 }
-            } else if (game_status == 1) {      // STARTED
+            } else if (game_status === 1) {      // STARTED
                 game_over = false;
                 hideEndGameBoxes();
             }
         } else {
-            console.log("BUDDY " + JSON.stringify(the_game.end_game_info));
+            game_over = true;
+            highlight_check_mate();
             setRatings(the_game.end_game_info);
             disableGameButtons();
         }
@@ -250,12 +288,31 @@ $(document).ready(function () {
             });
         }
 
-        var x = window.matchMedia("(max-width: 1105px)");
-        //myFunction(x) // Call listener function at run time
-        x.addEventListener("change", boardResize); // Attach listener function on state changes
+        //var x = window.matchMedia("(max-width: 1105px)");
+        // chessground does not require resize
+        //x.addEventListener("change", boardResize); // Attach listener function on state changes
         heartbeatOK = true;
         $(".fullpage").fadeOut("slow");
 
+        function setup_themes() {
+            var piece_func = getPieceFuncByName(pieceTheme);
+            var pieces = document.getElementsByClassName("black");
+            for (var t = 0; t < pieces.length; t++) {
+                console.log(pieces[t].className);
+                var classes = pieces[t].className.split(' ');
+                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+                pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+            }
+            var pieces = document.getElementsByClassName("white");
+            console.log('hello ' + pieces.length);
+            for (var t = 0; t < pieces.length; t++) {
+                console.log(pieces[t]);
+                var classes = pieces[t].className.split(' ');
+                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+                pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+                console.log(pieces[t].backgroundImage);
+            }
+        }
 
         function rematchAction(x) {
             const json = {
@@ -292,7 +349,7 @@ $(document).ready(function () {
                         promote = elem.id;
                         onDrop(promotion_in_progress[0], promotion_in_progress[1]);
                         console.log('Rerendering board position');
-                        board.position(game.fen(), true);
+                        resetBoard({"from": promotion_in_progress[0], "to": promotion_in_progress[1]});
                         promotion_in_progress = [];
                     }
                     elem.style.border = "3px solid #fc5185";
@@ -356,15 +413,15 @@ $(document).ready(function () {
                 }
             });
         }
-
+        /*
         function boardResize(x) {
             console.log('called board resize');
             if (x.matches) { // If media query matches
-                board.resize();
+                board.resize;
             } else {
                 board.resize();
             }
-        }
+        }*/
     });
 
     socket.on("draw", function (ans) {
@@ -411,34 +468,38 @@ $(document).ready(function () {
 
     function handleMoveOnBoard(the_move) {
         // chessboard.js doesn't handle castling, en-passant and pawn promotion correctly.
-        if (the_move.san === 'O-O-O' ||
-          the_move.san === 'O-O' ||
-          the_move.san.indexOf('=') > -1 ||
-          (the_move.san.indexOf('x') > -1 && the_move.flags == 'e')
-        ) {
-            console.log('Called board positioning while move handling');
-            board.position(game.fen(), true)
-        }
-        else {
-            board.move(the_move.from + '-' + the_move.to)
-        }
+        console.log('This is the move handled! ' + JSON.stringify(the_move));
+        resetBoard(the_move);
     }
 
-    function highlight_check_mate() {
-        var array = 0
-        if (game.isCheckmate()) {
-            array = get_piece_positions(game, { type: 'k', color: game.turn() })
-            let source = array[0]
-            $board.find('.square-' + source).addClass('highlight-mate')
-            game_over = true
-        } else if (game.inCheck()) {
-            array = get_piece_positions(game, { type: 'k', color: game.turn() })
-            let source = array[0]
-            $board.find('.square-' + source).addClass('highlight-check')
+    function resetBoard(last_move) {
+        conf.movable.dests = getMovesMap();
+        if (last_move)
+            conf.lastMove = [last_move["from"], last_move["to"]];
+        if (game.isGameOver()) {
+            conf.premovable.enabled = false;
+            conf.draggable.enabled = false;
+            conf.selectable.enabled = false;
         }
+        conf.turnColor = getColorFromTurn();
+        conf.fen = game.fen();
+        board.set(conf);
+    }
+
+    function getMovesMap() {
+        var moves_list = game.isGameOver() ? [] : game.moves({ verbose: true});
+        var map = new Map() ;
+        moves_list.forEach((move) => {
+            if (!map.has(move["from"])) {
+              map.set(move["from"], []);
+            }
+            map.get(move["from"]).push(move["to"]);
+        });
+        return map;
     }
 
     socket.on("move", function (ans) {
+        // move recieved from server considered valid
         var the_move = ans.move;
         console.log('Got move data ' + JSON.stringify(ans));
         if (ans.remaining) {
@@ -454,30 +515,30 @@ $(document).ready(function () {
                 setTime("clockdivA", ans.other_remaining);
             }
         }
-        if (game.turn() != the_move.color) {
+        if (game.turn() !== the_move.color) {
+            console.log('Got my own move back so quitting');
             return;      // Got my own move back
         }
         game.move(the_move.san);
         handleMoveOnBoard(the_move);
-        removeCheck();
+        removeHighlights();
+        removeCheckAndMate();
         insertMove(the_move);
         changeDrawButton('enabled');
 
-        var array = get_piece_positions(game, {type: "k", color: game.turn()});
-        var source = array[0];
+        highlight_check_mate();
         if (game.isCheckmate()) {
-            $board.find(".square-" + source).addClass("highlight-mate");
             game_over = true;
             return;
-        } else if (game.inCheck()) {
-            $board.find(".square-" + source).addClass("highlight-check");
         }
         // handle future move
+        console.log('the futureMoveData ' + futureMoveData);
         if (futureMoveData != null) {
             if (handlePromotion(futureMoveData.from, futureMoveData.to)) {
                 futureMoveData = null;
                 return;
             }
+            console.log('about to perform premove ' + futureMoveData.from + " " + futureMoveData.to);
             var move = gameMove(futureMoveData.from, futureMoveData.to, promote);
             if (move != null) {
                 var json = {
@@ -528,6 +589,7 @@ $(document).ready(function () {
 
         var y = document.getElementById("conty");
         y.style.display = "block";
+        y.style.opacity = "0.95";
         console.log(color_win + " " + my_color);
         var x = null;
         if (color_win === 'Draw') {
@@ -567,6 +629,49 @@ $(document).ready(function () {
                 }
             }
         }
+        dragElement(x);
+    }
+
+    // Make the DIV element draggable:
+    function dragElement(elmnt) {
+      var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      if (document.getElementById(elmnt.id + "header")) {
+        // if present, the header is where you move the DIV from:
+        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+      } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+      }
+
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+      }
+
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      }
+
+      function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
     }
 
     function updateLastCall() {
@@ -756,7 +861,7 @@ $(document).ready(function () {
             } else {
                 index = 2;
             }
-            handle_move(moves[i], index, ttl, moves.length == 1);
+            handle_move(moves[i], index, ttl, moves.length === 1);
         }
     }
 
@@ -806,15 +911,22 @@ $(document).ready(function () {
         var normalized_index = index - 1;
         var position_in_array = row * 2 + normalized_index;
         var selected_fen = the_game_fens[position_in_array];
-        board.position(selected_fen, true);
+        conf.fen = selected_fen
         $("td").removeClass("selectedCell");
         if (position_in_array < the_game_fens.length - 1) {
             cell.target.classList.add("selectedCell");
-            $("#myBoard .square-55d63").removeClass("highlight-check");
-            $("#myBoard .square-55d63").removeClass("highlight-mate");
+            removeCheckAndMate();
+            conf.highlight.lastMove = false;
+            conf.movable.dests = new Map();
+            conf.movable.color = undefined;
         } else {
+            conf.highlight.lastMove = true;
+            conf.movable.dests = getMovesMap();
+            conf.movable.color = my_color;
+            conf.turnColor = getColorFromTurn();
             highlight_check_mate();
         }
+        board.set(conf);
     }
 
     function heartbeat(force) {
@@ -878,21 +990,40 @@ $(document).ready(function () {
         }
     }
 
-    function removeGreySquares() {
-        //$('#myBoard .white-1e1d7').css('background', whiteSquare)
-        //$('#myBoard .black-3c85d').css('background', blacksquare)
-        $("svg").remove();
-        $("img").css("box-shadow", "");
+    function removePremoveHighlight() {
+        var collection = document.getElementsByClassName("current-premove");
+        var d = collection.length;
+        for(var i=0; i < d; i++) {
+            console.log('Removing premove highlight ' + collection[0]['cgKey'] + " " + collection[0].className);
+            collection[0].classList.remove("current-premove");
+        }
+        conf.premovable.current = null;
     }
 
-    function removeCheck() {
-        $("#myBoard .square-55d63").removeClass("highlight-check");
-        $("img").css("box-shadow", "");
+    function highlight_check_mate() {
+        const positions = document.getElementsByClassName(getColorFromTurn(game.turn()) + " king");
+        if (game.isCheckmate()) {
+            if (positions.length > 0)
+                positions[0].classList.add('highlight-mate');
+            game_over = true
+        } else if (game.inCheck()) {
+            if (positions.length > 0)
+                positions[0].classList.add('highlight-check');
+        }
+    }
+
+    function removeCheckAndMate() {
+        let positions = document.getElementsByClassName("white king");
+        positions[0].classList.remove("highlight-check");
+        positions[0].classList.remove("highlight-mate");
+        positions = document.getElementsByClassName("black king");
+        positions[0].classList.remove("highlight-check");
+        positions[0].classList.remove("highlight-mate");
+        //$("img").css("box-shadow", "");
     }
 
     function removeHighlights() {
-        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight1);
-        $("#myBoard .square-55d63").removeClass(Chessboard.CSS.highlight2);
+        removePremoveHighlight();
     }
 
     function changeCursor(square, change) {
@@ -911,64 +1042,23 @@ $(document).ready(function () {
         }
     }
 
-    function greySquare(square) {
-        if (!highlightMoves){
-            return
-        }
-        var $square = $("#myBoard .square-" + square);
-        var isPiece = false;
-        var image = null;
-        if ($square.children().length > 0) {
-            for (var r = 0; r < $square.children().length; r++) {
-                if ($square.children()[r].tagName == "IMG")
-                    isPiece = true;
-                image = $square.children()[r];
-            }
-        }
-        if (isPiece) {
-            image.style.boxShadow = "inset 0 0 6px 3px #fc5185";
-        } else {
-            var the_square = $square.get()[0];
-            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("width", "50");
-            svg.setAttribute("height", "50");
-            var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttributeNS(null, "cx", the_square.offsetHeight/2);
-            circle.setAttributeNS(null, "cy", the_square.offsetWidth/2);
-            circle.setAttributeNS(null, "r", 5);
-            //circle.setAttributeNS(null, 'stroke', "red")
-            //circle.setAttributeNS(null, 'stroke-width', "3")
-            circle.setAttributeNS(null, "fill", "#fc5185");
-            circle.setAttributeNS(null, "align", "center");
-            svg.appendChild(circle);
-
-            the_square.appendChild(svg);
-        }
-    }
-
-    function onDragStart(source, piece, position, orientation) {
-        // do not pick up pieces if the game is over
-        var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        removeHighlights();
-        if (game.isGameOver() || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
-        if (orientation == "white" && piece.indexOf("b") != -1) return false;
-        if (orientation == "black" && piece.indexOf("w") != -1) return false;
-        // record future move
-        if ((game.turn() === "w" && piece.indexOf("b") !== -1) ||
-            (game.turn() === "b" && piece.indexOf("w") !== -1)) {
-            futureMove = true;
-        }
-    }
-
     function is_my_turn() {
         var turn = game.turn();
         var mine = my_color.charAt(0);
         return turn === mine;
-
     }
 
-    function gameMove(source, target, promotion) {
+    function getColorFromTurn() {
+        var turn = game.turn();
+        if (turn === 'b') {
+            return 'black';
+        }
+        return 'white';
+    }
+
+    function gameMove(source, target, promote) {
         var move = null;
+        console.log('Handling game move ' + source + " " + target)
         try {
             move = game.move({
                 from: source,
@@ -977,20 +1067,13 @@ $(document).ready(function () {
             });
         }
         catch (e) {
-            console.log(`Detected pre-move since move is invalid:  ${JSON.stringify(move)} `);
+            console.log(`Detected pre-move since move is invalid: ${move}`);
         }
         return move;
     }
 
-    function onDrop(source, target) {
-        // see if the move is legal
-        if (handlePromotion(source, target)) {
-            removeHighlights();
-            return;
-        }
-        var move = gameMove(source, target, promote);
-        if (futureMove === true && source !== target) {
-            futureMove = false;
+    function onPreMoveSet(source, target) {
+        if (source !== target) {
             futureMoveData = {from: source, to: target};
             const moves = game.moves();
             const randomMove = moves[Math.floor(Math.random() * moves.length)];
@@ -1004,25 +1087,43 @@ $(document).ready(function () {
                 // this move is illegal and should not be counted as a future move
                 game.undo();    // undo the random move
                 removeHighlights();
-                futureMove = false;
                 futureMoveData = null;
             }
-        } else if (futureMove === true && source === target) {
-            futureMove = false;
+        } else if (source === target) {
             futureMoveData = null;
             removeHighlights();
         } else {
             removeHighlights();
         }
-        removeGreySquares();
+    }
+
+    function onPreMoveUnSet() {
+        futureMoveData = null;
+        removeHighlights();
+    }
+
+    function onDrop(source, target, captured) {
+        // see if the move is legal
+        console.log('onDrop invoked with ' + source + ' ' + target)
+        if (handlePromotion(source, target)) {
+            removeHighlights();
+            return;
+        }
+        var move = gameMove(source, target, promote);
+        if (!move) {
+            // we now call onDrop for opponent moves as well so we need to skip here in this case
+            console.log('skipping onDrop due to opponent move');
+            return;
+        }
+        removeHighlights();
         // illegal move
         updateStatus();
         var json = {
             "sid": player_id,
             "move": move
         };
-        if (move != null) {
-            removeCheck();
+        if (move !== null) {
+            removeCheckAndMate();
 
             if (move.san == "O-O-O" ||
                 move.san == "O-O" ||
@@ -1038,6 +1139,9 @@ $(document).ready(function () {
                 highlight_check_mate();
                 console.log("Answer from api/move " + ret);
                 if (!game_over) {
+                    if (captured){
+                        resetBoard(move);
+                    }
                     if (ret.remaining) {
                         discardTimeInterval('B');
                         setTime("clockdivB", ret["other_remaining"]);
@@ -1068,35 +1172,31 @@ $(document).ready(function () {
         if (source === undefined || target === undefined) {
             return false;
         }
-        var curr_position = Chessboard.fenToObj(game.fen());
+        var curr_position = fenToObj(game.fen());
         var piece = curr_position[source];
+        console.log('about to perform promotion, queenAutopromote:' + queenAutopromote + " target:" + target + " " + " promotion_in_progress: " + promotion_in_progress + " piece " + piece)
         if (!queenAutopromote && promotion_in_progress.length === 0 && (target[1] === "1" || target[1] === "8" ) && piece[1] === "P") {
             var move = gameMove(source, target, promote);
             if (move != null) {
-                if (piece[1] == "P") {
-                    promotion_in_progress = [source, target];
-                    var pieceType = ["B", "N", "R", "Q"];
-                    var themes = document.getElementsByClassName("promotionPieceHolder");
-                    for (var t = 0; t < themes.length; t++) {
-                        var theme = themes.item(t);
-                        var piece_theme = getPieceFuncByName(pieceTheme);
-                        my_color.charAt(0);
-                        var img = document.createElement("IMG");
-                        img.src = piece_theme(my_color.charAt(0) + pieceType[t]);
-                        img.style.maxHeight = "100%";
-                        img.style.maxWidth = "100%";
-                        theme.appendChild(img);
-                    }
-                    var promotionTab = document.getElementById("promotion");
-                    promotionTab.style.display = "flex";
-                    var gc = document.getElementById("gameBox");
-                    gc.style.opacity = 0.2;
-                    game.undo();
-                    return true;
-                } else {
-                    game.undo();
-                    return false;
+                promotion_in_progress = [source, target];
+                var pieceType = ["B", "N", "R", "Q"];
+                console.log('promotion in progress')
+                var themes = document.getElementsByClassName("promotionPieceHolder");
+                for (var t = 0; t < themes.length; t++) {
+                    var theme = themes.item(t);
+                    var piece_theme = getPieceFuncByName(pieceTheme);
+                    var img = document.createElement("IMG");
+                    img.src = piece_theme(my_color.charAt(0) + pieceType[t]);
+                    img.style.maxHeight = "100%";
+                    img.style.maxWidth = "100%";
+                    theme.appendChild(img);
                 }
+                var promotionTab = document.getElementById("promotion");
+                promotionTab.style.display = "flex";
+                var gc = document.getElementById("gameBox");
+                gc.style.opacity = 0.2;
+                game.undo();
+                return true;
             }
             return false
         }
@@ -1113,49 +1213,6 @@ $(document).ready(function () {
             const column = Math.ceil((64 - piece_index) / 8);
             return row + column;
         });
-    }
-
-    function onMouseoverSquare(square, piece, position, orientation) {
-        var cut_game_fen = game.fen().substr(0, game.fen().indexOf(" "));
-        if (game.isGameOver() || piece == false || cut_game_fen != board.fen() || promotion_in_progress.length > 0 || game_over) return false;
-        if (orientation == "white" && piece.indexOf("b") != -1) return false;
-        if (orientation == "black" && piece.indexOf("w") != -1) return false;
-        changeCursor(square, "grab");
-        // get list of possible moves for this square
-        var moves = game.moves({
-            square: square,
-            verbose: true
-        });
-
-        // exit if there are no moves available for this square
-        if (moves.length === 0) return;
-        removeGreySquares();
-        // highlight the possible squares for this piece
-        for (var i = 0; i < moves.length; i++) {
-            if (moves[i].to != "")
-                greySquare(moves[i].to);
-        }
-    }
-
-    function onMouseoutSquare(square, piece) {
-        changeCursor(square, "default");
-        removeGreySquares();
-    }
-
-    function onDragMove (newLocation, oldLocation, source, piece, position, orientation) {
-        if (newLocation === 'offboard') {
-            changeCursor(newLocation, "no-drop");
-        }
-    }
-
-
-    // update the board position after the piece snap
-    // for castling, en passant, pawn promotion and illegal moves
-    function onSnapEnd(draggedPieceSource, square, draggedPiece) {
-        if (needsBoardRendering) {
-            board.position(game.fen(), true);
-        }
-        needsBoardRendering = false;
     }
 
     function updateStatus() {

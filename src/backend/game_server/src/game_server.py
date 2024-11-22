@@ -373,7 +373,7 @@ class GameServer:
         self.redis.add_fen_to_game(game_id, board.fen(), pipeline=pipeline)
         self.redis.add_move_to_game(game_id, move["san"] if isinstance(move, dict) else move, pipeline=pipeline)   # engine produces move as string of form 'e2e4'
 
-        if len(moves) == 2:
+        if len(moves) == 1:     # second move, since we populated the moves variable before registering this last move
             self.redis.set_game_status(game_id, GameStatus.PLAYING, pipeline=pipeline)
         if repetitions == 2 or board.is_stalemate() or board.is_insufficient_material():
             # Draw by rule

@@ -95,6 +95,7 @@ class BaseTestCase(unittest.TestCase):
             self.assertEqual(player_b_session.get('rating'), "1500")
         self.assertEqual(player_b_session.get('preferences'), "{\"time_control\": \"1+0\"}")
 
+        # handle the moves
         white_sid = game_mapping.get('white')
         f = open(f'resources/{resource_name}.json', 'r')
         lines = tuple(f)
@@ -112,13 +113,19 @@ class BaseTestCase(unittest.TestCase):
                 current_sid = self.player_a_sid
         print(f"Moves throughput: {time.time() - start} seconds")
         f.close()
+
+        # the expiration of this game should still be active
         expirations = self.redis_cli.zcard(f'game_expirations')
         self.assertEqual(expirations, 1)
+
         time.sleep(5)
         aux_func(white_sid)
         time.sleep(5)
         self.assertTrue(self.game_over)
+
+        # at the end the expiration should not be present anymore
         expirations = self.redis_cli.zcard(f'game_expirations')
         self.assertEqual(expirations, 0)
+        # cleanup
         if disconnect:
             sio.disconnect()
