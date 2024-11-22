@@ -15,17 +15,23 @@ Simple, minimalist, free and open source chess server.
 ## Introduction
 
 The main goal of the project is to provide a lightweight, hassle-free and minimalist chess experience with basic functionality, whilst keeping it free and open for everyone. 
-This means no overload of features, no registrations or account settings, and no heavy infrastructure. Just keeping it simple and easy to use. 
+This means no overload of features, intuitive and simple design, and no heavy infrastructure. The simpler - the better.
 The tech stack is mainly Docker, Python, JS, Redis, Lua and Caddy.
 
 
-## Running locally
+## Local Run
 
-The simplest way to run a minimal installation of the service is by running the script in *src/ops/spin_dev.sh* which will spin up all required dev containers. The only prerequisite for this is docker.
+The simplest way to run a minimal installation of the service is by running the script in *src/ops/spin_dev.sh* which will spin up all required dev containers.
+It expects an argument for the kind of setup to run, currently it supports:
+- dev (for all containers)
+- debug-gs (for all containers except game server)
+- debug-caddy (for all containers except caddy)
+
+The only prerequisite for this command is docker.
 
 ### Run all containers:
 ```
-docker compose -f docker-compose-dev.yml up -d --build --force-recreate
+./spin_dev.sh dev
 ```
 
 Navigate to localhost:1443 and voila!

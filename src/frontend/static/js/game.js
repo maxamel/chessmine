@@ -197,7 +197,7 @@ $(document).ready(function () {
         console.log('setting board to fen ' + the_game_fen);
         board = Chessground($board, conf);
         setup_themes();
-        
+
         insertBulkMoves(the_game_moves, ttl_time);
 
         handle_engine_init(rival, the_game, the_game_fen, me.rating)
@@ -352,7 +352,7 @@ $(document).ready(function () {
                         resetBoard({"from": promotion_in_progress[0], "to": promotion_in_progress[1]});
                         promotion_in_progress = [];
                     }
-                    elem.style.border = "3px solid #fc5185";
+                    elem.style.border = "3px solid #81b622";
                     elem.style.color = "white";
                     elem.style.fontWeight = "bolder";
                 }, false);

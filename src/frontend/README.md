@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+## Local development
+=======
 ### Develop locally
+>>>>>>> master
 
 When changing one of the files within the _/static_ folder, you can use the *ops/update_fe_docker.sh* script to inject
 the changed file into the caddy container and then simply reload tha page in the browser to receive the updated file. 
@@ -9,7 +13,7 @@ External Tool:
 
 ![img.png](img.png)
 
-### Run caddy container from master
+## Run caddy container from master
 
 Caddy runs an official image with a set version. If you want to run caddy from latest master follow the below steps.
 
