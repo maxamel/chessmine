@@ -17,8 +17,13 @@
     admin :2019
 }
 
+www.{$APP_URL} {
+	redir {$APP_URL}{uri}
+}
+
 # Remove http:// to enable TLS
 {$APP_URL} {
+    tls {$TLS_CONFIG}
     # Set this path to your site's directory.
     root * /var/www/html/
 

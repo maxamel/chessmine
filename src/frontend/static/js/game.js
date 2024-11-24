@@ -1,4 +1,5 @@
-import { getPieceFuncByName, fenToObj } from './utils.js'
+import { getPieceFuncByName, fenToObj, setupThemes } from './utils.js'
+import { showEndGame } from './endgame.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move } from './stockfish_handler.js';
 import { Chessground } from './chessground.js';
@@ -52,12 +53,14 @@ $(document).ready(function () {
                 "time_control": timeControl
             }
         };
+        console.log('sending out cancellation')
         socket.emit("/api/cancelSearch", json, function (ret) {
+            console.log('cancel search resulted in ' + ret)
             if (ret === 0) {
                 evt.target.style.opacity = 0.5;
                 evt.target.style.pointerEvents = 'none';
             } else {
-                window.location.href = "/settings";
+                window.location.href = "/";
             }
         });
     });
@@ -69,7 +72,8 @@ $(document).ready(function () {
         discardTimeInterval('all');
         disableGameButtons();
         resetBoard(null);
-        showEndGame(ans.winner, ans.message);
+        showEndGame(ans.winner, ans.message, my_color);
+        changeRematchButton('enabled');
         setRatings(ans);
     });
 
@@ -196,7 +200,7 @@ $(document).ready(function () {
         }
         console.log('setting board to fen ' + the_game_fen);
         board = Chessground($board, conf);
-        setup_themes();
+        setupThemes(pieceTheme);
 
         insertBulkMoves(the_game_moves, ttl_time);
 
@@ -293,26 +297,6 @@ $(document).ready(function () {
         //x.addEventListener("change", boardResize); // Attach listener function on state changes
         heartbeatOK = true;
         $(".fullpage").fadeOut("slow");
-
-        function setup_themes() {
-            var piece_func = getPieceFuncByName(pieceTheme);
-            var pieces = document.getElementsByClassName("black");
-            for (var t = 0; t < pieces.length; t++) {
-                console.log(pieces[t].className);
-                var classes = pieces[t].className.split(' ');
-                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
-                pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
-            }
-            var pieces = document.getElementsByClassName("white");
-            console.log('hello ' + pieces.length);
-            for (var t = 0; t < pieces.length; t++) {
-                console.log(pieces[t]);
-                var classes = pieces[t].className.split(' ');
-                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
-                pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
-                console.log(pieces[t].backgroundImage);
-            }
-        }
 
         function rematchAction(x) {
             const json = {
@@ -484,6 +468,7 @@ $(document).ready(function () {
         conf.turnColor = getColorFromTurn();
         conf.fen = game.fen();
         board.set(conf);
+        setupThemes(pieceTheme);
     }
 
     function getMovesMap() {
@@ -583,95 +568,6 @@ $(document).ready(function () {
         document.getElementById("win-box").style.display = "none";
         document.getElementById("lose-box").style.display = "none";
         document.getElementById("abort-box").style.display = "none";
-    }
-
-    function showEndGame(color_win, msg) {
-
-        var y = document.getElementById("conty");
-        y.style.display = "block";
-        y.style.opacity = "0.95";
-        console.log(color_win + " " + my_color);
-        var x = null;
-        if (color_win === 'Draw') {
-            x = document.getElementById("draw-box");
-            x.style.display = "block";
-        } else if (color_win === 'Abort') {
-            x = document.getElementById("abort-box");
-            x.style.display = "block";
-        } else if (my_color === color_win) {
-            x = document.getElementById("win-box");
-            x.style.display = "block";
-        } else {
-            x = document.getElementById("lose-box");
-            x.style.display = "block";
-        }
-        changeRematchButton('enabled');
-        for (var r = 0; r < x.children.length; r++) {
-            if (x.children[r].className === 'message') {
-                var message = x.children[r];
-                for (var t = 0; t < message.children.length; t++) {
-                    if (message.children[t].tagName === 'P') {
-                        message.children[t].innerHTML = msg;
-                        break;
-                    }
-                }
-            }
-            if (x.children[r].className.includes('experiment')) {
-                var exp = x.children[r];
-                for (var t = 0; t < exp.children.length; t++) {
-                    if (exp.children[t].className === 'endgame') {
-                        if (my_color === 'black')
-                            exp.children[t].innerHTML = "&#x265A;";
-                        else
-                            exp.children[t].innerHTML = "&#x2654;";
-                        break;
-                    }
-                }
-            }
-        }
-        dragElement(x);
-    }
-
-    // Make the DIV element draggable:
-    function dragElement(elmnt) {
-      var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-      if (document.getElementById(elmnt.id + "header")) {
-        // if present, the header is where you move the DIV from:
-        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-      } else {
-        // otherwise, move the DIV from anywhere inside the DIV:
-        elmnt.onmousedown = dragMouseDown;
-      }
-
-      function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // get the mouse cursor position at startup:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        // call a function whenever the cursor moves:
-        document.onmousemove = elementDrag;
-      }
-
-      function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        // set the element's new position:
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-      }
-
-      function closeDragElement() {
-        // stop moving when mouse button is released:
-        document.onmouseup = null;
-        document.onmousemove = null;
-      }
     }
 
     function updateLastCall() {
@@ -927,6 +823,7 @@ $(document).ready(function () {
             highlight_check_mate();
         }
         board.set(conf);
+        setupThemes(pieceTheme);
     }
 
     function heartbeat(force) {
@@ -1024,22 +921,6 @@ $(document).ready(function () {
 
     function removeHighlights() {
         removePremoveHighlight();
-    }
-
-    function changeCursor(square, change) {
-        var $square = $("#myBoard .square-" + square);
-        var isPiece = false;
-        var image = null;
-        if ($square.children().length > 0) {
-            for (var r = 0; r < $square.children().length; r++) {
-                if ($square.children()[r].tagName == "IMG")
-                    isPiece = true;
-                image = $square.children()[r];
-                if (isPiece) {
-                    image.style.cursor = change;
-                 }
-            }
-        }
     }
 
     function is_my_turn() {
