@@ -3,8 +3,10 @@ FROM caddy:2.8.4-alpine
 WORKDIR /var/www/html/
 ARG APP_URL
 ARG BE_URL
+ARG TLS_CONFIG
 ENV APP_URL=$APP_URL
 ENV BE_URL=$BE_URL
+ENV TLS_CONFIG=$TLS_CONFIG
 COPY . /var/www/html/
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/settings.js  # for dynamic config of url
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for dynamic config of url

@@ -58,7 +58,8 @@ services:
           context: ../frontend
           dockerfile: Dockerfile
           args:
-            APP_URL: http://localhost:1443
+            APP_URL: localhost:1443
+            TLS_CONFIG: internal
             BE_URL: game_server
         ports:
           - 1443:1443

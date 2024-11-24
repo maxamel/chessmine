@@ -67,7 +67,8 @@ services:
           tags:
             - "frontend:curr"
           args:
-            APP_URL: www.chessmine.xyz
+            APP_URL: chessmine.xyz
+            TLS_CONFIG: chessmine500@protonmail.com
             BE_URL: game_server
         ports:
           - 443:443

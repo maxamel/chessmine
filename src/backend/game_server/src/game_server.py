@@ -132,7 +132,8 @@ class GameServer:
     def cancel_search(self, payload):
         data = payload["data"]
         sid = data["sid"]
-        return self.redis.remove_players_from_search_pool(data["time_control"].split("+")[0], sid)
+        search_pool_name = f"search_pool_{data['time_control'].split('+')[0]}"
+        return self.redis.remove_players_from_search_pool(search_pool_name, sid)
 
     def func(self, sid1, sid2, time_control):
         requests.get(url="http://localhost:5000/match/" + sid1 + "/" + sid2, json={'time_control': time_control})

@@ -81,4 +81,22 @@
         return 'w' + piece.toUpperCase()
     }
 
-    export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining, fenToObj }
+    function setupThemes(pieceTheme) {
+          console.log('setting piece themes as ' + pieceTheme);
+          var piece_func = getPieceFuncByName(pieceTheme);
+          var pieces = document.getElementsByClassName("black");
+          for (var t = 0; t < pieces.length; t++) {
+              var classes = pieces[t].className.split(' ');
+              var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+              pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+          }
+          var pieces = document.getElementsByClassName("white");
+
+          for (var t = 0; t < pieces.length; t++) {
+              var classes = pieces[t].className.split(' ');
+              var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+              pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+          }
+      }
+
+    export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining, fenToObj, setupThemes }
