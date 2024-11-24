@@ -33,7 +33,7 @@ $(document).ready(function () {
 
     var cookie_data = localStorage.getItem("user_session");
     var prefs = localStorage.getItem("user_prefs");
-    var socket = io("APP_URL/connect", {
+    var socket = io("https://APP_URL/connect", {
         transports: [ "polling", "websocket"],
         timestampParam: "timestamp",
         tryAllTransports: true,
