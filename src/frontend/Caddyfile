@@ -18,7 +18,7 @@
 }
 
 www.{$APP_URL} {
-	redir {$APP_URL}{uri}
+    redir {$APP_URL}{uri}
 }
 
 # Remove http:// to enable TLS

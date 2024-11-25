@@ -19,7 +19,7 @@
         if (str === "american") return american_piece_theme;
         if (str === "metro") return metro_piece_theme;
         if (str === "classical") return classical_piece_theme;
-        return alpha_piece_theme;
+        return null;
     }
 
     function getTimeRemaining(endtime) {
@@ -85,17 +85,18 @@
           console.log('setting piece themes as ' + pieceTheme);
           var piece_func = getPieceFuncByName(pieceTheme);
           var pieces = document.getElementsByClassName("black");
-          for (var t = 0; t < pieces.length; t++) {
+          for (var iter = 0; iter < 2; iter++) {
+            for (var t = 0; t < pieces.length; t++) {
               var classes = pieces[t].className.split(' ');
-              var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
-              pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
-          }
-          var pieces = document.getElementsByClassName("white");
-
-          for (var t = 0; t < pieces.length; t++) {
-              var classes = pieces[t].className.split(' ');
-              var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
-              pieces[t].style.backgroundImage = "url(" + piece_func(classes[0][0] + piece_first_letter) + ")"
+              var color_first_letter = classes[0][0];
+              if (color_first_letter === 'w' || color_first_letter === 'b') {   // if not w/b it's probably not a piece
+                var piece_first_letter = classes[1] === 'knight' ? "N" : classes[1][0].toUpperCase();
+                var piece_representation = piece_func(color_first_letter + piece_first_letter)
+                if (piece_representation)   // if null it's probably not a piece
+                  pieces[t].style.backgroundImage = "url(" + piece_representation + ")"
+              }
+            }
+            pieces = document.getElementsByClassName("white");
           }
       }
 

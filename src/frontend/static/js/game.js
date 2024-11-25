@@ -36,7 +36,7 @@ $(document).ready(function () {
 
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
-    var socket = io("APP_URL/connect", {
+    var socket = io("https://APP_URL/connect", {
         transports: [ "polling", "websocket"],
         timestampParam: "timestamp",
         tryAllTransports: true,
@@ -66,8 +66,7 @@ $(document).ready(function () {
     });
 
     socket.on("game_over", function (ans) {
-        console.log("Game Over")
-        console.log(JSON.stringify(ans))
+        console.log("Game Over " + JSON.stringify(ans))
         game_over = true;
         discardTimeInterval('all');
         disableGameButtons();
@@ -211,12 +210,6 @@ $(document).ready(function () {
 
         if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
-                window.onclick = function(event) {
-                  if (event.target.id != 'drawOfferedButton') {
-                      var inner_div = document.getElementById("droppedDrawOffer");
-                      inner_div.style.display = "none";
-                  }
-                };
 
                 attachPromotionListeners();
 
@@ -370,7 +363,10 @@ $(document).ready(function () {
 
         function offeredDrawAction(x) {
             var inner_div = document.getElementById("droppedDrawOffer");
-            inner_div.style.display = "block";
+            if (inner_div.style.display !== "none")
+                inner_div.style.display = "none";
+            else
+                inner_div.style.display = "block"
         }
 
         function resignAction(x) {
@@ -411,14 +407,14 @@ $(document).ready(function () {
     socket.on("draw", function (ans) {
         if (ans.color === my_color) {
             // Got my own draw offer back
-            if (ans.flag == 1) {    // I offered draw
+            if (ans.flag === 1) {    // I offered draw
                 changeDrawButton('disabled')
             } else {                // I declined draw
                 console.log("Got Draw that I declined")
                 changeDrawButton('enabled')
             }
         } else {
-            if (ans.flag == 1) {    // Draw offer
+            if (ans.flag === 1) {    // Draw offer
                 console.log("Got Draw offered to me")
                 changeDrawButton('hidden');
             } else {                  // My draw offer declined
@@ -460,7 +456,7 @@ $(document).ready(function () {
         conf.movable.dests = getMovesMap();
         if (last_move)
             conf.lastMove = [last_move["from"], last_move["to"]];
-        if (game.isGameOver()) {
+        if (game.isGameOver() || game_over) {
             conf.premovable.enabled = false;
             conf.draggable.enabled = false;
             conf.selectable.enabled = false;
@@ -472,7 +468,7 @@ $(document).ready(function () {
     }
 
     function getMovesMap() {
-        var moves_list = game.isGameOver() ? [] : game.moves({ verbose: true});
+        var moves_list = game.isGameOver() || game_over ? [] : game.moves({ verbose: true});
         var map = new Map() ;
         moves_list.forEach((move) => {
             if (!map.has(move["from"])) {
