@@ -24,14 +24,12 @@ services:
         - redis
     game_server:
         deploy:
-          replicas: 1
+          replicas: 2
           endpoint_mode: dnsrr
           resources:
             limits:
               cpus: '0.30'
               memory: 200M
-        ports:
-          - 5000:5000
         build:
           context: ../backend/game_server
           dockerfile: Dockerfile
@@ -40,7 +38,6 @@ services:
         depends_on:
           - redis
     operator:
-      container_name: "operator"
       build:
         context: ../backend/operator
         dockerfile: Dockerfile

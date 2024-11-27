@@ -56,7 +56,7 @@ $(document).ready(function () {
         console.log('sending out cancellation')
         socket.emit("/api/cancelSearch", json, function (ret) {
             console.log('cancel search resulted in ' + ret)
-            if (ret === 0) {
+            if (ret === 0) {        // we could not cancel this search since that has been a match
                 evt.target.style.opacity = 0.5;
                 evt.target.style.pointerEvents = 'none';
             } else {
@@ -225,6 +225,9 @@ $(document).ready(function () {
                 var offeredDraw = document.getElementById("drawOffer");
                 offeredDraw.addEventListener("click", offeredDrawAction);
 
+                var settingsSquare = document.getElementById("settingsButton");
+                settingsSquare.addEventListener("click", settingsAction);
+
                 var acceptDraw = document.getElementById("acceptDraw");
                 acceptDraw.addEventListener("click", drawAction);
 
@@ -363,6 +366,25 @@ $(document).ready(function () {
 
         function offeredDrawAction(x) {
             var inner_div = document.getElementById("droppedDrawOffer");
+            if (inner_div.style.display !== "none")
+                inner_div.style.display = "none";
+            else
+                inner_div.style.display = "block"
+        }
+
+        function settingsAction(x) {
+            var inner_div = document.getElementById("settingsSquare");
+            var button = document.getElementById("settingsButton");
+            const buttonRect = button.getBoundingClientRect();
+
+            // Calculate the position of the menu based on the button's position
+            const menuTop = buttonRect.top - window.scrollY;   // Menu appears just below the button
+            const menuLeft = buttonRect.left - window.scrollX;    // Menu aligns with the left of the button
+
+            console.log("The menuTop " + menuTop + " and menuLeft " + menuLeft)
+            // Set the position of the menu
+            inner_div.style.top = `${menuTop}px`;
+            inner_div.style.left = `${menuLeft}px`;
             if (inner_div.style.display !== "none")
                 inner_div.style.display = "none";
             else
@@ -811,12 +833,14 @@ $(document).ready(function () {
             conf.highlight.lastMove = false;
             conf.movable.dests = new Map();
             conf.movable.color = undefined;
+            $board.style.opacity = 0.5
         } else {
             conf.highlight.lastMove = true;
             conf.movable.dests = getMovesMap();
             conf.movable.color = my_color;
             conf.turnColor = getColorFromTurn();
             highlight_check_mate();
+            $board.style.opacity = 1
         }
         board.set(conf);
         setupThemes(pieceTheme);

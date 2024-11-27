@@ -1459,8 +1459,9 @@ button:focus {
 }
 
 .leftpane {
-  width: 50%;
+  width: 30%;
   margin: auto;
+  display: flex;
 }
 .rightpane {
   width: 50%;
@@ -1624,7 +1625,7 @@ th, td {
 .myButtonClone {
     width: 100px;
     cursor: pointer;
-    margin: 15px;
+    margin: 10px;
     padding: 10px;
     font-size: 14px;
     color: white;
@@ -1651,11 +1652,19 @@ th, td {
     margin-bottom: 3px;
 }
 
-.droppedDrawOffer{
+/*for Draw Pane*/
+.droppedPane{
   display: none;
   position: absolute;
   margin: 40px;
   margin-left: 80px;
+}
+
+.droppedSettings{
+  display: none;
+  position: fixed;
+  float: right;
+  z-index: 990;
 }
 
 .drawOffer {
@@ -1803,6 +1812,20 @@ th, td {
 .boardandclock {
   display: inline-block;
   float: right;
+}
+
+.leftmostpane {
+  width: 20%;
+  margin: auto;
+}
+
+.settingsClass {
+  position: relative;
+  height: 500px;
+}
+
+.settingsButton {
+  display: block;
 }
 
 .contact_info .info_item {

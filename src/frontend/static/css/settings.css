@@ -50,6 +50,10 @@
     animation: glowingButton 1.5s infinite;
 }
 
+.settingsButton {
+    float: right;
+}
+
 .themeLabel {
     font-family: "Baloo Paaji 2";;
 }
