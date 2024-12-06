@@ -14,11 +14,25 @@ $(document).ready(function () {
     for (let i = 0; i<time_controls.length; i++) {
       time_controls[i].addEventListener("click", function (event) {
         $(".fullpage").fadeIn("fast");
-        prefs = JSON.parse(prefs);
+        if (prefs == null) {
+          prefs = {
+            "time_control": "3 + 0",
+            "piece_theme": "classical"
+          }
+        } else {
+          prefs = JSON.parse(prefs);
+        }
+        console.log(prefs)
         console.log('The time_control before ' + prefs.time_control + " and what we're setting " + time_controls[i].textContent)
         prefs.time_control = time_controls[i].textContent;
         prefs.piece_theme = "classical";
         cookie_data = JSON.parse(cookie_data);
+        if (cookie_data == null) {
+          cookie_data = {}
+        } else {
+          if (cookie_data.preferences.piece_theme)
+            prefs.piece_theme = cookie_data.preferences.piece_theme;
+        }
         cookie_data.preferences = prefs;
         localStorage.setItem("user_prefs", JSON.stringify(prefs));
         var res = socket.emit("/api/play", { "data": cookie_data }, function (ans) {

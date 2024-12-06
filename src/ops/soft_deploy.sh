@@ -29,7 +29,7 @@ for service in $services; do
 
   replicas=$(docker compose -f docker-compose-$1.yml ps -q $service | wc -l)
   ((replicas++))
-  echo $replicas
+  echo "Scaling service $service to: $replicas"
 
   # Loop through each container and restart it one by one
   for container in $containers; do
@@ -53,7 +53,7 @@ for service in $services; do
     echo "Waiting for container $new_container_name to become healthy..."
     new_container_id=$(docker ps -q -f "name=$new_container_name")
     # Check the health status of the container
-    while [ "$elapsed_time" -le 30 ]; do
+    while [ "$elapsed_time" -le 48 ]; do
       # Get the current health status of the container
       health_status=$(docker inspect --format '{{.State.Health.Status}}' $new_container_id)
       echo "Container $new_container_name status: $health_status."

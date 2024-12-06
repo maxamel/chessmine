@@ -1,4 +1,4 @@
-import { getPieceFuncByName, fenToObj, setupThemes } from './utils.js'
+import { getPieceFuncByName, fenToObj, setupThemes, getBoardColorsByName, setupBoard } from './utils.js'
 import { showEndGame } from './endgame.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move } from './stockfish_handler.js';
@@ -207,6 +207,8 @@ $(document).ready(function () {
 
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
+        attachPieceThemeListeners();
+        attachColorThemeListener();
 
         if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
@@ -224,9 +226,6 @@ $(document).ready(function () {
 
                 var offeredDraw = document.getElementById("drawOffer");
                 offeredDraw.addEventListener("click", offeredDrawAction);
-
-                var settingsSquare = document.getElementById("settingsButton");
-                settingsSquare.addEventListener("click", settingsAction);
 
                 var acceptDraw = document.getElementById("acceptDraw");
                 acceptDraw.addEventListener("click", drawAction);
@@ -308,6 +307,88 @@ $(document).ready(function () {
             });
         }
 
+        function attachPieceThemeListeners() {
+            const subNavLinks = document.querySelectorAll('.sub-nav-link');
+
+            // Iterate over each sub-nav-link
+            subNavLinks.forEach(link => {
+                // Find the `div` inside this link
+                // Check if the `div` exists
+                const childDiv = link.querySelector('div');
+                if (childDiv) {
+                    // Attach a hover event listener
+                    link.addEventListener('mouseover', () => {
+                        // Change the background image or other properties
+                        const imagePath = `img/chesspieces/${childDiv.id}/wB.png`;
+                        childDiv.style.backgroundImage = `url(${imagePath})`;
+                        childDiv.style.backgroundSize = 'contain';
+                        childDiv.style.backgroundPosition = 'center';
+                        childDiv.style.backgroundRepeat = 'no-repeat';
+                    });
+
+                    link.addEventListener('mouseout', () => {
+                        childDiv.style.backgroundImage = 'none'; // Reset or replace with default
+                    });
+
+                    // Attach a click event listener
+                    link.addEventListener('click', (event) => {
+                        console.log(`clicker!`);
+                        event.preventDefault(); // Prevent default link behavior if needed
+                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        console.log(`You clicked on: ${linkValue}`);
+                        pieceTheme = linkValue.toLowerCase();
+                        var preferences = JSON.parse(prefs)
+                        preferences.piece_theme = pieceTheme
+                        localStorage.setItem("user_prefs", JSON.stringify(preferences));
+                        setupThemes(pieceTheme);
+                    });
+                }
+            });
+        }
+
+        function attachColorThemeListener() {
+            const subNavLinks = document.querySelectorAll('.board-sub-nav-link');
+            // Iterate over each sub-nav-link
+            subNavLinks.forEach(link => {
+                // Find the `div` inside this link
+                // Check if the `div` exists
+                const childDiv = link.querySelector('div');
+                if (childDiv) {
+                    // Attach a hover event listener
+                    link.addEventListener('mouseover', () => {
+                        // Change the background image or other properties
+
+                        const colorBoard = getBoardColorsByName(childDiv.id)
+                        link.style.backgroundColor = colorBoard[0];
+                        link.style.backgroundSize = 'contain';
+                        link.style.backgroundPosition = 'center';
+                        link.style.backgroundRepeat = 'no-repeat';
+                        link.style.color = "black"
+                        console.log('Going in ' + link.style.backgroundColor);
+                    });
+
+                    link.addEventListener('mouseout', () => {
+                        link.style.backgroundColor = 'white'; // Reset or replace with default
+                        link.style.backgroundSize = 'none';
+                        console.log('Going out ' + link.style.backgroundColor);
+                    });
+
+                    // Attach a click event listener
+                    link.addEventListener('click', (event) => {
+                        console.log(`clicker!`);
+                        event.preventDefault(); // Prevent default link behavior if needed
+                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        console.log(`You clicked on: ${linkValue}`);
+                        boardTheme = linkValue.toLowerCase();
+                        var preferences = JSON.parse(prefs)
+                        preferences.board_theme = boardTheme
+                        localStorage.setItem("user_prefs", JSON.stringify(preferences));
+                        setupBoard(boardTheme);
+                    });
+                }
+            });
+        }
+
         function attachPromotionListeners(){
             var conts = document.getElementsByClassName("themeContainer");
             for (var c = 0; c < conts.length; c++) {
@@ -366,25 +447,6 @@ $(document).ready(function () {
 
         function offeredDrawAction(x) {
             var inner_div = document.getElementById("droppedDrawOffer");
-            if (inner_div.style.display !== "none")
-                inner_div.style.display = "none";
-            else
-                inner_div.style.display = "block"
-        }
-
-        function settingsAction(x) {
-            var inner_div = document.getElementById("settingsSquare");
-            var button = document.getElementById("settingsButton");
-            const buttonRect = button.getBoundingClientRect();
-
-            // Calculate the position of the menu based on the button's position
-            const menuTop = buttonRect.top - window.scrollY;   // Menu appears just below the button
-            const menuLeft = buttonRect.left - window.scrollX;    // Menu aligns with the left of the button
-
-            console.log("The menuTop " + menuTop + " and menuLeft " + menuLeft)
-            // Set the position of the menu
-            inner_div.style.top = `${menuTop}px`;
-            inner_div.style.left = `${menuLeft}px`;
             if (inner_div.style.display !== "none")
                 inner_div.style.display = "none";
             else

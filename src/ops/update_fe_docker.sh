@@ -20,8 +20,8 @@ docker cp ./${target}temp caddy:/var/www/html/static/$target
 status=$?
 if [ $status = 0 ]; then
 echo COPIED
-rm ${target}temp
+rm -rf ${target}temp
 else
 echo COPY FAILED
-rm ${target}temp
+rm -rf ${target}temp
 fi
