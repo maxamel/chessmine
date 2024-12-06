@@ -12,16 +12,16 @@ fi
 echo COPYING $target INTO caddy:/var/www/html/static/$target
 cp $target ${target}temp
 if [[ $OSTYPE == 'darwin'* ]]; then
-  gsed -i "s#APP_URL#http://localhost:1443#g" ${target}temp
+  gsed -i "s#APP_URL#localhost:1443#g" ${target}temp
 else
-  sed -i "s#APP_URL#http://localhost:1443#g" ${target}temp
+  sed -i "s#APP_URL#localhost:1443#g" ${target}temp
 fi
 docker cp ./${target}temp caddy:/var/www/html/static/$target
 status=$?
 if [ $status = 0 ]; then
 echo COPIED
-rm ${target}temp
+rm -rf ${target}temp
 else
 echo COPY FAILED
-rm ${target}temp
+rm -rf ${target}temp
 fi

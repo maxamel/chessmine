@@ -1,33 +1,89 @@
 <!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <link rel="stylesheet" href="../css/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/magnific-popup.css">
+        <link rel="stylesheet" href="../vendors/animate-css/animate.css">
+
+        <link rel="stylesheet" type="text/css" href="../css/chessground.base.css" />
+        <link rel="stylesheet" type="text/css" href="../css/chessground.brown.css" />
+        <link rel="stylesheet" type="text/css" href="../css/chessground.cburnett.css" />
+        <!-- main css -->
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/game.css">
+        <link rel="stylesheet" href="../css/settings.css">
+        <link rel="stylesheet" href="../css/loading.css">
+        <link rel="stylesheet" href="../css/endgame.css">
+        <link rel="stylesheet" href="../css/submenu.css">
+    </head>
+    <body>
         <header class="header_area">
             <div class="main_menu">
-            	<nav class="navbar navbar-expand-lg navbar-light">
-					<div class="container box_1620">
-						<!-- Brand and toggle get grouped for better mobile display -->
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <div class="container box_1620">
+                        <!-- Brand and toggle get grouped for better mobile display -->
                         <img src="../img/chesspieces/metro/wN.png" type="image/png" alt="" width="70" height="60">
                         <div class="second_title">CHESSMINE</div>
-						<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-						</button>
-						<!-- Collect the nav links, forms, and other content for toggling -->
-						<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
-							<ul class="nav navbar-nav menu_nav justify-content-center">
-								<li class="nav-item"><a class="nav-link" href="../../../..">Home</a></li>
-								<li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-								<li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a>
-								<li class="nav-item submenu dropdown">
-									<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Play</a>
-									<ul class="dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
-										<li class="nav-item submenu dropdown-item"><a class="nav-link" href="settings">Create Game</a></li>
-										<!--li class="nav-item submenu dropdown"><a class="nav-link" href="settings">Daily Challenge</a></li-->
-									</ul>
-								</li>
-								<!--li class="nav-item"><a class="nav-link" href="game.html">Contact</a></li-->
-							</ul>
-						</div>
-					</div>
-            	</nav>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                                            <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse offset">
+                        <ul class="nav navbar-nav menu_nav justify-content-center">
+                            <li class="nav-item"><a class="nav-link" href="../../../..">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
+
+                            <li class="nav-item submenu dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Play</a>
+                                <ul id="navigator" class="dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
+                                    <li class="nav-item submenu"><a class="nav-link" href="#">Daily Challenge</a></li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu"><a class="nav-link" href="#">Quick Game</a>
+                                    <!--li><a href="#" target="_self" >SUB SUB LIST >></a-->
+                                        <ul>
+                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">1 + 0</a>
+                                            <li class="liner"></li>
+                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">3 + 0</a>
+                                            <li class="liner"></li>
+                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">5 + 0</a>
+                                            <li class="liner"></li>
+                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">15 + 0</a>
+                                            <li class="liner"></li>
+                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">30 + 0</a>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    </div>
+                </nav>
             </div>
         </header>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+                integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
+                integrity="sha512-YUkaLm+KJ5lQXDBdqBqk7EVhJAdxRnVdT2vtCzwPHSweCzyMgYV/tgGF4/dCyqtCC2eCphz0lRQgatGVdfR0ww=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js"
+                integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"
+                integrity="sha512-8ExARjWWkIllMlNzVg7JKq9RKWPlJABQUNq6YvAjE/HobctjH/NA+bSiDMDvouBVjp4Wwnf1VP1OEv7Zgjtuxw=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer">
+        </script>
+        <script type="module" src="../js/header.js"></script>
+    </body>
+</html>

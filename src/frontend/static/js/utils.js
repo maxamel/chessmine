@@ -5,6 +5,7 @@
         if (str === "standard") return standard_board_theme;
         if (str === "wiki") return wiki_board_theme;
         if (str === "wood") return wood_board_theme;
+        if (str === "alpha") return alpha_board_theme;
         if (str === "american") return american_board_theme;
         if (str === "metro") return metro_board_theme;
         if (str === "classical") return classical_board_theme;
@@ -19,6 +20,7 @@
         if (str === "american") return american_piece_theme;
         if (str === "metro") return metro_piece_theme;
         if (str === "classical") return classical_piece_theme;
+        if (str === "alpha") return alpha_piece_theme
         return null;
     }
 
@@ -81,6 +83,12 @@
         return 'w' + piece.toUpperCase()
     }
 
+    function setupBoard(boardTheme) {
+          console.log('setting board themes as ' + boardTheme);
+          var board_func = getBoardColorsByName(boardTheme);
+          document.querySelector('cg-board').style.backgroundColor=board_func[0];
+      }
+
     function setupThemes(pieceTheme) {
           console.log('setting piece themes as ' + pieceTheme);
           var piece_func = getPieceFuncByName(pieceTheme);
@@ -98,6 +106,6 @@
             }
             pieces = document.getElementsByClassName("white");
           }
-      }
+    }
 
-    export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining, fenToObj, setupThemes }
+    export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining, fenToObj, setupThemes, setupBoard }

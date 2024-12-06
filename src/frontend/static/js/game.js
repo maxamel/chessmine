@@ -1,4 +1,4 @@
-import { getPieceFuncByName, fenToObj, setupThemes } from './utils.js'
+import { getPieceFuncByName, fenToObj, setupThemes, getBoardColorsByName, setupBoard } from './utils.js'
 import { showEndGame } from './endgame.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move } from './stockfish_handler.js';
@@ -56,7 +56,7 @@ $(document).ready(function () {
         console.log('sending out cancellation')
         socket.emit("/api/cancelSearch", json, function (ret) {
             console.log('cancel search resulted in ' + ret)
-            if (ret === 0) {
+            if (ret === 0) {        // we could not cancel this search since that has been a match
                 evt.target.style.opacity = 0.5;
                 evt.target.style.pointerEvents = 'none';
             } else {
@@ -207,6 +207,8 @@ $(document).ready(function () {
 
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
+        attachPieceThemeListeners();
+        attachColorThemeListener();
 
         if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
@@ -301,6 +303,88 @@ $(document).ready(function () {
             socket.emit("/api/rematch", json, function (ret) {
                 if (ret) {
                     changeRematchButton('disabled')
+                }
+            });
+        }
+
+        function attachPieceThemeListeners() {
+            const subNavLinks = document.querySelectorAll('.sub-nav-link');
+
+            // Iterate over each sub-nav-link
+            subNavLinks.forEach(link => {
+                // Find the `div` inside this link
+                // Check if the `div` exists
+                const childDiv = link.querySelector('div');
+                if (childDiv) {
+                    // Attach a hover event listener
+                    link.addEventListener('mouseover', () => {
+                        // Change the background image or other properties
+                        const imagePath = `img/chesspieces/${childDiv.id}/wB.png`;
+                        childDiv.style.backgroundImage = `url(${imagePath})`;
+                        childDiv.style.backgroundSize = 'contain';
+                        childDiv.style.backgroundPosition = 'center';
+                        childDiv.style.backgroundRepeat = 'no-repeat';
+                    });
+
+                    link.addEventListener('mouseout', () => {
+                        childDiv.style.backgroundImage = 'none'; // Reset or replace with default
+                    });
+
+                    // Attach a click event listener
+                    link.addEventListener('click', (event) => {
+                        console.log(`clicker!`);
+                        event.preventDefault(); // Prevent default link behavior if needed
+                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        console.log(`You clicked on: ${linkValue}`);
+                        pieceTheme = linkValue.toLowerCase();
+                        var preferences = JSON.parse(prefs)
+                        preferences.piece_theme = pieceTheme
+                        localStorage.setItem("user_prefs", JSON.stringify(preferences));
+                        setupThemes(pieceTheme);
+                    });
+                }
+            });
+        }
+
+        function attachColorThemeListener() {
+            const subNavLinks = document.querySelectorAll('.board-sub-nav-link');
+            // Iterate over each sub-nav-link
+            subNavLinks.forEach(link => {
+                // Find the `div` inside this link
+                // Check if the `div` exists
+                const childDiv = link.querySelector('div');
+                if (childDiv) {
+                    // Attach a hover event listener
+                    link.addEventListener('mouseover', () => {
+                        // Change the background image or other properties
+
+                        const colorBoard = getBoardColorsByName(childDiv.id)
+                        link.style.backgroundColor = colorBoard[0];
+                        link.style.backgroundSize = 'contain';
+                        link.style.backgroundPosition = 'center';
+                        link.style.backgroundRepeat = 'no-repeat';
+                        link.style.color = "black"
+                        console.log('Going in ' + link.style.backgroundColor);
+                    });
+
+                    link.addEventListener('mouseout', () => {
+                        link.style.backgroundColor = 'white'; // Reset or replace with default
+                        link.style.backgroundSize = 'none';
+                        console.log('Going out ' + link.style.backgroundColor);
+                    });
+
+                    // Attach a click event listener
+                    link.addEventListener('click', (event) => {
+                        console.log(`clicker!`);
+                        event.preventDefault(); // Prevent default link behavior if needed
+                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        console.log(`You clicked on: ${linkValue}`);
+                        boardTheme = linkValue.toLowerCase();
+                        var preferences = JSON.parse(prefs)
+                        preferences.board_theme = boardTheme
+                        localStorage.setItem("user_prefs", JSON.stringify(preferences));
+                        setupBoard(boardTheme);
+                    });
                 }
             });
         }
@@ -811,12 +895,14 @@ $(document).ready(function () {
             conf.highlight.lastMove = false;
             conf.movable.dests = new Map();
             conf.movable.color = undefined;
+            $board.style.opacity = 0.5
         } else {
             conf.highlight.lastMove = true;
             conf.movable.dests = getMovesMap();
             conf.movable.color = my_color;
             conf.turnColor = getColorFromTurn();
             highlight_check_mate();
+            $board.style.opacity = 1
         }
         board.set(conf);
         setupThemes(pieceTheme);

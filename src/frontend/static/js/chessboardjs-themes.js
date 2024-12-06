@@ -9,11 +9,12 @@ wiki_piece_theme = function(piece){ return chesspieces["wiki"][piece][0]; };
 
 standard_board_theme = ['#9E7863', '#633526'];
 metro_board_theme = ['#FFFFFF', '#EFEFEF'];
-urban_board_theme = ['#FFFFFF', '#000000'];
+urban_board_theme = ['#A8A8A8', '#000000'];
 wiki_board_theme = ['#FFCE9E', '#D18B47'];
 wood_board_theme = ['#FFE5B6', '#B16228'];
-american_board_theme = ['#C3C6BE', '#727FA2'];
-classical_board_theme = ['#FFFFFF', '#58AC8A'];
+alpha_board_theme = ['#d9b99b', '#faf0e6']
+american_board_theme = ['#B3AC9A', '#727FA2'];
+classical_board_theme = ['#A0895D', '#58AC8A'];
 
 var chesspieces =  {
   "alpha": {

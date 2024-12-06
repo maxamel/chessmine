@@ -1,17 +1,17 @@
 ;(function($){
     "use strict"
-	
-	
-	var nav_offset_top = $('header').height() + 50; 
+
+
+	var nav_offset_top = $('header').height() + 50;
     /*-------------------------------------------------------------------------------
-	  Navbar 
+	  Navbar
 	-------------------------------------------------------------------------------*/
 
-	//* Navbar Fixed  
+	//* Navbar Fixed
     function navbarFixed(){
-        if ( $('.header_area').length ){ 
+        if ( $('.header_area').length ){
             $(window).scroll(function() {
-                var scroll = $(window).scrollTop();   
+                var scroll = $(window).scrollTop();
                 if (scroll >= nav_offset_top ) {
                     $(".header_area").addClass("navbar_fixed");
                 } else {
@@ -21,21 +21,21 @@
         };
     };
     navbarFixed();
-	
-	
+
+
 	/*----------------------------------------------------*/
     /*  Parallax Effect js
     /*----------------------------------------------------*/
-	function parallaxEffect() {
+	/*function parallaxEffect() {
     	$('.bg-parallax').parallax();
 	}
     parallaxEffect();
-    
+    */
 
 	/*----------------------------------------------------*/
     /*  brand Slider
     /*----------------------------------------------------*/
-	$(".brand-carousel").owlCarousel({
+	/*$(".brand-carousel").owlCarousel({
         items: 1,
         autoplay:false,
         loop:true,
@@ -55,7 +55,7 @@
                 items: 6,
             }
         }
-    });
+    });*/
 	/*----------------------------------------------------*/
     /*  Clients Slider
     /*----------------------------------------------------*/
@@ -81,14 +81,14 @@
         $('#mc_embed_signup').find('form').ajaxChimp();
     }
     mailChimp();
-	
-	$('select').niceSelect();
-	
+
+	//$('select').niceSelect();
+
 	$('.counter').counterUp({
 		delay: 10,
 		time: 1000
 	});
-	
+
 	$(".skill_main").each(function() {
         $(this).waypoint(function() {
             var progressBar = $(".progress-bar");
@@ -106,15 +106,8 @@
     /*----------------------------------------------------*/
     /*  Magnific Pop up js (Home Video)
     /*----------------------------------------------------*/
-    $('#play-home-video').magnificPopup({
-        type: 'iframe',
-        mainClass: 'mfp-fade',
-        removalDelay: 160,
-        preloader: false,
-        fixedContentPos: false
-    });
-	
-	
+
+
 	/*----------------------------------------------------*/
     /*  Isotope Fillter js
     /*----------------------------------------------------*/
@@ -128,9 +121,9 @@
                         duration: 750,
                         easing: 'linear'
                     }
-                }); 
+                });
             });
-			
+
             // Add isotope click function
             $(".filter li").on('click',function(){
                 $(".filter li").removeClass("active");
@@ -150,8 +143,8 @@
         }
     }
     projects_isotope();
-	
-	
+
+
 	/*----------------------------------------------------*/
     /*  Testimonials Slider
     /*----------------------------------------------------*/
@@ -164,7 +157,7 @@
     //             nav: false,
     //             autoplay: true,
     //             smartSpeed: 1500,
-    //             dots:false, 
+    //             dots:false,
     //             responsiveClass: true,
     //             responsive: {
     //                 0: {
@@ -178,11 +171,11 @@
     //     }
     // }
     // testimonials_slider();
-	
+
 	/*----------------------------------------------------*/
     /*  Google map js
     /*----------------------------------------------------*/
-     
+
     if ( $('#mapBox').length ){
         var $lat = $('#mapBox').data('lat');
         var $lon = $('#mapBox').data('lon');
@@ -389,11 +382,11 @@
             ]
         });
     }
-	
+
 	/*----------------------------------------------------*/
     /*  Google map js
     /*----------------------------------------------------*/
-     
+
     if ( $('#mapBox2').length ){
         var $lat = $('#mapBox2').data('lat');
         var $lon = $('#mapBox2').data('lon');
@@ -429,6 +422,6 @@
 			]
         });
     }
-	
+
 
 })(jQuery)
