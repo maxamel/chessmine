@@ -1,7 +1,7 @@
 import { getPieceFuncByName, fenToObj, setupThemes, getBoardColorsByName, setupBoard } from './utils.js'
 import { showEndGame } from './endgame.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
-import { stockfish_load, stockfish_move } from './stockfish_handler.js';
+import { stockfish_load, stockfish_move, stockfish_start } from './stockfish_handler.js';
 import { Chessground } from './chessground.js';
 
 $(document).ready(function () {
@@ -26,6 +26,7 @@ $(document).ready(function () {
     var the_game_fens = [];
     var promotion_in_progress = [];
     var promote = "q";
+    var emptyHeartbeats = 0;
     var game_over = false;
     var last_call = null;
     var heartbeatOK = false;
@@ -80,12 +81,11 @@ $(document).ready(function () {
         if (rival.player_type === 1) {   // rival is engine
             // lazy initialization of stockfish
             engine_sid = the_game.engine_sid
-            console.log(game.fen());
-            engine = stockfish_load(game.fen(), rating)
+            engine = stockfish_load()
             console.log(`The current position ${the_game_fen}`)
+
             engine.onmessage = function (line) {
-                //console.log(line);
-                var responseWords = line.split(' ')
+                var responseWords = line.data.split(' ')
                 if (responseWords[0] === 'bestmove') {
                     // make move to get full structure of chess move and then undo. This move will be processed
                     // properly once it goes through the server and back
@@ -102,12 +102,14 @@ $(document).ready(function () {
                     })
                 }
             }
+            stockfish_start(the_game_fen, rating)
         }
     }
 
     socket.on("game", function (ans) {
         load_cookies();
-        console.log(ans)
+        console.log(ans);
+        emptyHeartbeats = 0;
         my_color = JSON.stringify(ans.color);
         var the_game = ans.game;
         var my_time = JSON.stringify(the_game.white.time_remaining);
@@ -199,7 +201,7 @@ $(document).ready(function () {
         }
         console.log('setting board to fen ' + the_game_fen);
         board = Chessground($board, conf);
-        setupThemes(pieceTheme);
+        setupThemes(pieceTheme, boardTheme);
 
         insertBulkMoves(the_game_moves, ttl_time);
 
@@ -340,7 +342,7 @@ $(document).ready(function () {
                         var preferences = JSON.parse(prefs)
                         preferences.piece_theme = pieceTheme
                         localStorage.setItem("user_prefs", JSON.stringify(preferences));
-                        setupThemes(pieceTheme);
+                        setupThemes(pieceTheme, boardTheme);
                     });
                 }
             });
@@ -548,7 +550,7 @@ $(document).ready(function () {
         conf.turnColor = getColorFromTurn();
         conf.fen = game.fen();
         board.set(conf);
-        setupThemes(pieceTheme);
+        setupThemes(pieceTheme, boardTheme);
     }
 
     function getMovesMap() {
@@ -848,11 +850,12 @@ $(document).ready(function () {
         cell.setAttribute("class", "timeCell");
         clearInterval(moveInterval);
         moveInterval = setInterval(function () {
-            cell.innerHTML = cell.innerHTML - 1;
-            if (cell.innerHTML == 0) {
+            if (cell.innerHTML < 1) {
                 console.log("No move was made on time. Game abandoned.");
                 clearInterval(moveInterval);
             }
+            else
+                cell.innerHTML = cell.innerHTML - 1;
         }, 1000);
     }
 
@@ -905,7 +908,7 @@ $(document).ready(function () {
             $board.style.opacity = 1
         }
         board.set(conf);
-        setupThemes(pieceTheme);
+        setupThemes(pieceTheme, boardTheme);
     }
 
     function heartbeat(force) {
@@ -945,8 +948,10 @@ $(document).ready(function () {
                         icon.style.backgroundColor = "crimson"
                 }
             } else {
+                emptyHeartbeats++;
                 console.log("Got empty heartbeat response. See you next time");
-                window.location.href = "/settings";
+                if (emptyHeartbeats > 1)
+                    window.location.href = "/";
             }
         });
     }

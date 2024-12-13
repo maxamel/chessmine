@@ -16,7 +16,7 @@
 }
 
 www.{$APP_URL} {
-    redir {$APP_URL}{uri}
+    redir https://{$APP_URL}{uri}
 }
 
 # Remove http:// to enable TLS
@@ -53,6 +53,8 @@ www.{$APP_URL} {
 		root * static/
 		try_files {path} {path}.html html/{path}.html
 		redir /stockfish.wasm /js/stockfish.wasm
+		redir /stockfish.js /js/stockfish.js
+		redir /stockfish.asm.js /js/stockfish.asm.js
 		file_server
 	}
 

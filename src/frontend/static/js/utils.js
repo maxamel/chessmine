@@ -89,8 +89,8 @@
           document.querySelector('cg-board').style.backgroundColor=board_func[0];
       }
 
-    function setupThemes(pieceTheme) {
-          console.log('setting piece themes as ' + pieceTheme);
+    function setupThemes(pieceTheme, boardTheme) {
+          console.log('setting piece themes as ' + pieceTheme + ' and board themes as ' + boardTheme);
           var piece_func = getPieceFuncByName(pieceTheme);
           var pieces = document.getElementsByClassName("black");
           for (var iter = 0; iter < 2; iter++) {
@@ -106,6 +106,7 @@
             }
             pieces = document.getElementsByClassName("white");
           }
+          setupBoard(boardTheme);
     }
 
     export { getPieceFuncByName, getBoardColorsByName, getTimeRemaining, fenToObj, setupThemes, setupBoard }

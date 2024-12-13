@@ -470,8 +470,10 @@ class GameServer:
         if self.redis.is_player_mapping_exists(player.sid):
             self.redis.set_player_mapping_value(player.sid, LAST_SEEN, curr_time)
             return self._get_player_game(player)
-        else:       # We don't have a mapping yet. Probably waiting for match
-            return ServerResponse(dst_sid=player.sid)
+        else:       # We don't have a mapping yet. Probably waiting for match (otherwise raise an error)
+            if self.redis.is_player_in_search_pool(player.sid):
+                return ServerResponse(dst_sid=player.sid)
+            raise ValueError("No game in progress and no game search in progress. Should not be heartbeating")
 
     def _get_player_game(self, player: Player) -> ServerResponse:
         mapping = self.redis.get_player_mapping(player.sid)

@@ -1,6 +1,5 @@
-#checkov:skip=CKV_DOCKER_3: TODO figure out a way to add non-root user without breaking S6
 FROM woahbase/alpine-lua:5.2.4
-
+ENV S6_USER ""
 WORKDIR /home/alpine
 
 COPY . .
@@ -13,8 +12,7 @@ RUN luarocks install milua && luarocks install redis-lua && luarocks install lun
 #RUN setfacl -Rdm u:operator:rwx /usr/app/
 #RUN setfacl -Rdm u:operator:rwx /etc/group
 #RUN setfacl -Rdm u:operator:rwx /home/alpine
-#RUN chown -hR alpine /run && chown -hR alpine /var/log/ && chown -hR alpine /home/alpine && chown -hR alpine /etc/group
-#USER alpine
+RUN chown -hR alpine /run && chown -hR alpine /var/log/ && chown -hR alpine /home/alpine && chown -hR alpine /etc/group
+USER alpine
 HEALTHCHECK CMD curl --fail http://localhost:8800/healthcheck || exit 1
-
-CMD [ "lua", "./src/app.lua" ]
+ENTRYPOINT [ "lua", "./src/app.lua" ]

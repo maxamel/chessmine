@@ -1,8 +1,15 @@
 var stockfish = null;
 
-function stockfish_load(fen, rating) {
+function stockfish_load() {
   if (!stockfish) {
-    let threads = window.navigator.hardwareConcurrency || 1;
+    console.log('Initializing stockfish');
+    stockfish = new Worker("./stockfish.js");
+  }
+  return stockfish;
+}
+
+function stockfish_start(fen, rating) {
+  let threads = window.navigator.hardwareConcurrency || 1;
     var skill_level;
     if (rating < 1150)
       skill_level = 1
@@ -19,29 +26,20 @@ function stockfish_load(fen, rating) {
     else
       skill_level = 8
 
-    console.log('Loading stockfish with fen: ' + fen + ' and skill level ' + skill_level);
+  console.log('Loading stockfish with fen: ' + fen + ' and skill level ' + skill_level);
 
-    stockfish = STOCKFISH();
-    stockfish.postMessage('uci');
-    stockfish.postMessage('ucinewgame');
-    stockfish.postMessage(`setoption name Threads value ${threads}`);
-    stockfish.postMessage(`setoption name Skill Level value ${skill_level}`);
-    stockfish.postMessage(`position startpos fen ${fen}`);
-    stockfish.postMessage('isready');
-  }
-  return stockfish;
+  stockfish.postMessage('uci');
+  stockfish.postMessage('ucinewgame');
+  stockfish.postMessage(`setoption name Threads value ${threads}`);
+  stockfish.postMessage(`setoption name Skill Level value ${skill_level}`);
+  stockfish.postMessage(`position startpos fen ${fen}`);
+  stockfish.postMessage('isready');
 }
 
 function stockfish_move(fen) {
     let movetime = 1000;
-    /*if (movesList !== undefined && movesList.length > 0) {
-        movesList = 'moves ' + movesList;
-    }
-    console.log('The moves list: ' + movesList);
-     */
-    //stockfish.postMessage('ucinewgame');
     stockfish.postMessage(`position fen ${fen}`);
     stockfish.postMessage(`go movetime ${movetime}`);
 }
 
-export { stockfish_load, stockfish_move }
+export { stockfish_load, stockfish_move, stockfish_start }
