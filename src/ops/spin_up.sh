@@ -23,6 +23,7 @@ if [ "$1" == "prod" ]; then
     if [ "$2" == "soft" ]; then
       ./soft_deploy.sh $1
     else
+      docker volume prune -f
       docker compose -f docker-compose-$1.yml up -d --no-deps --remove-orphans
     fi
 else
