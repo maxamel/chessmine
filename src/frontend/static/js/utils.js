@@ -84,10 +84,22 @@
     }
 
     function setupBoard(boardTheme) {
-          console.log('setting board themes as ' + boardTheme);
-          var board_func = getBoardColorsByName(boardTheme);
-          document.querySelector('cg-board').style.backgroundColor=board_func[0];
-      }
+        const colors = getBoardColorsByName(boardTheme);
+        const light = colors[0];
+        const dark = colors[1];
+
+        const board = document.querySelector('cg-board');
+
+        board.style.background = `
+            repeating-conic-gradient(
+                ${dark} 0% 25%,
+                ${light} 0% 50%
+            )
+        `;
+
+        board.style.backgroundSize = '25% 25%';
+    }
+
 
     function setupThemes(pieceTheme, boardTheme) {
           console.log('setting piece themes as ' + pieceTheme + ' and board themes as ' + boardTheme);
