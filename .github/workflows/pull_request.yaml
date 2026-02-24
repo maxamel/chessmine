@@ -45,6 +45,10 @@ jobs:
           redis-version: 7.4.0
       - name: Luacov
         run: lua -lluacov src/backend/game_server/src/lua/test_match.lua
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: "."
       - name: Start Game Server
         working-directory: src/backend/game_server/
         run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &

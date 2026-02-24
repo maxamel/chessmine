@@ -1,3 +1,4 @@
+docker login https://ewr.vultrcr.com/chessmine -u $registry_username -p $registry_password
 #retag images
 docker rmi ewr.vultrcr.com/chessmine/game_server:prev
 docker pull ewr.vultrcr.com/chessmine/game_server:prev

@@ -31,7 +31,7 @@ The only prerequisite for this command is docker.
 
 ### Run all containers:
 ```
-./spin_dev.sh dev
+./spin_up.sh dev hard
 ```
 
 Navigate to localhost:1443 and voila!

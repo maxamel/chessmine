@@ -1,30 +1,28 @@
-name: Deploy to Production
+name: Manual Deployment
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
-  prepare-images:
+  revert-images:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build, Tag, and Push Images
+      - name: Re-Tag, and Push Images
         run: |
           # Ensure your script uses the Vultr Registry URL for tagging
           cd ./src/ops/
-          chmod +x ./prepare_images.sh
-          ./prepare_images.sh
+          chmod +x ./retag_images.sh
+          ./retag_images.sh
         env:
           registry_url: ${{ secrets.VULTR_REGISTRY_URL }}
           registry_username: ${{ secrets.VULTR_USERNAME }}
           registry_password: ${{ secrets.VULTR_API_KEY }}
 
   deploy:
-    needs: prepare-images
+    needs: revert-images
     runs-on: ubuntu-latest
     steps:
       - name: Execute remote commands via SSH
@@ -38,9 +36,10 @@ jobs:
             
             # Update the code on the server
             git pull origin master
-            
+
             docker login ${{ secrets.VULTR_REGISTRY_URL }} -u ${{ secrets.VULTR_USERNAME }} -p ${{ secrets.VULTR_API_KEY }}
 
+            # Run existing update script (use hard parameter to force frontend revert as well)
             cd ./src/ops/
             chmod +x spin_up.sh
-            ./spin_up.sh prod soft
+            ./spin_up.sh prod hard
