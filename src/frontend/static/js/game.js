@@ -357,22 +357,38 @@ $(document).ready(function () {
                 const childDiv = link.querySelector('div');
                 if (childDiv) {
                     // Attach a hover event listener
-                    link.addEventListener('mouseover', () => {
-                        // Change the background image or other properties
+                    link.addEventListener('mouseenter', () => {
+                        const colorBoard = getBoardColorsByName(childDiv.id);
+                        const light = colorBoard[0];
+                        const dark = colorBoard[1];
 
-                        const colorBoard = getBoardColorsByName(childDiv.id)
-                        link.style.backgroundColor = colorBoard[0];
-                        link.style.backgroundSize = 'contain';
-                        link.style.backgroundPosition = 'center';
-                        link.style.backgroundRepeat = 'no-repeat';
-                        link.style.color = "black"
-                        console.log('Going in ' + link.style.backgroundColor);
+                        // Build a 2x2 board preview aligned to the right
+                        // Pattern: top-left is light (like a1 in chess notation)
+                        childDiv.innerHTML = '';
+                        childDiv.style.display = 'flex';
+                        childDiv.style.flexWrap = 'wrap';
+                        childDiv.style.borderRadius = '6px';
+                        childDiv.style.overflow = 'hidden';
+                        childDiv.style.height = '40px';
+
+                        // Create 2x2 grid: (row + col) % 2 === 0 is light square
+                        for (let row = 0; row < 2; row++) {
+                            for (let col = 0; col < 2; col++) {
+                                const sq = document.createElement('div');
+                                sq.style.width = '50%';
+                                sq.style.height = '50%';
+                                // Match the pattern used in setupBoard: (file + rank) % 2 === 0 is light
+                                sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
+                                childDiv.appendChild(sq);
+                            }
+                        }
                     });
 
-                    link.addEventListener('mouseout', () => {
-                        link.style.backgroundColor = 'white'; // Reset or replace with default
-                        link.style.backgroundSize = 'none';
-                        console.log('Going out ' + link.style.backgroundColor);
+                    link.addEventListener('mouseleave', () => {
+                        // Reset preview
+                        childDiv.innerHTML = '';
+                        childDiv.style.display = '';
+                        childDiv.style.height = '';
                     });
 
                     // Attach a click event listener

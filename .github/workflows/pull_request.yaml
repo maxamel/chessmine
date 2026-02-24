@@ -40,7 +40,7 @@ jobs:
           luarocks install lunajson
           luarocks install Lua-cURL CURL_INCDIR=/usr/include/x86_64-linux-gnu
       - name: Start Redis
-        uses: supercharge/redis-github-action@ea9b21c6ecece47bd99595c532e481390ea0f044
+        uses: supercharge/redis-github-action@bc274cb7238cd63a45029db04ee48c07a72609fd
         with:
           redis-version: 7.4.0
       - name: Luacov

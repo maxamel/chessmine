@@ -4135,4 +4135,28 @@ h6 {
 ============================================================================================ */
 /*---------------------------------------------------- */
 
+/* Align piece/board theme previews in Settings dropdown */
+.settings-menu .dropdown-menu-right .sub-nav-link,
+.settings-menu .dropdown-menu-right .board-sub-nav-link {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.settings-menu .dropdown-menu-right .sub-nav-link > div,
+.settings-menu .dropdown-menu-right .board-sub-nav-link > div {
+  margin-left: auto;
+  width: 30%;
+  min-height: 32px;
+  left: 0 !important;
+}
+
+/* Slightly larger fixed width for board previews */
+.settings-menu .dropdown-menu-right .board-sub-nav-link > div {
+  width: 40px;
+  padding-right: 0 !important;
+  margin-right: 8px;
+}
+
 /*# sourceMappingURL=style.css.map */
