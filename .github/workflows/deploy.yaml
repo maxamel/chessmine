@@ -1,10 +1,10 @@
+---
 name: Deploy to Production
-
 on:
   push:
     branches:
       - master
-
+permissions: read-all
 jobs:
   prepare-images:
     runs-on: ubuntu-latest

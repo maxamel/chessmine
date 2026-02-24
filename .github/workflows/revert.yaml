@@ -1,8 +1,7 @@
 name: Manual Deployment
-
 on:
   workflow_dispatch:
-
+permissions: read-all
 jobs:
   revert-images:
     runs-on: ubuntu-latest
