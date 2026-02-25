@@ -8,23 +8,16 @@ function stockfish_load() {
   return stockfish;
 }
 
-function stockfish_start(fen, rating) {
+function stockfish_start(fen, rating, customSkillLevel = null) {
   let threads = window.navigator.hardwareConcurrency || 1;
     var skill_level;
-    if (rating < 1150)
-      skill_level = 1
-    else if (rating < 1450)
-      skill_level = 2
-    else if (rating < 1650)
-      skill_level = 3
-    else if (rating < 1850)
-      skill_level = 4
-    else if (rating < 2050)
-      skill_level = 5
-    else if (rating < 2250)
-      skill_level = 7
-    else
-      skill_level = 8
+    
+    // Use custom skill level if provided, otherwise derive from rating
+    if (customSkillLevel !== null) {
+      skill_level = customSkillLevel;
+    } else {
+      skill_level = 4;
+    }
 
   console.log('Loading stockfish with fen: ' + fen + ' and skill level ' + skill_level);
 
@@ -42,4 +35,11 @@ function stockfish_move(fen) {
     stockfish.postMessage(`go movetime ${movetime}`);
 }
 
-export { stockfish_load, stockfish_move, stockfish_start }
+function stockfish_set_skill_level(skillLevel) {
+    if (stockfish) {
+        console.log('Updating stockfish skill level to: ' + skillLevel);
+        stockfish.postMessage(`setoption name Skill Level value ${skillLevel}`);
+    }
+}
+
+export { stockfish_load, stockfish_move, stockfish_start, stockfish_set_skill_level }

@@ -149,3 +149,40 @@
     color: white;
     background: #2f5233;
 }
+
+.computer-level-link {
+    display:inline-block;
+    width:200px;
+    padding:0;
+    text-decoration:none;
+    font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
+    text-align: center;
+    color: black;
+    text-transform: uppercase;
+}
+
+.computer-level-link:focus,
+.computer-level-link:hover,
+.computer-level-link:active {
+    text-decoration: none;
+    color: white;
+    background: #2f5233;
+}
+
+/* Active/selected state for dropdown items */
+.sub-nav-link.active,
+.board-sub-nav-link.active,
+.computer-level-link.active {
+    background: #81b622 !important;
+    color: white !important;
+    font-weight: bold;
+    pointer-events: none;
+    cursor: default;
+}
+
+.sub-nav-link.active:hover,
+.board-sub-nav-link.active:hover,
+.computer-level-link.active:hover {
+    background: #81b622 !important;
+    color: white !important;
+}

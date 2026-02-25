@@ -4137,7 +4137,8 @@ h6 {
 
 /* Align piece/board theme previews in Settings dropdown */
 .settings-menu .dropdown-menu-right .sub-nav-link,
-.settings-menu .dropdown-menu-right .board-sub-nav-link {
+.settings-menu .dropdown-menu-right .board-sub-nav-link,
+.settings-menu .dropdown-menu-right .computer-level-link {
   display: flex !important;
   align-items: center;
   justify-content: space-between;
@@ -4160,3 +4161,62 @@ h6 {
 }
 
 /*# sourceMappingURL=style.css.map */
+
+
+/* ===== Promotion and Settings Styles (from settings.css) ===== */
+
+.settingsButton {
+    float: right;
+}
+
+.themeContainer {
+    text-align: center;
+    margin-left: 80px;
+    padding: 10px;
+    border: 3px solid transparent;
+}
+
+.themeContainer:hover {
+    background-color: #81b622;
+    outline: none;
+    cursor: pointer;
+}
+
+.themeContainer:focus {
+    outline: none;
+}
+
+#promotion {
+    display: none;
+    margin: auto;
+    width: 50%;
+    top: 50%;
+    position: sticky;
+    z-index: 1000;
+}
+
+.pieceHolder {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.promotionPieceHolder {
+    height: 60px;
+    width: 60px;
+    border-radius: 10%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.themeBox {
+    width: 100%;
+    background: #2f5233;
+    border-radius: 10px;
+}
+
+.settingsClass {
+    /* Add any specific styles if needed */
+}

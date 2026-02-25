@@ -1,7 +1,7 @@
 import { getPieceFuncByName, fenToObj, setupThemes, getBoardColorsByName, setupBoard } from './utils.js'
 import { showEndGame } from './endgame.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
-import { stockfish_load, stockfish_move, stockfish_start } from './stockfish_handler.js';
+import { stockfish_load, stockfish_move, stockfish_start, stockfish_set_skill_level } from './stockfish_handler.js';
 import { Chessground } from './chessground.js';
 
 $(document).ready(function () {
@@ -17,11 +17,12 @@ $(document).ready(function () {
     var other_remaining = 300000;
     var my_color = null;
     var needsBoardRendering = false;
-    var boardTheme = "metro";
-    var pieceTheme = "metro";
+    var boardTheme = "classical";
+    var pieceTheme = "classical";
     var timeControl = "5+0";
     var queenAutopromote = false;
     var highlightMoves = false;
+    var computerLevel = 5;
     var the_game_moves = [];
     var the_game_fens = [];
     var promotion_in_progress = [];
@@ -102,7 +103,7 @@ $(document).ready(function () {
                     })
                 }
             }
-            stockfish_start(the_game_fen, rating)
+            stockfish_start(the_game_fen, rating, computerLevel)
         }
     }
 
@@ -211,6 +212,7 @@ $(document).ready(function () {
         if (!isStart) abort_button = false;
         attachPieceThemeListeners();
         attachColorThemeListener();
+        attachComputerLevelListener();
 
         if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
@@ -312,6 +314,17 @@ $(document).ready(function () {
         function attachPieceThemeListeners() {
             const subNavLinks = document.querySelectorAll('.sub-nav-link');
 
+            // Set initial active state based on current pieceTheme
+            subNavLinks.forEach(link => {
+                const childDiv = link.querySelector('div');
+                if (childDiv) {
+                    const linkValue = link.textContent.trim().toLowerCase();
+                    if (linkValue === pieceTheme) {
+                        link.classList.add('active');
+                    }
+                }
+            });
+
             // Iterate over each sub-nav-link
             subNavLinks.forEach(link => {
                 // Find the `div` inside this link
@@ -320,12 +333,15 @@ $(document).ready(function () {
                 if (childDiv) {
                     // Attach a hover event listener
                     link.addEventListener('mouseover', () => {
-                        // Change the background image or other properties
-                        const imagePath = `img/chesspieces/${childDiv.id}/wB.png`;
-                        childDiv.style.backgroundImage = `url(${imagePath})`;
-                        childDiv.style.backgroundSize = 'contain';
-                        childDiv.style.backgroundPosition = 'center';
-                        childDiv.style.backgroundRepeat = 'no-repeat';
+                        // Don't show preview if this is the active item
+                        if (!link.classList.contains('active')) {
+                            // Change the background image or other properties
+                            const imagePath = `img/chesspieces/${childDiv.id}/wB.png`;
+                            childDiv.style.backgroundImage = `url(${imagePath})`;
+                            childDiv.style.backgroundSize = 'contain';
+                            childDiv.style.backgroundPosition = 'center';
+                            childDiv.style.backgroundRepeat = 'no-repeat';
+                        }
                     });
 
                     link.addEventListener('mouseout', () => {
@@ -334,15 +350,40 @@ $(document).ready(function () {
 
                     // Attach a click event listener
                     link.addEventListener('click', (event) => {
-                        console.log(`clicker!`);
                         event.preventDefault(); // Prevent default link behavior if needed
+                        
+                        // Don't process if already active
+                        if (link.classList.contains('active')) {
+                            return;
+                        }
+                        
+                        console.log(`clicker!`);
                         const linkValue = link.textContent.trim(); // Get the text of the link
                         console.log(`You clicked on: ${linkValue}`);
                         pieceTheme = linkValue.toLowerCase();
+                        
+                        // Ensure prefs is initialized
+                        if (!prefs) {
+                            prefs = JSON.stringify({
+                                board_theme: boardTheme,
+                                piece_theme: pieceTheme,
+                                time_control: timeControl,
+                                queen_autopromote: queenAutopromote,
+                                highlight_moves: highlightMoves,
+                                computer_level: computerLevel
+                            });
+                        }
+                        
                         var preferences = JSON.parse(prefs)
                         preferences.piece_theme = pieceTheme
-                        localStorage.setItem("user_prefs", JSON.stringify(preferences));
+                        prefs = JSON.stringify(preferences);
+                        localStorage.setItem("user_prefs", prefs);
                         setupThemes(pieceTheme, boardTheme);
+                        
+                        // Remove active class from all piece theme links
+                        subNavLinks.forEach(l => l.classList.remove('active'));
+                        // Add active class to clicked link
+                        link.classList.add('active');
                     });
                 }
             });
@@ -350,6 +391,18 @@ $(document).ready(function () {
 
         function attachColorThemeListener() {
             const subNavLinks = document.querySelectorAll('.board-sub-nav-link');
+            
+            // Set initial active state based on current boardTheme
+            subNavLinks.forEach(link => {
+                const childDiv = link.querySelector('div');
+                if (childDiv) {
+                    const linkValue = link.textContent.trim().toLowerCase();
+                    if (linkValue === boardTheme) {
+                        link.classList.add('active');
+                    }
+                }
+            });
+            
             // Iterate over each sub-nav-link
             subNavLinks.forEach(link => {
                 // Find the `div` inside this link
@@ -358,28 +411,31 @@ $(document).ready(function () {
                 if (childDiv) {
                     // Attach a hover event listener
                     link.addEventListener('mouseenter', () => {
-                        const colorBoard = getBoardColorsByName(childDiv.id);
-                        const light = colorBoard[0];
-                        const dark = colorBoard[1];
+                        // Don't show preview if this is the active item
+                        if (!link.classList.contains('active')) {
+                            const colorBoard = getBoardColorsByName(childDiv.id);
+                            const light = colorBoard[0];
+                            const dark = colorBoard[1];
 
-                        // Build a 2x2 board preview aligned to the right
-                        // Pattern: top-left is light (like a1 in chess notation)
-                        childDiv.innerHTML = '';
-                        childDiv.style.display = 'flex';
-                        childDiv.style.flexWrap = 'wrap';
-                        childDiv.style.borderRadius = '6px';
-                        childDiv.style.overflow = 'hidden';
-                        childDiv.style.height = '40px';
+                            // Build a 2x2 board preview aligned to the right
+                            // Pattern: top-left is light (like a1 in chess notation)
+                            childDiv.innerHTML = '';
+                            childDiv.style.display = 'flex';
+                            childDiv.style.flexWrap = 'wrap';
+                            childDiv.style.borderRadius = '6px';
+                            childDiv.style.overflow = 'hidden';
+                            childDiv.style.height = '40px';
 
-                        // Create 2x2 grid: (row + col) % 2 === 0 is light square
-                        for (let row = 0; row < 2; row++) {
-                            for (let col = 0; col < 2; col++) {
-                                const sq = document.createElement('div');
-                                sq.style.width = '50%';
-                                sq.style.height = '50%';
-                                // Match the pattern used in setupBoard: (file + rank) % 2 === 0 is light
-                                sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
-                                childDiv.appendChild(sq);
+                            // Create 2x2 grid: (row + col) % 2 === 0 is light square
+                            for (let row = 0; row < 2; row++) {
+                                for (let col = 0; col < 2; col++) {
+                                    const sq = document.createElement('div');
+                                    sq.style.width = '50%';
+                                    sq.style.height = '50%';
+                                    // Match the pattern used in setupBoard: (file + rank) % 2 === 0 is light
+                                    sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
+                                    childDiv.appendChild(sq);
+                                }
                             }
                         }
                     });
@@ -393,17 +449,97 @@ $(document).ready(function () {
 
                     // Attach a click event listener
                     link.addEventListener('click', (event) => {
-                        console.log(`clicker!`);
                         event.preventDefault(); // Prevent default link behavior if needed
+                        
+                        // Don't process if already active
+                        if (link.classList.contains('active')) {
+                            return;
+                        }
+                        
+                        console.log(`clicker!`);
                         const linkValue = link.textContent.trim(); // Get the text of the link
                         console.log(`You clicked on: ${linkValue}`);
                         boardTheme = linkValue.toLowerCase();
+                        
+                        // Ensure prefs is initialized
+                        if (!prefs) {
+                            prefs = JSON.stringify({
+                                board_theme: boardTheme,
+                                piece_theme: pieceTheme,
+                                time_control: timeControl,
+                                queen_autopromote: queenAutopromote,
+                                highlight_moves: highlightMoves,
+                                computer_level: computerLevel
+                            });
+                        }
+                        
                         var preferences = JSON.parse(prefs)
                         preferences.board_theme = boardTheme
-                        localStorage.setItem("user_prefs", JSON.stringify(preferences));
+                        prefs = JSON.stringify(preferences);
+                        localStorage.setItem("user_prefs", prefs);
                         setupBoard(boardTheme);
+                        
+                        // Remove active class from all board theme links
+                        subNavLinks.forEach(l => l.classList.remove('active'));
+                        // Add active class to clicked link
+                        link.classList.add('active');
                     });
                 }
+            });
+        }
+
+        function attachComputerLevelListener() {
+            const levelLinks = document.querySelectorAll('.computer-level-link');
+            
+            // Set initial active state based on current computerLevel
+            levelLinks.forEach(link => {
+                const level = parseInt(link.getAttribute('data-level'));
+                if (level === computerLevel) {
+                    link.classList.add('active');
+                }
+            });
+            
+            levelLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    
+                    // Don't process if already active
+                    if (link.classList.contains('active')) {
+                        return;
+                    }
+                    
+                    const level = parseInt(link.getAttribute('data-level'));
+                    console.log(`Computer level changed to: ${level}`);
+                    computerLevel = level;
+                    
+                    // Ensure prefs is initialized
+                    if (!prefs) {
+                        prefs = JSON.stringify({
+                            board_theme: boardTheme,
+                            piece_theme: pieceTheme,
+                            time_control: timeControl,
+                            queen_autopromote: queenAutopromote,
+                            highlight_moves: highlightMoves,
+                            computer_level: computerLevel
+                        });
+                    }
+                    
+                    // Update preferences
+                    var preferences = JSON.parse(prefs);
+                    preferences.computer_level = computerLevel;
+                    prefs = JSON.stringify(preferences);
+                    localStorage.setItem("user_prefs", prefs);
+                    
+                    // Update stockfish skill level if engine is active
+                    if (engine) {
+                        stockfish_set_skill_level(computerLevel);
+                    }
+                    
+                    // Remove active class from all computer level links
+                    levelLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    link.classList.add('active');
+                });
             });
         }
 
@@ -975,18 +1111,28 @@ $(document).ready(function () {
     function load_cookies() {
         cookie_data = localStorage.getItem("user_session");
         cookie_data = JSON.parse(cookie_data);
+        // Always re-read prefs from localStorage to get latest values
         prefs = localStorage.getItem("user_prefs");
         var obj_prefs = JSON.parse(prefs);
         if (cookie_data != null)
             cookie_data.preferences = obj_prefs;
             player_id = cookie_data.sid
         if (cookie_data && obj_prefs != null) {
-            boardTheme = obj_prefs.board_theme;
-            pieceTheme = obj_prefs.piece_theme;
-            timeControl = obj_prefs.time_control;
-            queenAutopromote = obj_prefs.queen_autopromote;
-            highlightMoves = obj_prefs.highlight_moves;
+            boardTheme = obj_prefs.board_theme || "classical";
+            pieceTheme = obj_prefs.piece_theme || "classical";
+            timeControl = obj_prefs.time_control || "5+0";
+            queenAutopromote = obj_prefs.queen_autopromote || false;
+            highlightMoves = obj_prefs.highlight_moves || false;
+            computerLevel = obj_prefs.computer_level || 5;
             setClockGlow(obj_prefs.clock_glow);
+        } else {
+            // Ensure defaults are set even if no preferences exist
+            boardTheme = "classical";
+            pieceTheme = "classical";
+            timeControl = "5+0";
+            queenAutopromote = false;
+            highlightMoves = false;
+            computerLevel = 5;
         }
     }
 
