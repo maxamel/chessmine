@@ -1,3 +1,19 @@
+#!/bin/bash
+# ==============================================================================
+# TITLE:       Caddy Hot-Fix Injector
+# DESCRIPTION: Injects static files into a running Caddy container with
+#              localized URL replacement (APP_URL -> localhost:1443).
+#
+# USAGE:       ./update_fe_docker.sh <PATH_TO_FILE>
+#
+# EXAMPLES:
+#   Run from src/frontend/static:
+#   1. Process a file in static root:
+#      ./update_fe_docker.sh css/settings.css   -> Target: index.html
+#
+#   2. Process a file in a subfolder:
+#      ./update_fe_docker.sh js/game.js      -> Target: js/game.js
+# ==============================================================================
 target=""
 
 echo PROCESSING $1

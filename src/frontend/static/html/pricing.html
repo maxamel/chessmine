@@ -49,7 +49,7 @@
 						</div>
 						<div class="price_footer">
 							<h3><span class="dlr">$</span> 0</h3>
-							<a class="primary_btn" href="/settings"><span>Play Now</span></a>
+							<a id="playNowBtn" class="primary_btn" href="#"><span>Play Now</span></a>
 						</div>
 					</div>
 				</div>
@@ -103,6 +103,55 @@
               $("#header").load("html/header.html");
               $("#footer").load("html/footer.html");
             });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var socket = io("https://APP_URL/connect", {
+                transports: ["polling", "websocket"],
+                timestampParam: "timestamp",
+                tryAllTransports: true,
+                query: {
+                    nonce: (Math.random() + 1).toString(36).substring(8)
+                }
+            });
+
+            $("#playNowBtn").click(function(event) {
+                event.preventDefault();
+                
+                var cookie_data = localStorage.getItem("user_session");
+                var prefs = localStorage.getItem("user_prefs");
+                
+                if (prefs == null) {
+                    prefs = {
+                        "time_control": "5+0",
+                        "piece_theme": "classical",
+                        "board_theme": "classical",
+                        "computer_level": 5
+                    };
+                } else {
+                    prefs = JSON.parse(prefs);
+                }
+                
+                // Set default time control if not set
+                if (!prefs.time_control) {
+                    prefs.time_control = "5+0";
+                }
+                
+                cookie_data = JSON.parse(cookie_data);
+                if (cookie_data == null) {
+                    cookie_data = {};
+                }
+                
+                cookie_data.preferences = prefs;
+                localStorage.setItem("user_prefs", JSON.stringify(prefs));
+                
+                socket.emit("/api/play", { "data": cookie_data }, function (ans) {
+                    cookie_data.sid = ans;
+                    localStorage.setItem("user_session", JSON.stringify(cookie_data));
+                    window.location.href = "/game";
+                });
+            });
+        });
     </script>
     </body>
 </html>
