@@ -213,6 +213,7 @@ $(document).ready(function () {
         attachPieceThemeListeners();
         attachColorThemeListener();
         attachComputerLevelListener();
+        attachNavigationListeners();
 
         if (game_status !== 3) {     // NOT ENDED
             if (!attached_listeners) {
@@ -974,6 +975,7 @@ $(document).ready(function () {
         if (abort_button)
             enableGameButtons();
         handle_move(move.san, index, 30000, true);
+        updateNavigationButtons();
     }
 
     function insertBulkMoves(moves, ttl) {
@@ -993,6 +995,7 @@ $(document).ready(function () {
             }
             handle_move(moves[i], index, ttl, moves.length === 1);
         }
+        updateNavigationButtons();
     }
 
     function insert_counter_cell(index, ttl) {
@@ -1061,6 +1064,133 @@ $(document).ready(function () {
         }
         board.set(conf);
         setupThemes(pieceTheme, boardTheme);
+        updateNavigationButtons();
+    }
+
+    function getCurrentMoveIndex() {
+        // Find the currently selected cell
+        var selectedCell = document.querySelector('.selectedCell');
+        if (selectedCell) {
+            var row = selectedCell.parentElement.rowIndex;
+            var index = selectedCell.cellIndex;
+            var normalized_index = index - 1;
+            return row * 2 + normalized_index;
+        }
+        // If no cell is selected, return the last move
+        return the_game_fens.length - 1;
+    }
+
+    function navigateToMove(position_in_array) {
+        if (position_in_array < 0 || position_in_array >= the_game_fens.length) {
+            return;
+        }
+
+        var selected_fen = the_game_fens[position_in_array];
+        conf.fen = selected_fen;
+        
+        // Remove all selected cells
+        $("td").removeClass("selectedCell");
+        
+        // Calculate row and cell index from position
+        var row = Math.floor(position_in_array / 2);
+        var cellIndex = (position_in_array % 2) + 1; // +1 because first cell is the row number
+        
+        // Add selected class to the appropriate cell
+        var table = document.getElementById("moveTable");
+        if (table.rows[row] && table.rows[row].cells[cellIndex]) {
+            var cell = table.rows[row].cells[cellIndex];
+            
+            if (position_in_array < the_game_fens.length - 1) {
+                cell.classList.add("selectedCell");
+                removeCheckAndMate();
+                conf.highlight.lastMove = false;
+                conf.movable.dests = new Map();
+                conf.movable.color = undefined;
+                $board.style.opacity = 0.8;
+            } else {
+                conf.highlight.lastMove = true;
+                conf.movable.dests = getMovesMap();
+                conf.movable.color = my_color;
+                conf.turnColor = getColorFromTurn();
+                highlight_check_mate();
+                $board.style.opacity = 1;
+            }
+        }
+        
+        board.set(conf);
+        setupThemes(pieceTheme, boardTheme);
+        updateNavigationButtons();
+    }
+
+    function updateNavigationButtons() {
+        var currentIndex = getCurrentMoveIndex();
+        var firstBtn = document.getElementById("firstMoveBtn");
+        var prevBtn = document.getElementById("prevMoveBtn");
+        var nextBtn = document.getElementById("nextMoveBtn");
+        var lastBtn = document.getElementById("lastMoveBtn");
+        
+        if (firstBtn && prevBtn && nextBtn && lastBtn) {
+            // Disable first/prev if at the beginning
+            if (currentIndex <= 0) {
+                firstBtn.classList.add('disabled');
+                prevBtn.classList.add('disabled');
+            } else {
+                firstBtn.classList.remove('disabled');
+                prevBtn.classList.remove('disabled');
+            }
+            
+            // Disable next/last if at the end
+            if (currentIndex >= the_game_fens.length - 1) {
+                nextBtn.classList.add('disabled');
+                lastBtn.classList.add('disabled');
+            } else {
+                nextBtn.classList.remove('disabled');
+                lastBtn.classList.remove('disabled');
+            }
+        }
+    }
+
+    function attachNavigationListeners() {
+        var firstBtn = document.getElementById("firstMoveBtn");
+        var prevBtn = document.getElementById("prevMoveBtn");
+        var nextBtn = document.getElementById("nextMoveBtn");
+        var lastBtn = document.getElementById("lastMoveBtn");
+        
+        if (firstBtn) {
+            firstBtn.addEventListener("click", function() {
+                if (!firstBtn.classList.contains('disabled')) {
+                    navigateToMove(0);
+                }
+            });
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener("click", function() {
+                if (!prevBtn.classList.contains('disabled')) {
+                    var currentIndex = getCurrentMoveIndex();
+                    navigateToMove(currentIndex - 1);
+                }
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener("click", function() {
+                if (!nextBtn.classList.contains('disabled')) {
+                    var currentIndex = getCurrentMoveIndex();
+                    navigateToMove(currentIndex + 1);
+                }
+            });
+        }
+        
+        if (lastBtn) {
+            lastBtn.addEventListener("click", function() {
+                if (!lastBtn.classList.contains('disabled')) {
+                    navigateToMove(the_game_fens.length - 1);
+                }
+            });
+        }
+        
+        updateNavigationButtons();
     }
 
     function heartbeat(force) {
