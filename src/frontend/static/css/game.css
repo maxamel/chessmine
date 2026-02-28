@@ -1522,13 +1522,6 @@ th, td {
   #background-image: -o-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -o-radial-gradient(circle at top left, #81b622, #ecf87f);
 }
 
-.tableNavigator {
-    height: 35px;
-    background: lavender;
-    width: 100%;
-    margin: 0px;
-}
-
 .blinking{
     animation:blinkingText 1.2s infinite;
 }
@@ -1562,11 +1555,69 @@ th, td {
 
 .moveBox {
   height: 390px;
+  position: relative;
+  overflow: hidden;
+}
+
+.moveTableHeader {
+  width: 100%;
+  height: 40px;
 }
 
 .tableWrapper {
   overflow-y: scroll;
-  height: 78%;
+  height: 270px;
+  width: 100%;
+}
+
+.moveTableFooter {
+  width: 100%;
+  height: 40px;
+  border-collapse: collapse;
+  display: block !important;
+  table-layout: fixed;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.moveTableFooter tbody {
+  display: block;
+  width: 100%;
+}
+
+.moveTableFooter tr {
+  display: flex;
+  width: 100%;
+}
+
+.moveTableFooter th {
+  width: 25%;
+  padding: 5px;
+  text-align: center;
+  display: block;
+  flex: 1;
+}
+
+.navCell {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  padding: 5px;
+  text-align: center;
+  user-select: none;
+  width: 25%;
+}
+
+.navCell:hover:not(.disabled) {
+  background: #f3f3f5;
+}
+
+.navCell.disabled {
+  background-color: #e0e0e0;
+  cursor: default;
+  color: #999;
 }
 
 .edgeCell {
@@ -1581,10 +1632,6 @@ th, td {
 }
 .blackCell {
   background-color: black;
-}
-
-.moveTableHeader {
-  width: 100%;
 }
 
 /* width */
