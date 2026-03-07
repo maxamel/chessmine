@@ -9,7 +9,6 @@ ENV BE_URL=$BE_URL
 ENV TLS_CONFIG=$TLS_CONFIG
 COPY . /var/www/html/
 
-RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/settings.js  # for dynamic config of url
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for dynamic config of url
 
 # install su-exec if need to perform operations as root and enable the su-exec command with RUN chmod u+s /sbin/su-exec

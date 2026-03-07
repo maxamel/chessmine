@@ -7,12 +7,13 @@ from util import PlayerType
 
 
 class Player:
-    def __init__(self, sid: str=None, name: str="Guest", rating: int=1500, preferences=None, player_type: int=PlayerType.HUMAN.value):
+    def __init__(self, sid: str=None, name: str="Guest", rating: int=1500, preferences=None, player_type: int=PlayerType.HUMAN.value, country_code: str=None):
         self.sid = sid if sid else uuid.uuid4().hex
         self.name = name
         self.rating = rating
         self.player_type = player_type
         self.preferences = preferences if preferences is not None else dict()
+        self.country_code = country_code if country_code is not None else 'None'
 
     def to_dict(self):
         return {
@@ -20,7 +21,8 @@ class Player:
             "name": self.name,
             "rating": self.rating,
             "player_type": self.player_type,
-            "preferences": json.dumps(self.preferences)
+            "preferences": json.dumps(self.preferences),
+            "country_code": self.country_code
         }
 
     @staticmethod
@@ -31,17 +33,18 @@ class Player:
         player_type = d[PLAYER_TYPE]
         if player_type != 'None':
             player_type = int(player_type)
-        return Player(sid=d[SID], name=d[NAME], rating=rating, player_type=player_type, preferences=json.loads(d[PREFERENCES]))
+        return Player(sid=d[SID], name=d[NAME], rating=rating, player_type=player_type, preferences=json.loads(d[PREFERENCES]), country_code=d[COUNTRY_CODE])
 
 
 class PlayerGameInfo:
-    def __init__(self, name="Guest", rating=1500, player_type: int=PlayerType.HUMAN.value, rating_delta=None, time_remaining=None, connect_status=None):
+    def __init__(self, name="Guest", rating=1500, player_type: int=PlayerType.HUMAN.value, rating_delta=None, time_remaining=None, connect_status=None, country_code=None):
         self.name = name
         self.rating = rating
         self.player_type = player_type
         self.rating_delta = rating_delta
         self.time_remaining = time_remaining
         self.connect_status = connect_status
+        self.country_code = country_code
 
     def to_dict(self):
         return {
@@ -50,7 +53,8 @@ class PlayerGameInfo:
             PLAYER_TYPE: self.player_type,
             RATING_DELTA: self.rating_delta,
             REMAINING_TIME: self.time_remaining,
-            CONNECT_STATUS: self.connect_status
+            CONNECT_STATUS: self.connect_status,
+            COUNTRY_CODE: self.country_code
         }
 
     @staticmethod
@@ -64,8 +68,11 @@ class PlayerGameInfo:
         rating_delta = d[RATING_DELTA]
         if rating_delta != 'None':
             rating_delta = int(rating_delta)
+        country_code = d[COUNTRY_CODE]
+        if country_code == 'None':
+            country_code = None
         return PlayerGameInfo(name=d[NAME], rating=rating, player_type=int(d[PLAYER_TYPE]), rating_delta=rating_delta,
-                              time_remaining=rm_time, connect_status=d[CONNECT_STATUS])
+                              time_remaining=rm_time, connect_status=d[CONNECT_STATUS], country_code=country_code)
 
 
 class PlayerMapping:
