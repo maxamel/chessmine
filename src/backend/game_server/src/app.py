@@ -93,12 +93,23 @@ def cancelSearch(payload):
 # First connection of a player - returns the details of user as known by the server
 @app.route('/play', methods=['POST'])
 def play():
-    response = game_server.play(request.get_json())
+    # Get client IP address
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if client_ip:
+        client_ip = client_ip.split(',')[0].strip()
+    payload = request.get_json()
+    payload["client_ip"] = client_ip
+    response = game_server.play(payload)
     return response.to_dict()
 
 
 @socketio.on('/api/play', namespace='/connect')
 def play(payload):
+    # Get client IP address from socket request
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if client_ip:
+        client_ip = client_ip.split(',')[0].strip()
+    payload["client_ip"] = client_ip
     response = game_server.play(payload)
     join_room(room=response.dst_sid)
     if "game" in response.extra_data:

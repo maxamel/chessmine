@@ -3,6 +3,7 @@ import { showEndGame } from './endgame.js'
 import { initializeClock, setTime, discardTimeInterval, setClockGlow } from './clock.js'
 import { stockfish_load, stockfish_move, stockfish_start, stockfish_set_skill_level } from './stockfish_handler.js';
 import { Chessground } from './chessground.js';
+import { displayFlag, removeFlag, displayStockfishLogo } from './flag_utils.js';
 
 $(document).ready(function () {
     load_cookies()
@@ -134,6 +135,12 @@ $(document).ready(function () {
         the_game_fens = JSON.parse(the_game.fens);
         player_id = cookie_data.sid;
 
+        // Remove existing flags before adding new ones
+        removeFlag("labelTitleA");
+        removeFlag("labelTitleASmall");
+        removeFlag("labelTitleB");
+        removeFlag("labelTitleBSmall");
+
         document.getElementById("labelTitleA").innerText = rival["name"];
         document.getElementById("labelRatingA").innerText = rival["rating"];
         document.getElementById("labelTitleASmall").innerText = rival["name"];
@@ -142,6 +149,38 @@ $(document).ready(function () {
         document.getElementById("labelRatingB").innerText = me.rating;
         document.getElementById("labelTitleBSmall").innerText = me.name;
         document.getElementById("labelRatingBSmall").innerText = me.rating;
+        
+        // Display country flags or Stockfish logo
+        console.log('=== FLAG DISPLAY DEBUG ===');
+        console.log('Rival data:', { player_type: rival.player_type, country_code: rival.country_code, name: rival.name });
+        console.log('Me data:', { player_type: me.player_type, country_code: me.country_code, name: me.name });
+        
+        if (rival.player_type === 1) {
+            // Rival is Stockfish engine
+            console.log('Rival is Stockfish engine');
+            displayStockfishLogo("labelTitleA");
+            displayStockfishLogo("labelTitleASmall");
+        } else if (rival.country_code && rival.country_code !== 'None') {
+            console.log('Displaying rival flag:', rival.country_code);
+            displayFlag("labelTitleA", rival.country_code);
+            displayFlag("labelTitleASmall", rival.country_code);
+        } else {
+            console.log('No rival flag to display');
+        }
+        
+        if (me.player_type === 1) {
+            // I am Stockfish engine (shouldn't happen, but handle it)
+            console.log('I am Stockfish engine');
+            displayStockfishLogo("labelTitleB");
+            displayStockfishLogo("labelTitleBSmall");
+        } else if (me.country_code && me.country_code !== 'None') {
+            console.log('Displaying my flag:', me.country_code);
+            displayFlag("labelTitleB", me.country_code);
+            displayFlag("labelTitleBSmall", me.country_code);
+        } else {
+            console.log('No my flag to display - country_code:', me.country_code);
+        }
+        
         document.getElementById("playerInfoA").style.visibility = "visible";
         document.getElementById("playerInfoB").style.visibility = "visible";
         var panes = document.getElementsByClassName("clock");

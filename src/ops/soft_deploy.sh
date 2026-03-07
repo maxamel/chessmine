@@ -100,11 +100,9 @@ echo COPYING ../frontend/static INTO caddy:/var/www/html/static/frontend/static
 cp -r ../frontend/static ../frontend/statictemp
 if [[ $OSTYPE == 'darwin'* ]]; then
   find ../frontend/statictemp/js/game.js -type f -exec gsed -i -e "s#APP_URL#$app_url#g" {} \;
-  find ../frontend/statictemp/js/settings.js -type f -exec gsed -i -e "s#APP_URL#$app_url#g" {} \;
   find ../frontend/statictemp/js/header.js -type f -exec gsed -i -e "s#APP_URL#$app_url#g" {} \;
 else
   find ../frontend/statictemp/js/game.js -type f -exec sed -i -e "s#APP_URL#$app_url#g" {} \;
-  find ../frontend/statictemp/js/settings.js -type f -exec sed -i -e "s#APP_URL#$app_url#g" {} \;
   find ../frontend/statictemp/js/header.js -type f -exec sed -i -e "s#APP_URL#$app_url#g" {} \;
 fi
 docker cp ../frontend/statictemp/. caddy:/var/www/html/static
