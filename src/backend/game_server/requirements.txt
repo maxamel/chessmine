@@ -7,3 +7,4 @@ requests==2.32.3
 prometheus_client==0.21.0
 gevent==24.11.1
 gevent-websocket==0.10.1
+maxminddb==3.1.1

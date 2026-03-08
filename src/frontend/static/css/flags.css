@@ -1,0 +1,159 @@
+/* Flag backgrounds using data URIs for common countries */
+.flag-us { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><rect fill="%23B22234" width="60" height="30"/><path d="M0,3.5h60m0,3.5H0m0,3.5h60m0,3.5H0m0,3.5h60m0,3.5H0m0,3.5h60" stroke="%23fff" stroke-width="3"/><rect fill="%233C3B6E" width="24" height="15"/></svg>'); }
+
+.flag-es { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23AA151B" width="60" height="10"/><rect fill="%23F1BF00" y="10" width="60" height="20"/><rect fill="%23AA151B" y="30" width="60" height="10"/></svg>'); }
+
+.flag-gb { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><rect fill="%23012169" width="60" height="30"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="%23fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="%23C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="%23fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="%23C8102E" stroke-width="6"/></svg>'); }
+
+.flag-fr { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23002395" width="20" height="40"/><rect fill="%23fff" x="20" width="20" height="40"/><rect fill="%23ED2939" x="40" width="20" height="40"/></svg>'); }
+
+.flag-de { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23000" width="60" height="13.33"/><rect fill="%23D00" y="13.33" width="60" height="13.33"/><rect fill="%23FFCE00" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-it { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23009246" width="20" height="40"/><rect fill="%23fff" x="20" width="20" height="40"/><rect fill="%23CE2B37" x="40" width="20" height="40"/></svg>'); }
+
+.flag-jp { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><circle fill="%23BC002D" cx="30" cy="20" r="9"/></svg>'); }
+
+.flag-cn { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23DE2910" width="60" height="40"/><polygon fill="%23FFDE00" points="10,5 11.5,9.5 16,9.5 12.5,12 14,16.5 10,13.5 6,16.5 7.5,12 4,9.5 8.5,9.5"/></svg>'); }
+
+.flag-br { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23009739" width="60" height="40"/><path fill="%23FEDD00" d="M30,5 L55,20 L30,35 L5,20 Z"/><circle fill="%23002776" cx="30" cy="20" r="7"/></svg>'); }
+
+.flag-ca { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><rect fill="%23FF0000" width="15" height="40"/><rect fill="%23FF0000" x="45" width="15" height="40"/><path fill="%23FF0000" d="M30,12 l2,6 h6 l-5,4 2,6 -5-4 -5,4 2-6 -5-4 h6 z"/></svg>'); }
+
+.flag-au { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><rect fill="%23012169" width="60" height="30"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="%23fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="%23C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="%23fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="%23C8102E" stroke-width="6"/></svg>'); }
+
+.flag-in { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FF9933" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%23138808" y="26.66" width="60" height="13.34"/><circle fill="%23000080" cx="30" cy="20" r="4"/></svg>'); }
+
+.flag-ru { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="13.33"/><rect fill="%230039A6" y="13.33" width="60" height="13.33"/><rect fill="%23D52B1E" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-mx { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23006847" width="20" height="40"/><rect fill="%23fff" x="20" width="20" height="40"/><rect fill="%23CE1126" x="40" width="20" height="40"/></svg>'); }
+
+.flag-kr { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><circle fill="%23C60C30" cx="30" cy="20" r="8"/><circle fill="%23003478" cx="30" cy="20" r="4"/></svg>'); }
+
+.flag-nl { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23AE1C28" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%2321468B" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-se { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23006AA7" width="60" height="40"/><rect fill="%23FECC00" x="16" width="8" height="40"/><rect fill="%23FECC00" y="16" width="60" height="8"/></svg>'); }
+
+.flag-no { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23BA0C2F" width="60" height="40"/><rect fill="%23fff" x="16" width="8" height="40"/><rect fill="%23fff" y="16" width="60" height="8"/><rect fill="%2300205B" x="18" width="4" height="40"/><rect fill="%2300205B" y="18" width="60" height="4"/></svg>'); }
+
+.flag-pl { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="20"/><rect fill="%23DC143C" y="20" width="60" height="20"/></svg>'); }
+
+.flag-ar { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%2375AADB" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%2375AADB" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-pt { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23006600" width="24" height="40"/><rect fill="%23FF0000" x="24" width="36" height="40"/></svg>'); }
+
+.flag-tr { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23E30A17" width="60" height="40"/><circle fill="%23fff" cx="22" cy="20" r="8"/><circle fill="%23E30A17" cx="24" cy="20" r="6.5"/><polygon fill="%23fff" points="32,20 34,22 36,20 34,18"/></svg>'); }
+
+/* Additional European Countries */
+.flag-ch { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><rect fill="%23FF0000" width="60" height="60"/><rect fill="%23fff" x="18" y="10" width="24" height="40"/><rect fill="%23fff" x="10" y="18" width="40" height="24"/></svg>'); }
+
+.flag-at { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23ED2939" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%23ED2939" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-be { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23000" width="20" height="40"/><rect fill="%23FDDA24" x="20" width="20" height="40"/><rect fill="%23EF3340" x="40" width="20" height="40"/></svg>'); }
+
+.flag-cz { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="20"/><rect fill="%23D7141A" y="20" width="60" height="20"/><path fill="%2311457E" d="M0,0 L30,20 L0,40 Z"/></svg>'); }
+
+.flag-dk { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23C8102E" width="60" height="40"/><rect fill="%23fff" x="16" width="8" height="40"/><rect fill="%23fff" y="16" width="60" height="8"/></svg>'); }
+
+.flag-fi { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><rect fill="%23003580" x="16" width="8" height="40"/><rect fill="%23003580" y="16" width="60" height="8"/></svg>'); }
+
+.flag-gr { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%230D5EAF" width="60" height="40"/><rect fill="%23fff" y="4.44" width="60" height="4.44"/><rect fill="%23fff" y="13.33" width="60" height="4.44"/><rect fill="%23fff" y="22.22" width="60" height="4.44"/><rect fill="%23fff" y="31.11" width="60" height="4.44"/></svg>'); }
+
+.flag-hu { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23CE2939" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%23477050" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-ie { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23169B62" width="20" height="40"/><rect fill="%23fff" x="20" width="20" height="40"/><rect fill="%23FF883E" x="40" width="20" height="40"/></svg>'); }
+
+.flag-ro { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23002B7F" width="20" height="40"/><rect fill="%23FCD116" x="20" width="20" height="40"/><rect fill="%23CE1126" x="40" width="20" height="40"/></svg>'); }
+
+.flag-ua { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%230057B7" width="60" height="20"/><rect fill="%23FFD700" y="20" width="60" height="20"/></svg>'); }
+
+.flag-bg { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="13.33"/><rect fill="%2300966E" y="13.33" width="60" height="13.33"/><rect fill="%23D62612" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-hr { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FF0000" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%23171796" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-sk { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="13.33"/><rect fill="%230B4EA2" y="13.33" width="60" height="13.33"/><rect fill="%23EE1C25" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-si { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="13.33"/><rect fill="%230000FF" y="13.33" width="60" height="13.33"/><rect fill="%23FF0000" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-lt { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FDB913" width="60" height="13.33"/><rect fill="%23006A44" y="13.33" width="60" height="13.33"/><rect fill="%23C1272D" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-lv { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%239E3039" width="60" height="16"/><rect fill="%23fff" y="16" width="60" height="8"/><rect fill="%239E3039" y="24" width="60" height="16"/></svg>'); }
+
+.flag-ee { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%230072CE" width="60" height="13.33"/><rect fill="%23000" y="13.33" width="60" height="13.33"/><rect fill="%23fff" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-rs { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23C6363C" width="60" height="13.33"/><rect fill="%230C4076" y="13.33" width="60" height="13.33"/><rect fill="%23fff" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-is { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%2302529C" width="60" height="40"/><rect fill="%23fff" x="16" width="8" height="40"/><rect fill="%23fff" y="16" width="60" height="8"/><rect fill="%23DC1E35" x="18" width="4" height="40"/><rect fill="%23DC1E35" y="18" width="60" height="4"/></svg>'); }
+
+/* South American Countries */
+.flag-co { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FCD116" width="60" height="20"/><rect fill="%23003893" y="20" width="60" height="10"/><rect fill="%23CE1126" y="30" width="60" height="10"/></svg>'); }
+
+.flag-cl { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="20"/><rect fill="%23D52B1E" y="20" width="60" height="20"/><rect fill="%230039A6" width="20" height="20"/><polygon fill="%23fff" points="10,6 11,9 14,9 11.5,11 12.5,14 10,12 7.5,14 8.5,11 6,9 9,9"/></svg>'); }
+
+.flag-pe { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23D91023" width="20" height="40"/><rect fill="%23fff" x="20" width="20" height="40"/><rect fill="%23D91023" x="40" width="20" height="40"/></svg>'); }
+
+.flag-ve { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FFCC00" width="60" height="13.33"/><rect fill="%23003893" y="13.33" width="60" height="13.33"/><rect fill="%23CF142B" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-ec { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FFD100" width="60" height="20"/><rect fill="%23034EA2" y="20" width="60" height="10"/><rect fill="%23ED1C24" y="30" width="60" height="10"/></svg>'); }
+
+.flag-uy { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><rect fill="%230038A8" y="4.44" width="60" height="4.44"/><rect fill="%230038A8" y="13.33" width="60" height="4.44"/><rect fill="%230038A8" y="22.22" width="60" height="4.44"/><rect fill="%230038A8" y="31.11" width="60" height="4.44"/><rect fill="%23fff" width="24" height="20"/></svg>'); }
+
+.flag-py { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23D52B1E" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%230038A8" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-bo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23D52B1E" width="60" height="13.33"/><rect fill="%23F9E300" y="13.33" width="60" height="13.33"/><rect fill="%23007934" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-gy { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23009E49" width="60" height="40"/><path fill="%23FCD116" d="M0,0 L60,20 L0,40 Z"/><path fill="%23000" d="M0,5 L50,20 L0,35 Z"/></svg>'); }
+
+.flag-sr { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23377E3F" width="60" height="10"/><rect fill="%23fff" y="10" width="60" height="5"/><rect fill="%23B40A2D" y="15" width="60" height="10"/><rect fill="%23fff" y="25" width="60" height="5"/><rect fill="%23377E3F" y="30" width="60" height="10"/></svg>'); }
+
+/* Additional Major Countries */
+.flag-za { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><rect fill="%23007A4D" y="16" width="60" height="8"/><path fill="%23000" d="M0,0 L20,20 L0,40 Z"/><path fill="%23FFB612" d="M0,2 L18,20 L0,38 Z"/><rect fill="%23DE3831" width="60" height="12"/><rect fill="%23002395" y="28" width="60" height="12"/></svg>'); }
+
+.flag-eg { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23CE1126" width="60" height="13.33"/><rect fill="%23fff" y="13.33" width="60" height="13.33"/><rect fill="%23000" y="26.66" width="60" height="13.34"/></svg>'); }
+
+.flag-ng { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23008751" width="20" height="40"/><rect fill="%23fff" x="20" width="20" height="40"/><rect fill="%23008751" x="40" width="20" height="40"/></svg>'); }
+
+.flag-il { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23fff" width="60" height="40"/><rect fill="%230038B8" y="5" width="60" height="4"/><rect fill="%230038B8" y="31" width="60" height="4"/><polygon fill="%230038B8" points="30,14 32,18 36,18 33,21 34,25 30,22 26,25 27,21 24,18 28,18"/></svg>'); }
+
+.flag-sa { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23165B33" width="60" height="40"/></svg>'); }
+
+.flag-ae { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FF0000" width="15" height="40"/><rect fill="%23009900" x="15" width="45" height="13.33"/><rect fill="%23fff" x="15" y="13.33" width="45" height="13.33"/><rect fill="%23000" x="15" y="26.66" width="45" height="13.34"/></svg>'); }
+
+.flag-id { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23FF0000" width="60" height="20"/><rect fill="%23fff" y="20" width="60" height="20"/></svg>'); }
+
+.flag-my { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23CC0001" width="60" height="40"/><rect fill="%23fff" y="2.86" width="60" height="2.86"/><rect fill="%23fff" y="8.57" width="60" height="2.86"/><rect fill="%23fff" y="14.29" width="60" height="2.86"/><rect fill="%23fff" y="20" width="60" height="2.86"/><rect fill="%23fff" y="25.71" width="60" height="2.86"/><rect fill="%23fff" y="31.43" width="60" height="2.86"/><rect fill="%23010066" width="30" height="20"/></svg>'); }
+
+.flag-th { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23ED1C24" width="60" height="6.67"/><rect fill="%23fff" y="6.67" width="60" height="6.67"/><rect fill="%23241D4F" y="13.33" width="60" height="13.33"/><rect fill="%23fff" y="26.66" width="60" height="6.67"/><rect fill="%23ED1C24" y="33.33" width="60" height="6.67"/></svg>'); }
+
+.flag-vn { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23DA251D" width="60" height="40"/><polygon fill="%23FFFF00" points="30,10 32,16 38,16 33,20 35,26 30,22 25,26 27,20 22,16 28,16"/></svg>'); }
+
+.flag-ph { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23CE1126" y="20" width="60" height="20"/><rect fill="%230038A8" width="60" height="20"/><path fill="%23fff" d="M0,0 L30,20 L0,40 Z"/></svg>'); }
+
+.flag-nz { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><rect fill="%23012169" width="60" height="30"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="%23fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="%23C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="%23fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="%23C8102E" stroke-width="6"/></svg>'); }
+
+/* Fallback for unknown countries - show a generic placeholder */
+.country-flag-wrapper:not([class*="flag-"]) {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"><rect fill="%23ccc" width="60" height="40"/><text x="30" y="25" text-anchor="middle" font-size="12" fill="%23666">?</text></svg>');
+}
+
+/* Country flag styles using emoji fallback */
+.country-flag-wrapper {
+    display: inline-block;
+    width: 20px;
+    height: 15px;
+    margin-right: 6px;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* Stockfish logo for computer players */
+.stockfish-logo {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle fill="%23000" cx="50" cy="50" r="48" stroke="%23fff" stroke-width="2"/><path fill="%23fff" d="M30,70 Q30,40 50,30 Q70,40 70,70 L65,70 Q65,45 50,38 Q35,45 35,70 Z"/><circle fill="%23fff" cx="50" cy="25" r="8"/><path fill="%23fff" d="M45,25 L42,15 L48,15 Z M55,25 L52,15 L58,15 Z"/></svg>');
+}

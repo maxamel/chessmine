@@ -8,7 +8,6 @@ ENV APP_URL=$APP_URL
 ENV BE_URL=$BE_URL
 ENV TLS_CONFIG=$TLS_CONFIG
 COPY . /var/www/html/
-RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/settings.js  # for dynamic config of url
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/game.js      # for dynamic config of url
 RUN sed -i "s#APP_URL#${APP_URL}#g" /var/www/html/static/js/header.js      # for dynamic config of url
 RUN apk add npm minify acl curl goaccess && npm install

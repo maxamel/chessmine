@@ -16,6 +16,7 @@ from matcher.redis_smart_matcher import RedisSmartMatcher
 from player import Player, PlayerMapping, Game, PlayerGameInfo
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
+from geo_ip_lookup import GeoIpLookup
 from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, GameStatusDetail, \
     piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType
 
@@ -32,8 +33,7 @@ class GameServer:
         self.metric_total_moves_played = Counter('moves_played', 'Total Moves Played')
         self.metric_move_time = Histogram('move_time', 'Move Time')
         self.matcher = RedisSmartMatcher()
-        #self.th = threading.Thread(target=self.work)
-        #self.th.start()
+        self.geo_ip_lookup = GeoIpLookup()
         lgr.info("Initialized Game Server! {}".format("Hello World"))
 
     def work(self):
@@ -111,17 +111,17 @@ class GameServer:
         self.metric_total_games_played.inc()
         self.redis.set_game_endgame(game_id=game_id, end_game=end_game_info, pipeline=pipeline)
 
-    def get_player_from_cookie(self, cookie):
+    def get_player_from_cookie(self, cookie, geo: str = None) -> Player:
         if "sid" not in cookie:
-            player = Player(preferences=cookie["preferences"])
+            player = Player(preferences=cookie["preferences"], country_code=geo)
         else:
             sid = cookie["sid"]
             preferences = cookie["preferences"]
             player = self.redis.get_player_session(sid)
             if player is None:       # First time we see this player
-                player = Player(preferences=preferences)
+                player = Player(preferences=preferences, country_code=geo)
             else:
-                player = Player(sid=sid, name=player.name, rating=player.rating, preferences=preferences)
+                player = Player(sid=sid, name=player.name, rating=player.rating, preferences=preferences, country_code=player.country_code)
         self.redis.set_player_session(player=player)
         lgr.debug("Set player session: {}".format(player.to_dict()))
         return player
@@ -288,7 +288,7 @@ class GameServer:
         lgr.info("Player {} aborted game {}".format(player_info.sid, player_info.game_id))
         return res
 
-    def move(self, payload):
+    def move(self, payload: dict[str, dict[str, str]]):
         '''
         :param payload: the move as recorded by user
         :return: sid of the player to send this move to and the move data slightly changed
@@ -414,10 +414,14 @@ class GameServer:
     def play(self, payload) -> ServerResponse:
         '''
         :param payload: the cookie as sent by player
+        :param client_ip: Client IP address for geo lookup
         :return: sid of recepient player and the data to send
         '''
         cookie = payload["data"]
-        player = self.get_player_from_cookie(cookie)
+        client_ip = payload["client_ip"]
+        geo = self.geo_ip_lookup.lookup_mmdb(client_ip)
+        player = self.get_player_from_cookie(cookie, geo)
+        lgr.info(f"Received country code {player.country_code}")
         mapping = self.redis.get_player_mapping(player.sid)
         if mapping is not None:
             self.redis.set_player_session(player=player)
@@ -430,14 +434,14 @@ class GameServer:
 
         if not self.redis.get_player_session(player.sid):
             # We don't recognize this user. Regenerate sid
-            player = Player(preferences=player.preferences)
+            player = Player(preferences=player.preferences, country_code=player.country_code)
             self.redis.set_player_session(player=player)
         lgr.info("Player {} connecting to play. Initiating match search".format(player.sid))
         self.find_match(player=player)
         ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict()})
         return ser_res
 
-    def heartbeat(self, payload) -> ServerResponse:
+    def heartbeat(self, payload: dict[str, dict[str, str]]) -> ServerResponse:
         '''
         This method is called by client in two cases:
         1) A periodic keepalive ("checkin")
@@ -532,8 +536,8 @@ class GameServer:
         else:
             raise ValueError("Unknown game status %s", status)
 
-        white_info = PlayerGameInfo(name=white.name, rating=white.rating, player_type=white.player_type, time_remaining=white_time)
-        black_info = PlayerGameInfo(name=black.name, rating=black.rating, player_type=black.player_type, time_remaining=black_time)
+        white_info = PlayerGameInfo(name=white.name, rating=white.rating, player_type=white.player_type, time_remaining=white_time, country_code=white.country_code)
+        black_info = PlayerGameInfo(name=black.name, rating=black.rating, player_type=black.player_type, time_remaining=black_time, country_code=black.country_code)
         game = Game(game_id=mapping.game_id,
                     position=fen,
                     moves=moves,
