@@ -13,8 +13,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download MaxMind GeoLite2-Country Database
+        env:
+          MMDB_LICENSE: ${{ secrets.MMDB_LICENSE }}
         run: |
-          curl -L "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${{ secrets.MMDB_LICENSE }}&suffix=tar.gz" -o GeoLite2-Country.tar.gz
+          curl -L "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=$MMDB_LICENSE&suffix=tar.gz" -o GeoLite2-Country.tar.gz
           tar -xzf GeoLite2-Country.tar.gz
           find . -name "GeoLite2-Country.mmdb" -exec cp -f {} src/backend/game_server/src/GeoLite2-Country.mmdb \;
           rm -rf GeoLite2-Country.tar.gz GeoLite2-Country_*
