@@ -419,7 +419,7 @@ class GameServer:
         '''
         cookie = payload["data"]
         client_ip = payload["client_ip"]
-        geo = self.geo_ip_lookup.lookup(client_ip)
+        geo = self.geo_ip_lookup.lookup_mmdb(client_ip)
         player = self.get_player_from_cookie(cookie, geo)
         lgr.info(f"Received country code {player.country_code}")
         mapping = self.redis.get_player_mapping(player.sid)

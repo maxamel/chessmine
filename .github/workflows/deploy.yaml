@@ -12,6 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download MaxMind GeoLite2-Country Database
+        run: |
+          curl -L "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${{ secrets.MMDB_LICENSE }}&suffix=tar.gz" -o GeoLite2-Country.tar.gz
+          tar -xzf GeoLite2-Country.tar.gz
+          find . -name "GeoLite2-Country.mmdb" -exec cp -f {} src/backend/game_server/src/GeoLite2-Country.mmdb \;
+          rm -rf GeoLite2-Country.tar.gz GeoLite2-Country_*
+
       - name: Build, Tag, and Push Images
         run: |
           # Ensure your script uses the Vultr Registry URL for tagging
