@@ -57,7 +57,7 @@
 
 .sub-nav-link {
     display:inline-block;
-    width:200px;
+    width:60px;
     padding:0;
     text-decoration:none;
     font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
@@ -185,4 +185,110 @@
 .computer-level-link.active:hover {
     background: #81b622 !important;
     color: white !important;
+}
+
+/* Settings dropdown icons */
+.settings-icon {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Piece Theme Icon - Black Pawn */
+.piece-theme-icon {
+    background-image: url('../img/chesspieces/classical/bP.png');
+}
+
+.sub-nav-link:hover .piece-theme-icon {
+    background-image: url('../img/chesspieces/classical/wP.png');
+}
+
+/* Board Theme Icon - 2x2 Chessboard */
+.board-theme-icon {
+    position: relative;
+    border-radius: 2px;
+    border: 1px solid #333;
+    background: #808080;
+}
+
+.board-theme-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 50%;
+    background: #000000;
+}
+
+.board-theme-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+    background: #000000;
+}
+
+.sub-nav-link:hover .board-theme-icon {
+    background: #ffffff;
+    border: 1px solid #555;
+}
+
+.sub-nav-link:hover .board-theme-icon::before,
+.sub-nav-link:hover .board-theme-icon::after {
+    background: #808080;
+}
+
+/* Computer Level Icon - Processor */
+.computer-level-icon {
+    background-color: #333;
+    border-radius: 2px;
+    position: relative;
+}
+
+.computer-level-icon::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: linear-gradient(45deg, #666 25%, transparent 25%),
+                linear-gradient(-45deg, #666 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #666 75%),
+                linear-gradient(-45deg, transparent 75%, #666 75%);
+    background-size: 4px 4px;
+    background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+    border-radius: 1px;
+}
+
+.sub-nav-link:hover .computer-level-icon {
+    background-color: #555;
+}
+
+.sub-nav-link:hover .computer-level-icon::before {
+    background: linear-gradient(45deg, #888 25%, transparent 25%),
+                linear-gradient(-45deg, #888 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #888 75%),
+                linear-gradient(-45deg, transparent 75%, #888 75%);
+    background-size: 4px 4px;
+    background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+}
+
+/* Center the icons in the dropdown items */
+.settings-item .sub-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    min-height: 48px;
+    width: 60px;
 }
