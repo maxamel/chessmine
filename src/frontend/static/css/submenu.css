@@ -204,7 +204,8 @@
     background-image: url('../img/chesspieces/classical/bP.png');
 }
 
-.sub-nav-link:hover .piece-theme-icon {
+.sub-nav-link:hover .piece-theme-icon,
+.nav-item.submenu:hover .piece-theme-icon {
     background-image: url('../img/chesspieces/classical/wP.png');
 }
 
@@ -241,45 +242,67 @@
     border: 1px solid #555;
 }
 
+.nav-item.submenu:hover .board-theme-icon {
+    background: #ffffff;
+    border: 1px solid #555;
+}
+
 .sub-nav-link:hover .board-theme-icon::before,
-.sub-nav-link:hover .board-theme-icon::after {
+.sub-nav-link:hover .board-theme-icon::after,
+.nav-item.submenu:hover .board-theme-icon::before,
+.nav-item.submenu:hover .board-theme-icon::after {
     background: #808080;
 }
 
-/* Computer Level Icon - Processor */
+/* Computer Level Icon - Simple Dumbbell */
 .computer-level-icon {
-    background-color: #333;
-    border-radius: 2px;
+    background-color: transparent;
     position: relative;
+    border: none;
 }
 
+/* Main dumbbell bar - centered */
 .computer-level-icon::before {
     content: '';
     position: absolute;
-    top: 2px;
+    top: 14px;
+    left: 4px;
+    width: 24px;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+}
+
+/* Weight plates on both ends - centered */
+.computer-level-icon::after {
+    content: '';
+    position: absolute;
+    top: 10px;
     left: 2px;
-    right: 2px;
-    bottom: 2px;
-    background: linear-gradient(45deg, #666 25%, transparent 25%),
-                linear-gradient(-45deg, #666 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #666 75%),
-                linear-gradient(-45deg, transparent 75%, #666 75%);
-    background-size: 4px 4px;
-    background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
-    border-radius: 1px;
+    width: 6px;
+    height: 12px;
+    background: #333;
+    border-radius: 2px;
+    box-shadow: 
+        /* Right weight plate */
+        24px 0 0 0 #333,
+        /* Middle grip area (lighter) - centered at 12px */
+        12px 4px 0 2px #666;
 }
 
-.sub-nav-link:hover .computer-level-icon {
-    background-color: #555;
+.sub-nav-link:hover .computer-level-icon::before,
+.nav-item.submenu:hover .computer-level-icon::before {
+    background: #666;
 }
 
-.sub-nav-link:hover .computer-level-icon::before {
-    background: linear-gradient(45deg, #888 25%, transparent 25%),
-                linear-gradient(-45deg, #888 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #888 75%),
-                linear-gradient(-45deg, transparent 75%, #888 75%);
-    background-size: 4px 4px;
-    background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+.sub-nav-link:hover .computer-level-icon::after,
+.nav-item.submenu:hover .computer-level-icon::after {
+    background: #666;
+    box-shadow: 
+        /* Right weight plate - gray on hover */
+        24px 0 0 0 #666,
+        /* Middle grip area - white on hover - centered at 12px */
+        12px 4px 0 2px #fff;
 }
 
 /* Center the icons in the dropdown items */
