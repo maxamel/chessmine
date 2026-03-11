@@ -53,6 +53,16 @@
 #navigator li:hover ul {display:block;box-shadow:none;}
 #navigator li li:hover ul {margin-left:200px; margin-top:-35px; display:block; color: white}
 
+/* Make dropdown-menu-right behave the same - to the right, same height, no space */
+#navigator li li:hover ul.dropdown-menu-right {
+    margin-left: 200px;
+    margin-top: -35px;
+    right: auto;
+    left: auto;
+    display: block;
+    color: white;
+}
+
 
 
 .sub-nav-link {
@@ -85,11 +95,22 @@
 
 .dropdown-menu-right {
     position: absolute;
-    right: 100%; /* Position it to the right of the parent item */
+    right: 100%; /* Position it to the LEFT of the parent item */
     top: 0; /* Align with the top of the parent */
     display: none; /* Initially hide the submenu */
     background-color: #f8f9fa; /* Optional: to set the background color of the submenu */
     border-radius: 0.25rem; /* Optional: rounded corners for the submenu */
+}
+
+/* Override dropdown-menu-right inside header navigator (Play menu) to go to the LEFT */
+#navigator:not(.settings-menu) .dropdown-menu-right {
+    position: absolute;
+    right: 100%;
+    left: auto;
+    top: 0;
+    margin-right: 0;
+    margin-top: 0;
+    background-color: transparent;
 }
 
 /* Show the submenu when hovering over the parent item */
