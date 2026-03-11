@@ -115,10 +115,8 @@
 }
 
 .widener {
-    /*
     width: 120px !important;
     color: black;
-     */
 }
 
 .piece-nav-link {
@@ -133,10 +131,10 @@
 
 .board-sub-nav-link {
     display:inline-block;
-    width:200px;
+    width:100px;
     padding:0;
     text-decoration:none;
-    font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
+    font: 500 6px / 50px "Baloo Paaji 2", sans-serif;
     text-align: center;
     color: black;
     text-transform: uppercase;
@@ -152,10 +150,10 @@
 
 .computer-level-link {
     display:inline-block;
-    width:200px;
+    width:100px;
     padding:0;
     text-decoration:none;
-    font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
+    font: 500 6px / 50px "Baloo Paaji 2", sans-serif;
     text-align: center;
     color: black;
     text-transform: uppercase;
@@ -314,4 +312,11 @@
     padding: 8px;
     min-height: 48px;
     width: 60px;
+}
+
+/* Settings menu main icons - make containers half size (only the direct icon buttons, not submenu items) */
+.settings-item > .sub-nav-link[data-bs-toggle="dropdown"] {
+    width: 60px !important;
+    min-height: 48px !important;
+    padding: 8px !important;
 }
