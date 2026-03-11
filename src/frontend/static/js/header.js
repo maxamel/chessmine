@@ -13,8 +13,6 @@ $(document).ready(function () {
     var time_controls = document.getElementsByClassName("time-control")
     for (let i = 0; i<time_controls.length; i++) {
       time_controls[i].addEventListener("click", function (event) {
-        $(".fullpage").fadeIn("fast");
-        
         // Always re-read prefs from localStorage to get latest values
         prefs = localStorage.getItem("user_prefs");
         cookie_data = localStorage.getItem("user_session");
@@ -44,12 +42,24 @@ $(document).ready(function () {
         cookie_data.preferences = prefs;
         localStorage.setItem("user_prefs", JSON.stringify(prefs));
         
-        var res = socket.emit("/api/play", { "data": cookie_data }, function (ans) {
-          // Save my sid
-          cookie_data.sid = ans;
-          localStorage.setItem("user_session", JSON.stringify(cookie_data));
+        // Check if this is an invite friend time control
+        if (time_controls[i].classList.contains("invite-friend-time")) {
+          // Set a flag to indicate invite friend mode
+          localStorage.setItem("invite_friend_mode", "true");
+          
+          // Navigate to game page which will show the waiting screen
           window.location.href = "/game";
-        });
+        } else {
+          // Regular Quick Game
+          $(".fullpage").fadeIn("fast");
+          
+          var res = socket.emit("/api/play", { "data": cookie_data }, function (ans) {
+            // Save my sid
+            cookie_data.sid = ans;
+            localStorage.setItem("user_session", JSON.stringify(cookie_data));
+            window.location.href = "/game";
+          });
+        }
       });
     }
 });

@@ -17,7 +17,6 @@ class RedisPlug:
         self.redis_port = os.getenv('REDIS_PORT', "6379")
         self.search_pool = "search_pool"
         self.player_info = "player_session_"
-        self.geo_ip_lookup = "geo_ip_"
         self.player = "player_mapping_"
         self.game = "game_mapping_"
         self.game_moves = "game_moves_"
@@ -102,17 +101,6 @@ class RedisPlug:
     def set_game_endgame(self, game_id, end_game: EndGameInfo, pipeline: Pipeline = None):
         key = self.game_endgame + game_id
         self.get_redis(pipeline).hmset(key, end_game.to_dict())
-
-    def get_geo_ip(self, ip):
-        key = self.geo_ip_lookup + ip
-        if not self.get_redis().exists(key):
-            return None
-        geo = self.get_redis().get(key)
-        return geo
-
-    def set_geo_ip(self, ip, geo):
-        key = self.geo_ip_lookup + ip
-        self.get_redis().set(name=key, value=geo, ex=3600)
 
     def get_game_endgame(self, game_id):
         key = self.game_endgame + game_id
