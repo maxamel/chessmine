@@ -31,14 +31,14 @@ jobs:
           luaVersion: "5.4"
       - name: Luarocks
         uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
-      - name: Install lua modules (versions pinned to match operator Dockerfile)
+      - name: Install lua modules (CI uses Lua 5.4; operator image pins versions for Lua 5.2)
         run: |
           luarocks install luacov
           luarocks install luaunit
-          luarocks install redis-lua 2.0.6-0
-          luarocks install milua 0.3-0
-          luarocks install lunajson 1.2.3-1
-          luarocks install Lua-cURL 0.3.13-1 CURL_INCDIR=/usr/include/x86_64-linux-gnu
+          luarocks install redis-lua
+          luarocks install milua
+          luarocks install lunajson
+          luarocks install Lua-cURL CURL_INCDIR=/usr/include/x86_64-linux-gnu
       - name: Start Redis
         uses: supercharge/redis-github-action@bc274cb7238cd63a45029db04ee48c07a72609fd
         with:
