@@ -1,33 +1,34 @@
 local app = require 'milua'
 local redis = require 'redis'
 
--- Basic example
-app.add_handler(
+-- Basic example (Milua API: add_callback(method, path_pattern, callback))
+-- Callback receives (params, query, headers, body)
+app.add_callback(
     "GET",
     "/",
-    function()
+    function(params, query, headers)
         return "<h1>Welcome to the <i>handsome</i> server!</h1>", {
             ["Content-Type"] = "text/html"
         }
     end
 )
 
--- Example capturing a path variable
-app.add_handler(
+-- Example capturing a path variable (Milua uses {name} in path)
+app.add_callback(
     "GET",
-    "/user/...",
-    function (captures, query, headers)
-        local username = captures[1]
-        local times = query.times or 1
-        return "The user " .. username .. " is" .. (" very"):rep(times) .. " handsome"
+    "/user/{username}",
+    function(params, query, headers)
+        local username = params.username
+        local times = query and query.times or 1
+        return "The user " .. username .. " is" .. (" very"):rep(tonumber(times) or 1) .. " handsome"
     end
 )
 
--- Example returning no data and status
-app.add_handler(
+-- Healthcheck for Docker HEALTHCHECK
+app.add_callback(
     "GET",
     "/healthcheck",
-    function ()
+    function(params, query, headers)
         return 'OK', { [":status"] = "200" }
     end
 )

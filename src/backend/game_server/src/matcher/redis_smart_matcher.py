@@ -1,12 +1,12 @@
 import time
-import requests
 from threading import Thread
 
 from logger import get_logger
 from matcher.matcher import Matcher
 from player import Player
 from redis_plug import RedisPlug
-from util import get_millis_for_time_control
+from util import get_millis_for_time_control, force_players_match
+
 
 lgr = get_logger(prefix="RedisSmartMatcher", path="/var/log/server.log")
 
@@ -48,8 +48,7 @@ class RedisSmartMatcher(Matcher):
                     lgr.info("No match found. Yet...")
                 else:
                     lgr.info(f"The match returned {rival_sid} for {player.sid}")
-                    res = requests.get(url="http://localhost:5000/match/" + player.sid + "/" + rival_sid,
-                                       json={'time_control': get_millis_for_time_control(player.preferences['time_control'])})
+                    res = force_players_match(player.sid, rival_sid, player.preferences['time_control'])
                     lgr.info(f"Sending match resulted in: {res.text}")
                     if res.status_code != 200:
                         raise Exception(f'Sending match failed with {res.status_code}: {res.reason}')
@@ -60,8 +59,7 @@ class RedisSmartMatcher(Matcher):
             ret = self.redis_plug.remove_players_from_search_pool(search_pool_name, player.sid)
             lgr.info(f"Search yielded no results so matching with engine. Removed player from search pool: {ret == 1}")
             if ret == 1:
-                res = requests.get(url="http://localhost:5000/match/" + player.sid + "/@",
-                                   json={'time_control': get_millis_for_time_control('30+0')})
+                res = force_players_match(player.sid, "@", '30+0')
                 lgr.info(f"Sending match resulted in: {res.text}")
                 if res.status_code != 200:
                     raise Exception(f'Sending match failed with {res.status_code}: {res.reason}')

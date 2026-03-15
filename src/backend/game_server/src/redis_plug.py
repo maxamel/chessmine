@@ -16,8 +16,8 @@ class RedisPlug:
         self.redis_url = os.getenv('REDIS_URL', "redis")
         self.redis_port = os.getenv('REDIS_PORT', "6379")
         self.search_pool = "search_pool"
+        self.friends_room = "friends_room_"
         self.player_info = "player_session_"
-        self.geo_ip_lookup = "geo_ip_"
         self.player = "player_mapping_"
         self.game = "game_mapping_"
         self.game_moves = "game_moves_"
@@ -46,12 +46,6 @@ class RedisPlug:
     def is_player_in_search_pool(self, player_sid):
         return self.get_redis().sismember(self.search_pool, player_sid)
 
-    def get_game_fen(self, game_id) -> str:
-        key = self.game + game_id
-        if not self.get_redis().exists(key):
-            return None
-        return self.get_redis().hget(key, FEN)
-
     def get_game_status(self, game_id) -> str:
         key = self.game + game_id
         if not self.get_redis().exists(key):
@@ -77,6 +71,21 @@ class RedisPlug:
             return Player.from_dict(session)
         return None
 
+    def get_friends_room(self, waiting_id, pipeline: Pipeline = None) -> dict[str, str]:
+        key = self.friends_room + waiting_id
+        if not self.get_redis().exists(key):
+            return None
+        return self.get_redis(pipeline).hgetall(key)
+
+    def set_friends_room(self, waiting_id, sid, time_control, pipeline: Pipeline = None):
+        key = self.friends_room + waiting_id
+        self.get_redis(pipeline).hmset(key, {WAITING: sid, TIME_CONTROL: time_control})
+        self.get_redis(pipeline).expire(key, 3600)  # expire in one hour
+
+    def remove_friends_room(self, waiting_id, pipeline = None):
+        key = self.friends_room + waiting_id
+        return self.get_redis(pipeline).delete(key)
+
     def add_move_to_game(self, game_id, move, pipeline: Pipeline = None):
         key = self.game_moves + game_id
         self.get_redis(pipeline).rpush(key, move)
@@ -99,20 +108,15 @@ class RedisPlug:
         key = self.game + game_id
         self.get_redis(pipeline).hset(key, FEN, fen)
 
+    def get_game_fen(self, game_id) -> str:
+        key = self.game + game_id
+        if not self.get_redis().exists(key):
+            return None
+        return self.get_redis().hget(key, FEN)
+
     def set_game_endgame(self, game_id, end_game: EndGameInfo, pipeline: Pipeline = None):
         key = self.game_endgame + game_id
         self.get_redis(pipeline).hmset(key, end_game.to_dict())
-
-    def get_geo_ip(self, ip):
-        key = self.geo_ip_lookup + ip
-        if not self.get_redis().exists(key):
-            return None
-        geo = self.get_redis().get(key)
-        return geo
-
-    def set_geo_ip(self, ip, geo):
-        key = self.geo_ip_lookup + ip
-        self.get_redis().set(name=key, value=geo, ex=3600)
 
     def get_game_endgame(self, game_id):
         key = self.game_endgame + game_id

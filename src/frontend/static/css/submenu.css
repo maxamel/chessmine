@@ -53,11 +53,21 @@
 #navigator li:hover ul {display:block;box-shadow:none;}
 #navigator li li:hover ul {margin-left:200px; margin-top:-35px; display:block; color: white}
 
+/* Make dropdown-menu-right behave the same - to the right, same height, no space */
+#navigator li li:hover ul.dropdown-menu-right {
+    margin-left: 200px;
+    margin-top: -35px;
+    right: auto;
+    left: auto;
+    display: block;
+    color: white;
+}
+
 
 
 .sub-nav-link {
     display:inline-block;
-    width:200px;
+    width:60px;
     padding:0;
     text-decoration:none;
     font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
@@ -85,11 +95,22 @@
 
 .dropdown-menu-right {
     position: absolute;
-    right: 100%; /* Position it to the right of the parent item */
+    right: 100%; /* Position it to the LEFT of the parent item */
     top: 0; /* Align with the top of the parent */
     display: none; /* Initially hide the submenu */
     background-color: #f8f9fa; /* Optional: to set the background color of the submenu */
     border-radius: 0.25rem; /* Optional: rounded corners for the submenu */
+}
+
+/* Override dropdown-menu-right inside header navigator (Play menu) to go to the LEFT */
+#navigator:not(.settings-menu) .dropdown-menu-right {
+    position: absolute;
+    right: 100%;
+    left: auto;
+    top: 0;
+    margin-right: 0;
+    margin-top: 0;
+    background-color: transparent;
 }
 
 /* Show the submenu when hovering over the parent item */
@@ -115,10 +136,8 @@
 }
 
 .widener {
-    /*
     width: 120px !important;
     color: black;
-     */
 }
 
 .piece-nav-link {
@@ -133,10 +152,10 @@
 
 .board-sub-nav-link {
     display:inline-block;
-    width:200px;
+    width:100px;
     padding:0;
     text-decoration:none;
-    font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
+    font: 500 6px / 50px "Baloo Paaji 2", sans-serif;
     text-align: center;
     color: black;
     text-transform: uppercase;
@@ -152,10 +171,10 @@
 
 .computer-level-link {
     display:inline-block;
-    width:200px;
+    width:100px;
     padding:0;
     text-decoration:none;
-    font: 500 12px / 100px "Baloo Paaji 2", sans-serif;
+    font: 500 6px / 50px "Baloo Paaji 2", sans-serif;
     text-align: center;
     color: black;
     text-transform: uppercase;
@@ -185,4 +204,140 @@
 .computer-level-link.active:hover {
     background: #81b622 !important;
     color: white !important;
+}
+
+/* Settings dropdown icons */
+.settings-icon {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Piece Theme Icon - Black Pawn */
+.piece-theme-icon {
+    background-image: url('../img/chesspieces/classical/bP.png');
+}
+
+.sub-nav-link:hover .piece-theme-icon,
+.nav-item.submenu:hover .piece-theme-icon {
+    background-image: url('../img/chesspieces/classical/wP.png');
+}
+
+/* Board Theme Icon - 2x2 Chessboard */
+.board-theme-icon {
+    position: relative;
+    border-radius: 2px;
+    border: 1px solid #333;
+    background: #808080;
+}
+
+.board-theme-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 50%;
+    background: #000000;
+}
+
+.board-theme-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+    background: #000000;
+}
+
+.sub-nav-link:hover .board-theme-icon {
+    background: #ffffff;
+    border: 1px solid #555;
+}
+
+.nav-item.submenu:hover .board-theme-icon {
+    background: #ffffff;
+    border: 1px solid #555;
+}
+
+.sub-nav-link:hover .board-theme-icon::before,
+.sub-nav-link:hover .board-theme-icon::after,
+.nav-item.submenu:hover .board-theme-icon::before,
+.nav-item.submenu:hover .board-theme-icon::after {
+    background: #808080;
+}
+
+/* Computer Level Icon - Simple Dumbbell */
+.computer-level-icon {
+    background-color: transparent;
+    position: relative;
+    border: none;
+}
+
+/* Main dumbbell bar - centered */
+.computer-level-icon::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 4px;
+    width: 24px;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+}
+
+/* Weight plates on both ends - centered */
+.computer-level-icon::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 2px;
+    width: 6px;
+    height: 12px;
+    background: #333;
+    border-radius: 2px;
+    box-shadow: 
+        /* Right weight plate */
+        24px 0 0 0 #333,
+        /* Middle grip area (lighter) - centered at 12px */
+        12px 4px 0 2px #666;
+}
+
+.sub-nav-link:hover .computer-level-icon::before,
+.nav-item.submenu:hover .computer-level-icon::before {
+    background: #666;
+}
+
+.sub-nav-link:hover .computer-level-icon::after,
+.nav-item.submenu:hover .computer-level-icon::after {
+    background: #666;
+    box-shadow: 
+        /* Right weight plate - gray on hover */
+        24px 0 0 0 #666,
+        /* Middle grip area - white on hover - centered at 12px */
+        12px 4px 0 2px #fff;
+}
+
+/* Center the icons in the dropdown items */
+.settings-item .sub-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    min-height: 48px;
+    width: 60px;
+}
+
+/* Settings menu main icons - make containers half size (only the direct icon buttons, not submenu items) */
+.settings-item > .sub-nav-link[data-bs-toggle="dropdown"] {
+    width: 60px !important;
+    min-height: 48px !important;
+    padding: 8px !important;
 }

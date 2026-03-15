@@ -1,6 +1,8 @@
 from enum import Enum
 
 import chess
+import requests
+from requests import Response
 
 from consts import WHITE, BLACK
 
@@ -76,3 +78,7 @@ class Outcome(Enum):
 class PlayerType(Enum):
     HUMAN = 0
     ENGINE = 1
+
+
+def force_players_match(sid1, sid2, time_control) -> Response:
+    return requests.get(url="http://localhost:5000/match/" + sid1 + "/" + sid2, json={'time_control': get_millis_for_time_control(time_control)})

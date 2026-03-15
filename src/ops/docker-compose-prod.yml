@@ -37,8 +37,6 @@ services:
           dockerfile: Dockerfile
           tags:
             - "game_server:curr"
-        volumes:
-          - ../backend/game_server/:/usr/app
         depends_on:
           - redis
     operator:

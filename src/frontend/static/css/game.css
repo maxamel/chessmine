@@ -1270,6 +1270,12 @@ button:focus {
   height: 420px;
   margin-bottom: 80px; }
 
+/* Keep header above loading overlay so Play dropdown works during invite wait */
+#header {
+  position: relative;
+  z-index: 1001;
+}
+
 .gameContainer {
   position: relative;
   min-height: 800px;

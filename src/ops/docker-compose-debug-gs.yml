@@ -28,6 +28,8 @@ services:
         REDIS_ADDR: redis
       volumes:
         - ../backend/operator/:/usr/app
+      depends_on:
+        - redis
     caddy:
         container_name: "caddy"
         build:

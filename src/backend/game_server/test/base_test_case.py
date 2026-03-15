@@ -12,6 +12,7 @@ class BaseTestCase(unittest.TestCase):
         super(BaseTestCase, self).__init__(method_name)
         self.player_a_sid = None
         self.player_b_sid = None
+        self.waiting_id = None  # populated only in inviter test
         self.last_move_made = None
         self.game_over = False
         self.seen_moves = set()
@@ -19,7 +20,16 @@ class BaseTestCase(unittest.TestCase):
         self.semaphore = threading.BoundedSemaphore(1)  # for correlating between sending moves and receiving
         self.redis_cli = redis.Redis(decode_responses=True)
 
-    def base(self, sio, resource_name, aux_func, disconnect=True):
+    @staticmethod
+    def default_pre_game_func(sio, game):
+        sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
+                        namespace='/connect', callback=game)
+        sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
+                        namespace='/connect', callback=game)
+        # Allow time for matching
+        time.sleep(10)
+
+    def base(self, sio, resource_name, aux_func, disconnect=True, pre_game_func=default_pre_game_func):
 
         @sio.client.on('move', namespace='/connect')
         def move(data):
@@ -50,12 +60,7 @@ class BaseTestCase(unittest.TestCase):
             self.seen_moves = set()
             self.last_move_made = None
         if not second_game:
-            sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
-                            namespace='/connect', callback=game)
-            sio.client.emit(event='/api/play', data={'data': {'preferences': {'time_control': '1+0', }}},
-                            namespace='/connect', callback=game)
-            # Allow time for matching
-            time.sleep(10)
+            pre_game_func(sio, game)
 
         self.assertIsNotNone(self.player_a_sid)
         self.assertIsNotNone(self.player_b_sid)

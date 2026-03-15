@@ -15,6 +15,8 @@ FEN = "fen"
 PGN = "pgn"
 TURN = "turn"
 EXPIRE = "expire"
+WAITING = "waiting"
+TIME_CONTROL = "time_control"
 
 
 BLACK = 'black'
