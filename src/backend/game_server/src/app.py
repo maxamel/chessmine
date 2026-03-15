@@ -85,9 +85,32 @@ def abort():
 
 
 @socketio.on('/api/cancelSearch', namespace='/connect')
-def cancelSearch(payload):
+def cancel_search(payload):
     lgr.info(f"Cancelling search with payload {payload}")
     return game_server.cancel_search(payload)
+
+
+@socketio.on('/api/cancelWaiting', namespace='/connect')
+def cancel_waiting(payload):
+    lgr.info(f"Cancelling waiting for friend {payload}")
+    return game_server.cancel_waiting(payload)
+
+
+# First connection of a player - returns the details of user as known by the server
+@socketio.on('/api/invite', namespace='/connect')
+def invite(payload):
+    # Get client IP address
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if client_ip:
+        client_ip = client_ip.split(',')[0].strip()
+    payload["client_ip"] = client_ip
+    response = game_server.invite_friend(payload)
+    join_room(room=response.dst_sid)
+    if "game" in response.extra_data:
+        lgr.info(f"and here we are!!! {response.to_dict()}")
+        the_dict = {'color': response.src_color, 'game': response.extra_data["game"]}
+        socketio.emit("game", the_dict, namespace='/connect', room=response.dst_sid)
+    return response.to_dict()
 
 
 # First connection of a player - returns the details of user as known by the server

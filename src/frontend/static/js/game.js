@@ -6,7 +6,12 @@ import { Chessground } from './chessground.js';
 import { displayFlag, removeFlag, displayStockfishLogo } from './flag_utils.js';
 
 $(document).ready(function () {
-    load_cookies()
+    // Parse invite params before load_cookies so guest flow works with empty localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const waitingIdFromUrl = urlParams.get("waiting_id");
+    const inviteRoleFromUrl = urlParams.get("role");
+
+    load_cookies();
 
     var moveInterval = null;
     var board = null;       // the chessground board
@@ -47,26 +52,124 @@ $(document).ready(function () {
             nonce: (Math.random() + 1).toString(36).substring(8)
         }
     });
+    const waitingId = waitingIdFromUrl;
+    const inviteRole = inviteRoleFromUrl; // "host" when coming from Invite Friend menu
+    console.log("game.js URL params:", window.location.search, "waitingId =", waitingId, "inviteRole =", inviteRole);
 
+    // Adjust loading message and cancel behaviour for Invite Friend
     var cancel = document.getElementById("cancelSearch");
-    cancel.addEventListener("click", function(evt) {
-        var json = {
-            "data": {
-                "sid": player_id,
-                "time_control": timeControl
+    var loadMessage = document.querySelector(".loadMessage");
+
+    if (waitingId) {
+        console.log("Invite Friend flow detected. waiting_id =", waitingId, "role =", inviteRole);
+        if (inviteRole === "host") {
+            // Host: show invite waiting UI (structure in HTML/CSS); only set URL, QR and copy handler here
+            var fullpageEl = document.getElementById("fullpage");
+            if (fullpageEl) {
+                fullpageEl.classList.add("invite-waiting");
             }
-        };
-        console.log('sending out cancellation')
-        socket.emit("/api/cancelSearch", json, function (ret) {
-            console.log('cancel search resulted in ' + ret)
-            if (ret === 0) {        // we could not cancel this search since that has been a match
-                evt.target.style.opacity = 0.5;
-                evt.target.style.pointerEvents = 'none';
-            } else {
-                window.location.href = "/";
+            var inviteUrl = window.location.origin + "/game?waiting_id=" + encodeURIComponent(waitingId);
+            var urlInput = document.getElementById("inviteUrlInput");
+            var qrCodeDiv = document.getElementById("invite-qrcode");
+            var copyBtn = document.getElementById("inviteCopyBtn");
+            if (urlInput) {
+                urlInput.value = inviteUrl;
             }
+            if (qrCodeDiv && typeof QRCode !== "undefined") {
+                try {
+                    new QRCode(qrCodeDiv, {
+                        text: inviteUrl,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch (e) {
+                    qrCodeDiv.textContent = "QR code unavailable";
+                }
+            } else if (qrCodeDiv) {
+                qrCodeDiv.textContent = "QR code unavailable";
+            }
+            if (copyBtn && urlInput) {
+                copyBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    urlInput.select();
+                    urlInput.setSelectionRange(0, 99999);
+                    var icon = copyBtn.querySelector("i.fa");
+                    var showCopied = function () {
+                        if (icon) {
+                            icon.className = "fa fa-check";
+                            setTimeout(function () { icon.className = "fa fa-copy"; }, 2000);
+                        }
+                    };
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(inviteUrl).then(showCopied).catch(function () {
+                            document.execCommand("copy");
+                            showCopied();
+                        });
+                    } else {
+                        document.execCommand("copy");
+                        showCopied();
+                    }
+                });
+            }
+        } else {
+            // Guest: hide loading overlay until /api/invite response; only then show it or redirect
+            var fullpageElGuest = document.getElementById("fullpage");
+            if (fullpageElGuest) {
+                fullpageElGuest.style.display = "none";
+            }
+            if (cancel) {
+                cancel.style.display = "none";
+            }
+        }
+
+        if (cancel && inviteRole === "host") {
+            cancel.addEventListener("click", function (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                var btn = evt.currentTarget;
+                if (btn.getAttribute("data-cancel-disabled") === "1") return;
+                btn.setAttribute("data-cancel-disabled", "1");
+                btn.style.opacity = "0.6";
+                btn.style.pointerEvents = "none";
+                console.log("Sending cancel waiting for friend, waiting_id:", waitingId);
+                var redirectFallbackId = setTimeout(function () {
+                    window.location.href = "/";
+                }, 400);
+                socket.emit("/api/cancelWaiting", { "waiting_id": waitingId }, function (ret) {
+                    clearTimeout(redirectFallbackId);
+                    if (ret === 0 || ret === "0") {
+                        btn.style.opacity = "0.5";
+                    } else {
+                        window.location.href = "/";
+                    }
+                });
+            });
+        }
+    } else if (cancel) {
+        // Default Quick Game cancellation behaviour
+        cancel.addEventListener("click", function(evt) {
+            var json = {
+                "data": {
+                    "sid": player_id,
+                    "time_control": timeControl
+                }
+            };
+            console.log('sending out cancellation');
+            socket.emit("/api/cancelSearch", json, function (ret) {
+                console.log('cancel search resulted in ' + ret);
+                if (ret === 0) {        // we could not cancel this search since that has been a match
+                    evt.target.style.opacity = 0.5;
+                    evt.target.style.pointerEvents = 'none';
+                } else {
+                    window.location.href = "/";
+                }
+            });
         });
-    });
+    }
 
     socket.on("game_over", function (ans) {
         console.log("Game Over " + JSON.stringify(ans))
@@ -833,8 +936,74 @@ $(document).ready(function () {
         }
     });
 
-    heartbeat();
-    setInterval(heartbeat, 3000, false);
+    function startHeartbeatLoop() {
+        heartbeat();
+        setInterval(heartbeat, 3000, false);
+    }
+
+    // For Invite Friend guest (non-host), we must first register via /api/invite with waiting_id
+    if (waitingId && inviteRole !== "host") {
+        // Build minimal cookie_data similar to Quick Game header flow
+        var rawPrefs = localStorage.getItem("user_prefs");
+        var localPrefs;
+        if (rawPrefs == null) {
+            localPrefs = {
+                "time_control": "5+0",
+                "piece_theme": "classical",
+                "board_theme": "classical",
+                "computer_level": 5
+            };
+        } else {
+            try {
+                localPrefs = JSON.parse(rawPrefs);
+            } catch (e) {
+                localPrefs = {
+                    "time_control": "5+0",
+                    "piece_theme": "classical",
+                    "board_theme": "classical",
+                    "computer_level": 5
+                };
+            }
+        }
+
+        var session = localStorage.getItem("user_session");
+        var localCookie;
+        if (!session) {
+            localCookie = {};
+        } else {
+            try {
+                localCookie = JSON.parse(session) || {};
+            } catch (e) {
+                localCookie = {};
+            }
+        }
+        localCookie.preferences = localPrefs;
+
+        socket.emit("/api/invite", { "data": localCookie, "waiting_id": waitingId }, function (ans) {
+            if (ans && ans.dst_sid) {
+                localCookie.sid = ans.dst_sid;
+            }
+            localStorage.setItem("user_session", JSON.stringify(localCookie));
+            // If inviter cancelled, BE returns extra_data with only 'user' (no 'waiting_id') – redirect to home
+            var extra = ans && ans.extra_data;
+            if (typeof extra === "string") {
+                try {
+                    extra = JSON.parse(extra);
+                } catch (e) {
+                    extra = {};
+                }
+            }
+            if (!extra || !extra.waiting_id) {
+                window.location.href = "/";
+                return;
+            }
+            // Room is valid: keep overlay hidden and go straight to heartbeat; game will show when data arrives
+            startHeartbeatLoop();
+        });
+    } else {
+        // Regular Quick Game or Invite Friend host who already has sid
+        startHeartbeatLoop();
+    }
 
     function hideEndGameBoxes() {
         document.getElementById("conty").style.display = "none";
@@ -1270,22 +1439,36 @@ $(document).ready(function () {
                 }
             } else {
                 emptyHeartbeats++;
-                console.log("Got empty heartbeat response. See you next time");
-                if (emptyHeartbeats > 1)
+                console.log("Got empty heartbeat response. emptyHeartbeats =", emptyHeartbeats, "waitingId =", waitingId);
+                // For regular Quick Game, redirect home after a couple of empty heartbeats.
+                // For Invite Friend flows (waitingId present), stay on the waiting screen instead.
+                if (!waitingId && emptyHeartbeats > 1) {
                     window.location.href = "/";
+                }
             }
         });
     }
 
     function load_cookies() {
-        cookie_data = localStorage.getItem("user_session");
-        cookie_data = JSON.parse(cookie_data);
-        // Always re-read prefs from localStorage to get latest values
+        var storedSession = localStorage.getItem("user_session");
+        try {
+            cookie_data = (storedSession != null && storedSession !== "") ? JSON.parse(storedSession) : null;
+        } catch (e) {
+            cookie_data = null;
+        }
         prefs = localStorage.getItem("user_prefs");
-        var obj_prefs = JSON.parse(prefs);
-        if (cookie_data != null)
-            cookie_data.preferences = obj_prefs;
-            player_id = cookie_data.sid
+        var obj_prefs = null;
+        try {
+            obj_prefs = (prefs != null && prefs !== "") ? JSON.parse(prefs) : null;
+        } catch (e) {
+            obj_prefs = null;
+        }
+        if (cookie_data != null) {
+            cookie_data.preferences = obj_prefs || {};
+            player_id = cookie_data.sid;
+        } else {
+            player_id = null;
+        }
         if (cookie_data && obj_prefs != null) {
             boardTheme = obj_prefs.board_theme || "classical";
             pieceTheme = obj_prefs.piece_theme || "classical";

@@ -18,7 +18,7 @@ from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from geo_ip_lookup import GeoIpLookup
 from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, GameStatusDetail, \
-    piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType
+    piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType, force_players_match
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -126,17 +126,18 @@ class GameServer:
         lgr.debug("Set player session: {}".format(player.to_dict()))
         return player
 
-    def find_match(self, player):
+    def _find_match(self, player):
         return self.matcher.match(player)
+
+    def cancel_waiting(self, payload):
+        data = payload["waiting_id"]
+        return self.redis.remove_friends_room(data)
 
     def cancel_search(self, payload):
         data = payload["data"]
         sid = data["sid"]
         search_pool_name = f"search_pool_{data['time_control'].split('+')[0]}"
         return self.redis.remove_players_from_search_pool(search_pool_name, sid)
-
-    def func(self, sid1, sid2, time_control):
-        requests.get(url="http://localhost:5000/match/" + sid1 + "/" + sid2, json={'time_control': time_control})
 
     def rematch(self, payload):
         # Rematch request
@@ -164,8 +165,8 @@ class GameServer:
                 if player_info.color == WHITE:
                     sid1 = rival_info.sid
                     sid2 = sid
-                my_thread = threading.Thread(target=self.func, args=(sid1, sid2,
-                                             get_millis_for_time_control(session.preferences['time_control'])))
+                my_thread = threading.Thread(target=force_players_match, args=(sid1, sid2,
+                                                                               get_millis_for_time_control(session.preferences['time_control'])))
                 my_thread.start()
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color, dst_color=rival_info.color,
                                      game_status_detail=GameStatusDetail.REMATCH_AGREED)
@@ -411,10 +412,56 @@ class GameServer:
         pipeline.execute()
         return rival, payload
 
-    def play(self, payload) -> ServerResponse:
+    def invite_friend(self, payload) -> ServerResponse:
         '''
         :param payload: the cookie as sent by player
-        :param client_ip: Client IP address for geo lookup
+        :return: sid of recipient player and the data to send
+        '''
+        cookie = payload["data"]
+        client_ip = payload["client_ip"]
+        geo = self.geo_ip_lookup.lookup_mmdb(client_ip)
+        player = self.get_player_from_cookie(cookie, geo)
+        lgr.info(f"Received country code {player.country_code}")
+        mapping = self.redis.get_player_mapping(player.sid)
+        if mapping is not None:
+            self.redis.set_player_session(player=player)
+            if self.redis.is_game_mapping_exists(mapping.game_id):
+                game = self.redis.get_game(mapping.game_id)
+                if int(game[STATUS]) != GameStatus.ENDED.value:   # if game in progress return to game
+                    return self._get_player_game(player)
+                else:
+                    self.redis.remove_player_mapping(player.sid)
+
+        if not self.redis.get_player_session(player.sid):
+            # We don't recognize this user. Regenerate sid
+            player = Player(preferences=player.preferences, country_code=player.country_code)
+            self.redis.set_player_session(player=player)
+        if "waiting_id" in payload:
+            # Player joining invitation
+            waiting_id = payload["waiting_id"]
+            lgr.info("Player {} joining friend invitation. Locating waiting room {}".format(player.sid, waiting_id))
+            room = self.redis.get_friends_room(waiting_id)
+            if not room:
+                # Probably the inviter cancelled the game
+                lgr.info(f"Room does not exist anymore, so no game to wait")
+                ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict()})
+                return ser_res
+            force_players_match(room[WAITING], player.sid, room[TIME_CONTROL])
+            self.redis.remove_friends_room(waiting_id)
+            ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict(), "waiting_id": waiting_id})
+            return ser_res
+        else:
+            # initiating an invite
+            waiting_id = uuid.uuid4().hex
+            lgr.info("Player {} connecting to invite a friend. Initiating waiting room {}".format(player.sid, waiting_id))
+            time_control = player.preferences['time_control']
+            self.redis.set_friends_room(waiting_id, player.sid, time_control)
+            ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict(), "waiting_id": waiting_id})
+            return ser_res
+
+    def play(self, payload) -> ServerResponse:
+        '''
+        :param payload: the cookie as sent by player + client_ip
         :return: sid of recepient player and the data to send
         '''
         cookie = payload["data"]
@@ -437,7 +484,7 @@ class GameServer:
             player = Player(preferences=player.preferences, country_code=player.country_code)
             self.redis.set_player_session(player=player)
         lgr.info("Player {} connecting to play. Initiating match search".format(player.sid))
-        self.find_match(player=player)
+        self._find_match(player=player)
         ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict()})
         return ser_res
 
@@ -551,6 +598,11 @@ class GameServer:
                     engine_sid=rival.sid if rival.player_type == PlayerType.ENGINE.value else None
                     )
         return ServerResponse(dst_sid=player.sid, src_color=mapping.color, game_status_detail=game_status_detail, extra_data={'game': game.to_dict()})
+
+    def _create_friends_room(self, player: Player) -> str:
+        waiting_id = uuid.uuid4().hex
+        ret = self.redis.add_players_to_search_pool(f"{self.redis.friends_room}/{player.sid}", {player.sid: player.rating})
+        return waiting_id
 
     def _update_ratings(self, sid1: str, sid2: str, winner_color: Union[BLACK, WHITE], outcome: Outcome):
         # returns rating, delta for sid1 and rating, delta for sid2

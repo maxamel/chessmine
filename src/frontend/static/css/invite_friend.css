@@ -1,0 +1,136 @@
+/* Invite Friend Waiting Page Styles */
+
+/* Invite-only blocks: hidden until .invite-waiting is set on #fullpage */
+.invite-load-message,
+.invite-share-block {
+    display: none;
+}
+
+.fullpage.invite-waiting .loadMessage:not(.invite-load-message) {
+    display: none;
+}
+
+.fullpage.invite-waiting .invite-load-message,
+.fullpage.invite-waiting .invite-share-block {
+    display: block;
+}
+
+.fullpage.invite-waiting .invite-share-block {
+    margin-top: 0;
+}
+
+/* Center entire waiting block on the page (like Quick Game) */
+.fullpage.invite-waiting {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fullpage.invite-waiting .loadGameCanvas {
+    position: static;
+    left: auto;
+    top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.fullpage.invite-waiting .loadMessage {
+    text-align: center;
+    max-width: 420px;
+}
+
+.fullpage.invite-waiting .lds-ellipsis {
+    left: 0;
+    transform: translateX(-30px)
+}
+
+.fullpage.invite-waiting #cancelSearch {
+    margin-top: 24px;
+    cursor: pointer;
+}
+
+/* Labels and copy icon in theme green */
+.invite-url-label,
+.invite-qr-label {
+    color: #81b622;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.invite-url-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.invite-url-box {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.invite-url-input {
+    padding: 10px;
+    font-size: 14px;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Copy button: icon only, greenish to match theme */
+.invite-copy-button {
+    padding: 10px 14px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #81b622;
+    background-color: transparent;
+    color: #81b622;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.invite-copy-button:hover {
+    background-color: #81b622;
+    color: #fff;
+}
+
+.invite-copy-button:active {
+    opacity: 0.9;
+}
+
+.invite-qr-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+/* QR code stays black/white for scan reliability; container can have theme border */
+.invite-qrcode {
+    display: inline-block;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #81b622;
+}
+
+@media (max-width: 768px) {
+    .invite-url-input {
+        width: 300px;
+    }
+
+    .invite-url-box {
+        flex-direction: column;
+    }
+
+    .invite-copy-button {
+        width: auto;
+    }
+}
