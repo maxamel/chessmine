@@ -5,9 +5,9 @@ WORKDIR /home/alpine
 COPY . .
 
 RUN apk add acl curl-dev gcc musl-dev make m4 libffi-dev openssl-dev bsd-compat-headers
-# Pin Lua deps to avoid API breakage (e.g. milua add_handler -> add_callback)
+# Pinned to versions available for Lua 5.2 (luarocks list in this image). Same pins in CI workflow.
 RUN luarocks install milua 0.3-0 \
-    && luarocks install redis-lua 2.0.6-0 \
+    && luarocks install redis-lua 2.0.4-1 \
     && luarocks install lunajson 1.2.3-1 \
     && luarocks install Lua-cURL 0.3.13-1
 
