@@ -165,8 +165,7 @@ class GameServer:
                 if player_info.color == WHITE:
                     sid1 = rival_info.sid
                     sid2 = sid
-                my_thread = threading.Thread(target=force_players_match, args=(sid1, sid2,
-                                                                               get_millis_for_time_control(session.preferences['time_control'])))
+                my_thread = threading.Thread(target=force_players_match, args=(sid1, sid2, session.preferences['time_control']))
                 my_thread.start()
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color, dst_color=rival_info.color,
                                      game_status_detail=GameStatusDetail.REMATCH_AGREED)

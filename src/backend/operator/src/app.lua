@@ -5,7 +5,25 @@ curl = require("cURL")
 require 'src.elo'
 
 local expire_key = 'game_expirations'
-local client = redis.connect(os.getenv("REDIS_ADDR") or 'localhost', 6379)
+local redis_addr = os.getenv("REDIS_ADDR") or 'localhost'
+local redis_port = 6379
+local client
+local max_attempts = 30
+local attempt = 0
+while attempt < max_attempts do
+  local ok, err = pcall(function()
+    client = redis.connect(redis_addr, redis_port)
+  end)
+  if ok and client then
+    break
+  end
+  attempt = attempt + 1
+  if attempt == max_attempts then
+    error("could not connect to redis:" .. redis_port .. " after " .. max_attempts .. " attempts: " .. tostring(err))
+  end
+  print("Redis not ready, retrying in 2s (" .. attempt .. "/" .. max_attempts .. ")...")
+  socket.sleep(2)
+end
 
 os.execute("lua src/webserver.lua &")
 print("Start at: " .. socket.gettime()*1000)
