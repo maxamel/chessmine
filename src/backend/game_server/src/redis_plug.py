@@ -129,10 +129,18 @@ class RedisPlug:
         key = self.game + game_id
         self.get_redis(pipeline).hset(key, STATUS, status.value)
 
-    def set_player_mapping(self, player, opponent, color, game_id, time_control=None, turn_start=None, pipeline: Pipeline = None):
+    def get_player_mapping(self, player) -> PlayerMapping:
+        key = self.player + player
+        if not self.get_redis().exists(key):
+            return None
+        mapping = self.get_redis().hgetall(key)
+        return PlayerMapping.from_dict(mapping)
+
+    def set_player_mapping(self, player, opponent, color, game_id, time_control=None, turn_start=None,
+                           increment=0, pipeline: Pipeline = None):
         key = self.player + player
         pm = PlayerMapping(sid=player, opponent=opponent, color=color, game_id=game_id,
-                           time_remaining=time_control, turn_start_time=turn_start)
+                           time_remaining=time_control, turn_start_time=turn_start, increment=increment)
         self.get_redis(pipeline).hmset(key, pm.to_dict())
         self.get_redis(pipeline).expire(key, 3600)  # expire in one hour
 
@@ -159,13 +167,6 @@ class RedisPlug:
     def is_player_session_exists(self, player) -> bool:
         key = self.player_info + player
         return self.get_redis().exists(key)
-
-    def get_player_mapping(self, player) -> PlayerMapping:
-        key = self.player + player
-        if not self.get_redis().exists(key):
-            return None
-        mapping = self.get_redis().hgetall(key)
-        return PlayerMapping.from_dict(mapping)
 
     def set_game_timeout(self, game_id, timeout, pipeline: Pipeline = None):
         key = self.game_expire

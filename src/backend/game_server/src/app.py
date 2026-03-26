@@ -37,7 +37,8 @@ game_server = GameServer()
 
 @app.route('/match/<sid1>/<sid2>')
 def match(sid1, sid2):
-    tc = request.json['time_control']
+    tcm = request.json['time_control_millis']
+    inc = request.json['increment_millis']
     player1 = game_server.redis.get_player_session(sid1)
     if sid2 == '@':
         # no findings so we need to match with engine
@@ -47,9 +48,9 @@ def match(sid1, sid2):
         sid2 = engine.sid
     player2 = game_server.redis.get_player_session(sid2)
 
-    p1 = PlayerGameInfo(name=player1.name, rating=player1.rating, time_remaining=tc)
-    p2 = PlayerGameInfo(name=player2.name, rating=player2.rating, time_remaining=tc)
-    game_id = game_server.map_rivals(sid1, sid2, time_control=tc)
+    p1 = PlayerGameInfo(name=player1.name, rating=player1.rating, time_remaining=tcm)
+    p2 = PlayerGameInfo(name=player2.name, rating=player2.rating, time_remaining=tcm)
+    game_id = game_server.map_rivals(sid1, sid2, time_control=tcm, increment=inc)
     Game(game_id=game_id, position=chess.Board().fen(), fens=[], moves=[],
                 white=p1, black=p2, status=GameStatus.STARTED.value)
     lgr.info(f"Matched players - {sid1}, {sid2}")
@@ -107,7 +108,6 @@ def invite(payload):
     response = game_server.invite_friend(payload)
     join_room(room=response.dst_sid)
     if "game" in response.extra_data:
-        lgr.info(f"and here we are!!! {response.to_dict()}")
         the_dict = {'color': response.src_color, 'game': response.extra_data["game"]}
         socketio.emit("game", the_dict, namespace='/connect', room=response.dst_sid)
     return response.to_dict()

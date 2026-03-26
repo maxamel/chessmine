@@ -78,10 +78,11 @@ class PlayerGameInfo:
 class PlayerMapping:
     def __init__(self, sid, opponent, color, time_remaining,
                  game_id, turn_start_time, ttl_start_time=None, draw_offer=0,
-                 rematch_offer=0, last_seen=None):
+                 rematch_offer=0, last_seen=None, increment=0):
         self.sid = sid
         self.opponent = opponent
         self.color = color
+        self.increment = increment
         self.time_remaining = time_remaining
         self.turn_start_time = turn_start_time
         self.game_id = game_id
@@ -96,6 +97,7 @@ class PlayerMapping:
             "sid": self.sid,
             "opponent": self.opponent,
             "color": self.color,
+            "increment": self.increment,
             "time_remaining": self.time_remaining,
             "turn_start_time": self.turn_start_time if self.turn_start_time is not None else 'None',
             "game_id": self.game_id,
@@ -110,6 +112,9 @@ class PlayerMapping:
         rem_time = pd[REMAINING_TIME]
         if rem_time != 'None':
             rem_time = int(rem_time)
+        inc_time = pd[INCREMENT]
+        if inc_time != 'None':
+            inc_time = int(inc_time)
         tst = pd[TURN_START_TIME]
         if tst != 'None':
             tst = int(tst)
@@ -127,7 +132,7 @@ class PlayerMapping:
             lst = int(lst)
         return PlayerMapping(sid=pd[SID], opponent=pd[OPPONENT], color=pd[COLOR], time_remaining=rem_time,
                              turn_start_time=tst, game_id=pd[GAME], ttl_start_time=ttl, draw_offer=draw,
-                             rematch_offer=rematch, last_seen=lst)
+                             rematch_offer=rematch, last_seen=lst, increment=inc_time)
 
 
 class Game:

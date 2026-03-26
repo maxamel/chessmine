@@ -5,7 +5,7 @@ from logger import get_logger
 from matcher.matcher import Matcher
 from player import Player
 from redis_plug import RedisPlug
-from util import get_millis_for_time_control, force_players_match
+from util import get_millis_from_time_control, force_players_match
 
 
 lgr = get_logger(prefix="RedisSmartMatcher", path="/var/log/server.log")
@@ -19,7 +19,7 @@ class RedisSmartMatcher(Matcher):
             self.script = self.redis_plug.register_script(data)
 
     def match(self, player: Player):
-        search_pool_name = f"search_pool_{player.preferences['time_control'].split('+')[0]}"
+        search_pool_name = f"search_pool_{player.preferences['time_control'].replace('+','_')}"
         ret = self.redis_plug.add_players_to_search_pool(search_pool_name, {player.sid: player.rating})
         if ret == 1:
             lgr.info(f"Added player {player.sid} to pool {search_pool_name}")
@@ -30,7 +30,7 @@ class RedisSmartMatcher(Matcher):
 
     def search(self, player: Player):
         loop_round = 0
-        search_pool_name = f"search_pool_{player.preferences['time_control'].split('+')[0]}"
+        search_pool_name = f"search_pool_{player.preferences['time_control'].replace('+','_')}"
         try:
             while loop_round < 6:    # up to six rounds
                 rival_sid = self.script(keys=[search_pool_name,

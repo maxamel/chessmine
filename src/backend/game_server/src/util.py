@@ -14,10 +14,16 @@ def get_turn_from_fen(fen: str) -> str:
     return BLACK
 
 
-def get_millis_for_time_control(time_control: str) -> int:
+def get_millis_from_time_control(time_control: str) -> int:
     array = time_control.split('+')
     mins = int(array[0])
     return mins*1000*60
+
+
+def get_millis_increment_from_time_control(time_control: str) -> int:
+    array = time_control.split('+')
+    secs = int(array[1])
+    return secs*1000
 
 
 def get_opposite_color(color: str):
@@ -81,4 +87,6 @@ class PlayerType(Enum):
 
 
 def force_players_match(sid1, sid2, time_control) -> Response:
-    return requests.get(url="http://localhost:5000/match/" + sid1 + "/" + sid2, json={'time_control': get_millis_for_time_control(time_control)})
+    return requests.get(url="http://localhost:5000/match/" + sid1 + "/" + sid2,
+                        json={'time_control_millis': get_millis_from_time_control(time_control),
+                              'increment_millis': get_millis_increment_from_time_control(time_control)})

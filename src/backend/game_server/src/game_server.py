@@ -17,7 +17,7 @@ from player import Player, PlayerMapping, Game, PlayerGameInfo
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from geo_ip_lookup import GeoIpLookup
-from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_for_time_control, GameStatusDetail, \
+from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_from_time_control, GameStatusDetail, \
     piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType, force_players_match
 
 current_milli_time = lambda: int(round(time.time() * 1000))
@@ -95,14 +95,14 @@ class GameServer:
         self.redis.remove_player_mapping(black)
         lgr.info("Removed info of game with id {}".format(game_id))
 
-    def map_rivals(self, player1_sid, player2_sid, time_control):
+    def map_rivals(self, player1_sid, player2_sid, time_control, increment):
         game_id = uuid.uuid4().hex
         lgr.info("Mapping rivals with args: {}, {}, {}, {}".format(player1_sid, player2_sid, game_id, time_control))
         pipeline: Pipeline = self.redis.get_pipeline()
         self.redis.set_player_mapping(player=player1_sid, opponent=player2_sid, game_id=game_id, color=WHITE,
-                                      time_control=time_control, pipeline=pipeline)
+                                      time_control=time_control, increment=increment, pipeline=pipeline)
         self.redis.set_player_mapping(player=player2_sid, opponent=player1_sid, game_id=game_id, color=BLACK,
-                                      time_control=time_control, pipeline=pipeline)
+                                      time_control=time_control, increment=increment, pipeline=pipeline)
         self.redis.set_game_mapping(game_id=game_id, white_sid=player1_sid, black_sid=player2_sid, pipeline=pipeline)
         pipeline.execute()
         return game_id
@@ -136,7 +136,7 @@ class GameServer:
     def cancel_search(self, payload):
         data = payload["data"]
         sid = data["sid"]
-        search_pool_name = f"search_pool_{data['time_control'].split('+')[0]}"
+        search_pool_name = f"search_pool_{data['time_control'].replace('+', '_')}"
         return self.redis.remove_players_from_search_pool(search_pool_name, sid)
 
     def rematch(self, payload):
@@ -333,7 +333,7 @@ class GameServer:
             last_time = int(player_info.turn_start_time)
             elapsed = curr_time - last_time if last_time > 0 else 0
             payload["remaining"] = int(rival_info.time_remaining)
-            payload["other_remaining"] = int(player_info.time_remaining) - elapsed
+            payload["other_remaining"] = int(player_info.time_remaining) - elapsed + player_info.increment
             if canceled != 1 and player_info.turn_start_time != 0:
                 # we're in the process of timeouting the game. Just quit now and let it timeout gracefully
                 lgr.error("Move {} by player {} is not counted due to game {} termination".format(move["san"], player_info.sid, player_info.game_id))
