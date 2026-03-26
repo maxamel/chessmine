@@ -49,20 +49,26 @@ scp -r . user@domain:~/
 
 This step assumes a fresh alpine linux machine but similar commands should apply for other flavours.
 
+### Running the application in server debug mode (from src/ops directory)
+
+```
+sh spin_up.sh debug-gs hard
+```
+
+
 ```
 apk add --update py-pip
 apk add nano
 apk add redis
 ```
 
-### Run redis and game_server in the background inside virtual env
+### Run game_server in the background inside virtual env
 
 ```
 python -m venv .
 source ./bin/activate
 pip install -r requirements.txt
-redis-server &
-REDIS_URL="localhost" python src/app.py &
+REDIS_URL="localhost" LOG_PATH=server.log python src/app.py &
 ```
 
 From inside tests directory run:
