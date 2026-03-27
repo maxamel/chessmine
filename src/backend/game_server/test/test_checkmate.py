@@ -20,6 +20,10 @@ class CheckmateTestCase(BaseTestCase):
             self.assertEqual(len(self.seen_moves), 104)
 
             # Assert the state in redis at end of game
+            time_remaining_a = self.redis_cli.hget(f'player_mapping_{self.player_a_sid}', 'time_remaining')
+            time_remaining_b = self.redis_cli.hget(f'player_mapping_{self.player_b_sid}', 'time_remaining')
+            self.assertLess(int(time_remaining_a), 60000)
+            self.assertLess(int(time_remaining_b), 60000)
             game_id = self.redis_cli.hget(f'player_mapping_{self.player_a_sid}', 'game_id')
             self.assertEqual(self.redis_cli.llen(f'game_fens_{game_id}'), 104)
             self.assertEqual(self.redis_cli.llen(f'game_moves_{game_id}'), 104)
