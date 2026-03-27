@@ -45,6 +45,7 @@ class IncrementTestCase(BaseTestCase):
 
         BaseTestCase.time_control = '3+3'
         self.base(sio, "threefold", lambda x: None)
+        BaseTestCase.time_control = '1+0'
 
 
 if __name__ == '__main__':

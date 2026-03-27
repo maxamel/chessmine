@@ -91,7 +91,7 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(player_a_session.get('name'), "Guest")
         if not second_game:
             self.assertEqual(player_a_session.get('rating'), "1500")
-        #self.assertEqual(player_a_session.get('preferences'), '{\"time_control\": \"1+0\"}')
+        self.assertEqual(player_a_session.get('preferences'), f'{{"time_control": "{self.time_control}"}}')
 
         player_b_session = self.redis_cli.hgetall(f'player_session_{self.player_b_sid}')
         self.assertEqual(player_b_session.get('sid'), self.player_b_sid)
@@ -99,7 +99,7 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(player_b_session.get('name'), "Guest")
         if not second_game:
             self.assertEqual(player_b_session.get('rating'), "1500")
-        #self.assertEqual(player_b_session.get('preferences'), "{\"time_control\": \"1+0\"}")
+        self.assertEqual(player_b_session.get('preferences'), f'{{"time_control": "{self.time_control}"}}')
 
         # handle the moves
         white_sid = game_mapping.get('white')
