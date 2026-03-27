@@ -43,9 +43,10 @@ class IncrementTestCase(BaseTestCase):
             self.assertEqual(game_mapping.get('fen'), "8/8/8/p7/P3K3/6B1/3k1P2/Q7 w - - 15 75")
             self.game_over = True
 
+        backup = BaseTestCase.time_control
         BaseTestCase.time_control = '3+3'
         self.base(sio, "threefold", lambda x: None)
-        BaseTestCase.time_control = '1+0'
+        BaseTestCase.time_control = backup
 
 
 if __name__ == '__main__':
