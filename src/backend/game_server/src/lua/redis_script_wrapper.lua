@@ -8,6 +8,10 @@ local host = "127.0.0.1"
 local port = 6379
 
 client = redis.connect(host, port)
+local redis_password = os.getenv("REDIS_PASSWORD")
+if redis_password then
+  client:auth(redis_password)
+end
 
 -- Workaround for absence of redis.call
 redis.call = function(cmd, ...)

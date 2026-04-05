@@ -49,6 +49,8 @@ jobs:
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       - name: Luacov
         run: lua -lluacov src/backend/game_server/src/lua/test_match.lua
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       - name: Start Game Server
         working-directory: src/backend/game_server/
         run: python src/app.py &
