@@ -7,8 +7,6 @@ services:
           dockerfile: Dockerfile
         volumes:
           - ../redis/:/usr/app
-        ports:
-          - 6379:6379
         deploy:
           resources:
             limits:
@@ -95,8 +93,6 @@ services:
     grafana:
         container_name: "grafana"
         image: "grafana/grafana:latest"
-        ports:
-          - 3000:3000
         environment:
           - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
           - DS_PROMETHEUS=prometheus
