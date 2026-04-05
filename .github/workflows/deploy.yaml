@@ -42,6 +42,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: REDIS_PASSWORD
           script: |
             cd ~/chessmine || exit
             
@@ -52,4 +53,6 @@ jobs:
 
             cd ./src/ops/
             chmod +x spin_up.sh
-            ./spin_up.sh prod soft
+            REDIS_PASSWORD="$REDIS_PASSWORD" ./spin_up.sh prod soft
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}

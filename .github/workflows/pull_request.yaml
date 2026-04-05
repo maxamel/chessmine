@@ -39,18 +39,29 @@ jobs:
           luarocks install milua 0.3-0
           luarocks install lunajson 1.2.3-1
           luarocks install Lua-cURL 0.3.13-1 CURL_INCDIR=/usr/include/x86_64-linux-gnu
-      - name: Start Redis
-        uses: supercharge/redis-github-action@bc274cb7238cd63a45029db04ee48c07a72609fd
-        with:
-          redis-version: 7.4.0
+      - name: Start Redis with password
+        run: |
+          docker run -d --name redis -p 6379:6379 redis:7.4.0-alpine redis-server --requirepass "$REDIS_PASSWORD"
+          for i in $(seq 1 15); do
+            docker exec redis redis-cli -a "$REDIS_PASSWORD" ping && break || sleep 2
+          done
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       - name: Luacov
         run: lua -lluacov src/backend/game_server/src/lua/test_match.lua
       - name: Start Game Server
         working-directory: src/backend/game_server/
-        run: LOG_PATH=server.log REDIS_URL=localhost python src/app.py &
+        run: python src/app.py &
+        env:
+          LOG_PATH: server.log
+          REDIS_URL: localhost
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       - name: Start Operator
         working-directory: src/backend/operator/
         run: lua src/app.lua &
+        env:
+          REDIS_ADDR: localhost
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -64,6 +75,8 @@ jobs:
       - name: Test Backend
         working-directory: src/backend/game_server/test/
         run: python -m unittest discover -v -s ./  -p 'test_*.py'
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       - name: Test with Checkov
         id: checkov
         uses: bridgecrewio/checkov-action@e983355829b735cff43000af6158aac9f7b4a7da

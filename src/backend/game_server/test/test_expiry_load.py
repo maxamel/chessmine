@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import unittest
 import redis
@@ -17,7 +18,7 @@ class ExpiryTestCase(unittest.TestCase):
         self.seen_moves = set()
         self.lock = threading.Lock()  # for internal locking of move method so every time a single move is processed
         self.semaphore = threading.BoundedSemaphore(1)  # for correlating between sending moves and receiving
-        self.redis_cli = redis.Redis(decode_responses=True)
+        self.redis_cli = redis.Redis(host=os.environ.get('REDIS_URL', 'localhost'), decode_responses=True, password=os.environ.get('REDIS_PASSWORD'))
         self.sid_set = set()
 
     def test_expiry_load(self):

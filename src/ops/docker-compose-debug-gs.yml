@@ -3,6 +3,9 @@ services:
     redis:
         container_name: "redis"
         image: "redis:alpine"
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+        environment:
+          REDIS_PASSWORD: ${REDIS_PASSWORD}
         ports:
           - 6379:6379
         deploy:
@@ -16,6 +19,7 @@ services:
       privileged: true
       environment:
         REDIS_ADDR: "redis"
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
       depends_on:
         - redis
     operator:
@@ -26,6 +30,7 @@ services:
       environment:
         SERVER_ADDR: host.docker.internal
         REDIS_ADDR: redis
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
       volumes:
         - ../backend/operator/:/usr/app
       depends_on:

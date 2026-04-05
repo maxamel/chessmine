@@ -37,42 +37,47 @@ python load_test_wrapper.py
 
 ## Running component tests
 
+### Prerequisites
 
-### Prerequisites:
+- Docker with Compose V2 (`docker compose`)
+- Python 3.9+ with dependencies installed:
+  ```
+  pip install -r requirements.txt websocket-client
+  ```
 
-pip, python3.9+, game server running on localhost:5000, redis running on localhost:6379
+### Start the dev stack with test ports exposed
 
-In case using dedicated machine to run tests, transfer the files from *game_server/* to the remote machine:
-scp -r . user@domain:~/
-
-### Install pip, redis and nano
-
-This step assumes a fresh alpine linux machine but similar commands should apply for other flavours.
-
-### Running the application in server debug mode (from src/ops directory)
-
-```
-sh spin_up.sh debug-gs hard
-```
-
+Services do not expose ports by default. Use the test compose override to open
+Redis (`6379`) and the game server (`5000`) on localhost:
 
 ```
-apk add --update py-pip
-apk add nano
-apk add redis
+cd src/ops/
+docker compose -f docker-compose-dev.yml -f docker-compose-test.yml up -d
 ```
 
-### Run game_server in the background inside virtual env
+Wait until all containers are healthy:
 
 ```
-python -m venv .
-source ./bin/activate
-pip install -r requirements.txt
-REDIS_URL="localhost" LOG_PATH=server.log python src/app.py &
+docker compose -f docker-compose-dev.yml -f docker-compose-test.yml ps
 ```
 
-From inside tests directory run:
-### Run test inside virtual env
+### Run the tests
+
+From inside the `src/backend/game_server/` directory, run the tests with `REDIS_PASSWORD`
+set to the dev password:
+
 ```
-python -m unittest discover -v -s ./  -p 'test_*.py'
+REDIS_PASSWORD=changeme python -m unittest discover -v -s test/ -p 'test_*.py'
+```
+
+On Windows (PowerShell):
+
+```
+$env:REDIS_PASSWORD="changeme"; python -m unittest discover -v -s test/ -p 'test_*.py'
+```
+
+### Tear down
+
+```
+docker compose -f docker-compose-dev.yml -f docker-compose-test.yml down
 ```

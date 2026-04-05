@@ -25,29 +25,29 @@ LOGGER = None
 
 
 def run_test(results: list, index: int, players_per_thread: int, endpoint: str, redis_host: str, redis_port: int,
-             call_timeout: int):
+             call_timeout: int, redis_password: str = None):
     LOGGER.info(f"Running test number {index}")
     sid_to_data = dict()
     start = time.time()
-    test(results, index, players_per_thread, endpoint, redis_host, redis_port, call_timeout, sid_to_data)
+    test(results, index, players_per_thread, endpoint, redis_host, redis_port, call_timeout, sid_to_data, redis_password)
     LOGGER.info(f"Test #{index} lasted {time.time() - start} seconds")
 
 
 class UtilityHelper:
 
-    def __init__(self, redis_host: str, redis_port: int):
+    def __init__(self, redis_host: str, redis_port: int, redis_password: str = None):
         self.player_sid = None
         self.line_index = 0
         self.color = 'w'
         self.ready = False
         self.seen_moves = set()
         self.last_heartbeat = None
-        self.redis_cli = redis.Redis(redis_host, redis_port, decode_responses=True)
+        self.redis_cli = redis.Redis(redis_host, redis_port, password=redis_password, decode_responses=True)
         self.game_over = False
 
 
 def test(results: list, index: int, players_per_thread: int, endpoint: str, redis_host: str,
-         redis_port: int, call_timeout: int, sid_to_data: dict):
+         redis_port: int, call_timeout: int, sid_to_data: dict, redis_password: str = None):
     try:
 
         for i in range(players_per_thread):
@@ -116,7 +116,7 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
             sio.connect(url=endpoint + f"?nonce={nonce}", namespaces='/connect', transports=['websocket'])
             assert sio.sid is not None
             sid_to_data[sio.sid] = dict()
-            sid_to_data[sio.sid][UTILS] = UtilityHelper(redis_host, redis_port)
+            sid_to_data[sio.sid][UTILS] = UtilityHelper(redis_host, redis_port, redis_password)
             sid_to_data[sio.sid][SIO] = sio
 
             move_partial = partial(move, sio.sid)
@@ -168,19 +168,19 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
 
 
 def main(threads, logger, players_per_thread=1, endpoint="https://www.chessmine.xyz/",
-         redis_host="localhost", redis_port=6379, call_timeout=2) -> Report:
+         redis_host="localhost", redis_port=6379, call_timeout=2, redis_password=None) -> Report:
     global LOGGER
     LOGGER = logger
     threads_list = []
     results = []
-    redis_cli = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+    redis_cli = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
     redis_cli.flushdb()
     start = time.time()
 
     for n in range(threads):
         results.append([0, 0, 0, 0, 0])
         t = Thread(target=run_test,
-                   args=(results, n, players_per_thread, endpoint, redis_host, redis_port, call_timeout))
+                   args=(results, n, players_per_thread, endpoint, redis_host, redis_port, call_timeout, redis_password))
         t.start()
         threads_list.append(t)
 

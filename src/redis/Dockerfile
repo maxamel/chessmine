@@ -3,5 +3,5 @@ COPY redis.conf /usr/local/etc/redis/redis.conf
 
 USER redis
 
-HEALTHCHECK CMD redis-cli ping || exit 1
+HEALTHCHECK CMD REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli ping || exit 1
 CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]

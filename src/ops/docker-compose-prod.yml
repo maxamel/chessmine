@@ -5,6 +5,9 @@ services:
         build:
           context: ../redis
           dockerfile: Dockerfile
+        command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+        environment:
+          REDIS_PASSWORD: ${REDIS_PASSWORD}
         volumes:
           - ../redis/:/usr/app
         deploy:
@@ -18,6 +21,7 @@ services:
       privileged: true
       environment:
         REDIS_ADDR: "redis"
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
       depends_on:
         - redis
     game_server:
@@ -35,6 +39,9 @@ services:
           dockerfile: Dockerfile
           tags:
             - "game_server:curr"
+        environment:
+          REDIS_URL: redis
+          REDIS_PASSWORD: ${REDIS_PASSWORD}
         depends_on:
           - redis
     operator:
@@ -48,6 +55,7 @@ services:
       environment:
         SERVER_ADDR: "game_server"
         REDIS_ADDR: "redis"
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
       volumes:
         - ../backend/operator/:/usr/app
       depends_on:
