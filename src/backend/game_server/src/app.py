@@ -27,8 +27,10 @@ monkey.patch_all()
 
 redis_url = os.getenv('REDIS_URL', "redis")
 redis_port = os.getenv('REDIS_PORT', "6379")
+redis_password = os.getenv('REDIS_PASSWORD', None)
+_redis_auth = f":{redis_password}@" if redis_password else ""
 socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, async_mode='gevent',
-                    message_queue=f'redis://{redis_url}:{redis_port}', logger=False, engineio_logger=False)
+                    message_queue=f'redis://{_redis_auth}{redis_url}:{redis_port}', logger=False, engineio_logger=False)
 
 Payload.max_decode_packets = 150
 

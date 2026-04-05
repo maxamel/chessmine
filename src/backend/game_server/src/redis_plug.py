@@ -15,6 +15,7 @@ class RedisPlug:
     def __init__(self):
         self.redis_url = os.getenv('REDIS_URL', "redis")
         self.redis_port = os.getenv('REDIS_PORT', "6379")
+        self.redis_password = os.getenv('REDIS_PASSWORD', None)
         self.search_pool = "search_pool"
         self.friends_room = "friends_room_"
         self.player_info = "player_session_"
@@ -24,7 +25,7 @@ class RedisPlug:
         self.game_fens = "game_fens_"
         self.game_endgame = "game_endgame_"
         self.game_expire = "game_expirations"
-        self.redis = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, decode_responses=True, retry_on_timeout=True)
+        self.redis = redis.Redis(host=self.redis_url, port=self.redis_port, db=0, password=self.redis_password, decode_responses=True, retry_on_timeout=True)
 
     def add_players_to_search_pool(self, name: str, player_sids_to_ratings: dict[str, int]):
         return self.get_redis().zadd(name, player_sids_to_ratings)

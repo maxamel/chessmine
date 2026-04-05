@@ -1,0 +1,14 @@
+# Compose override for running component tests from the host machine.
+# Extends docker-compose-dev.yml by exposing Redis and the game server ports.
+#
+# Usage:
+#   docker compose -f docker-compose-dev.yml -f docker-compose-test.yml up -d
+services:
+  redis:
+    ports:
+      - "6379:6379"
+  game_server:
+    ports:
+      - "5000:5000"
+    deploy:
+      replicas: 1

@@ -5,10 +5,11 @@ services:
         build:
           context: ../redis
           dockerfile: Dockerfile
+        command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+        environment:
+          REDIS_PASSWORD: ${REDIS_PASSWORD}
         volumes:
           - ../redis/:/usr/app
-        ports:
-          - 6379:6379
         deploy:
           resources:
             limits:
@@ -20,6 +21,7 @@ services:
       privileged: true
       environment:
         REDIS_ADDR: "redis"
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
       depends_on:
         - redis
     game_server:
@@ -37,6 +39,9 @@ services:
           dockerfile: Dockerfile
           tags:
             - "game_server:curr"
+        environment:
+          REDIS_URL: redis
+          REDIS_PASSWORD: ${REDIS_PASSWORD}
         depends_on:
           - redis
     operator:
@@ -50,6 +55,7 @@ services:
       environment:
         SERVER_ADDR: "game_server"
         REDIS_ADDR: "redis"
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
       volumes:
         - ../backend/operator/:/usr/app
       depends_on:
@@ -95,8 +101,6 @@ services:
     grafana:
         container_name: "grafana"
         image: "grafana/grafana:latest"
-        ports:
-          - 3000:3000
         environment:
           - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
           - DS_PROMETHEUS=prometheus

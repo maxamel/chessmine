@@ -5,5 +5,6 @@
   "endpoint": "http://localhost:1443",
   "redis_port": 6379,
   "redis_host": "localhost",
+  "redis_password": null,
   "call_timeout": 4
 }

@@ -7,6 +7,7 @@ require 'src.elo'
 local expire_key = 'game_expirations'
 local redis_addr = os.getenv("REDIS_ADDR") or 'localhost'
 local redis_port = 6379
+local redis_password = os.getenv("REDIS_PASSWORD")
 local client
 local max_attempts = 30
 local attempt = 0
@@ -23,6 +24,9 @@ while attempt < max_attempts do
   end
   print("Redis not ready, retrying in 2s (" .. attempt .. "/" .. max_attempts .. ")...")
   socket.sleep(2)
+end
+if redis_password then
+  client:auth(redis_password)
 end
 
 os.execute("lua src/webserver.lua &")
