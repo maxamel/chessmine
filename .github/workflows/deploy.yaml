@@ -43,6 +43,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: REDIS_PASSWORD
+          script_stop: true
           script: |
             cd ~/chessmine || exit
             
