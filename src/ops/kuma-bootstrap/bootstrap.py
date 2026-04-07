@@ -20,6 +20,12 @@ Required env vars:
 Optional env vars:
   KUMA_URL                    Kuma base URL (default: http://uptime-kuma:3001)
   APP_SCHEME                  https | http (default: https)
+  APP_MONITOR_URL             Full URL Kuma uses for the HTTP liveness check.
+                              Defaults to APP_SCHEME://APP_HOST/healthcheck.
+                              Override to avoid TLS SNI mismatch / hairpin-NAT:
+                                http://caddy:2019/config/
+                              Caddy's admin API is plain HTTP, always reachable
+                              from inside Docker regardless of TLS cert setup.
   ENABLE_TLS_MONITOR          "true" to create a TLS-expiry monitor (prod only)
   TELEGRAM_BOT_TOKEN          Telegram bot token — omit to disable notifications
   TELEGRAM_CHAT_ID            Telegram chat ID  — omit to disable notifications
@@ -57,6 +63,19 @@ APP_SCHEME = os.environ.get("APP_SCHEME", "https")
 ENABLE_TLS_MONITOR = os.environ.get("ENABLE_TLS_MONITOR", "false").lower() == "true"
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+# Internal hostname Kuma uses to reach the app (defaults to APP_HOST).
+# In dev, APP_HOST is "localhost:1443" which resolves to the Kuma container
+# itself — override with the Docker service name so the check actually works.
+# URL Kuma uses for the HTTP liveness check.  Defaults to APP_URL/healthcheck
+# (works if the public hostname is reachable from inside Docker), but should
+# be overridden to Caddy's plain-HTTP admin probe in all environments to
+# avoid TLS SNI mismatch (cert is for the public hostname, not "caddy") and
+# hairpin-NAT reliability issues on the host.
+# Use: http://caddy:2019/config/  — Caddy admin API, plain HTTP, always up.
+APP_MONITOR_URL = os.environ.get(
+    "APP_MONITOR_URL",
+    f"{APP_SCHEME}://{APP_HOST}/healthcheck",
+)
 
 # Pre-defined push tokens — generated once and stored as GitHub Secrets
 # (prod) or committed dev UUIDs (.env).  Kuma uses them as-is, so push URLs
@@ -71,9 +90,9 @@ IS_LOCAL = APP_HOST.startswith("localhost") or APP_HOST.startswith("127.")
 
 # Checkmate runs every 4 h; allow 30 min grace window before alerting.
 CHECKMATE_HEARTBEAT_SECS = 4 * 3600 + 1800
-# Illegal-move monitor is event-driven; 30-day interval so it only flips DOWN
-# if the server is completely dead, not just quiet.
-ILLEGAL_HEARTBEAT_SECS = 30 * 24 * 3600
+# Illegal-move monitor is event-driven; use Kuma's maximum allowed interval
+# (24 days) so it only flips DOWN if the server is completely dead, not quiet.
+ILLEGAL_HEARTBEAT_SECS = 2_073_600  # 24 days — Kuma's hard cap
 
 
 # ---------------------------------------------------------------------------
@@ -90,18 +109,26 @@ def get_notifications(api: UptimeKumaApi) -> dict:
     return {n["name"]: n for n in api.get_notifications()}
 
 
-def ensure_monitor(api: UptimeKumaApi, monitors: dict, name: str, **kwargs) -> None:
-    """Create the monitor if it doesn't exist; update pushToken if it drifted."""
+def ensure_monitor(api: UptimeKumaApi, monitors: dict, name: str,
+                   push_token: str = None, **kwargs) -> None:
+    """Create the monitor if it doesn't exist; update pushToken if it drifted.
+
+    push_token is handled separately because the library's add_monitor()
+    does not accept pushToken — it auto-generates one.  We set/correct it
+    immediately afterwards via edit_monitor(), which merges kwargs into the
+    full existing record and therefore accepts pushToken just fine.
+    """
     if name not in monitors:
-        api.add_monitor(name=name, **kwargs)
+        result = api.add_monitor(name=name, **kwargs)
+        monitor_id = result["monitorID"]
+        if push_token:
+            api.edit_monitor(monitor_id, pushToken=push_token)
         log.info("Created monitor: '%s'", name)
     else:
         existing = monitors[name]
-        expected_token = kwargs.get("pushToken")
-        if expected_token and existing.get("pushToken") != expected_token:
+        if push_token and existing.get("pushToken") != push_token:
             # Token drifted (e.g. migrated from non-deterministic setup).
-            # Update it so the pre-defined push URL stays valid.
-            api.edit_monitor(existing["id"], pushToken=expected_token)
+            api.edit_monitor(existing["id"], pushToken=push_token)
             log.info("Updated pushToken for monitor: '%s'", name)
         else:
             log.info("Monitor already up to date: '%s'", name)
@@ -114,19 +141,26 @@ def ensure_monitor(api: UptimeKumaApi, monitors: dict, name: str, **kwargs) -> N
 def main() -> None:
     api = UptimeKumaApi(KUMA_URL)
 
-    # First-time account setup; raises if already configured — that's expected.
+    # First-time account setup.  "userExist" is the normal already-configured
+    # message; any other error (e.g. weak password) is a real failure.
     try:
         api.setup(KUMA_USERNAME, KUMA_PASSWORD)
         log.info("Kuma initial setup complete")
     except Exception as exc:
-        log.info("Setup skipped (already configured): %s", exc)
+        msg = str(exc)
+        if "userExist" in msg or "already" in msg.lower():
+            log.info("Setup skipped (already configured)")
+        else:
+            log.error("Kuma setup failed: %s", msg)
+            sys.exit(1)
 
     api.login(KUMA_USERNAME, KUMA_PASSWORD)
     log.info("Logged in as '%s'", KUMA_USERNAME)
 
     # Global settings: alert 14 days before TLS expiry.
+    # tlsExpiryNotifyDays expects a list of day thresholds, not a scalar.
     try:
-        api.set_settings(passwordReset=False, tlsExpiryNotifyDays=14)
+        api.set_settings(tlsExpiryNotifyDays=[14])
         log.info("Global TLS expiry threshold set to 14 days")
     except Exception as exc:
         log.warning("Could not apply global settings: %s", exc)
@@ -162,12 +196,14 @@ def main() -> None:
     # ------------------------------------------------------------------
     monitors = get_monitors(api)
 
-    # 1. HTTP 200 check
+    # 1. HTTP liveness check.  APP_MONITOR_URL points at Caddy's plain-HTTP
+    #    admin API (http://caddy:2019/config/) so Kuma never has to deal with
+    #    TLS SNI mismatch or hairpin-NAT to the public hostname.
     ensure_monitor(
         api, monitors,
         name=f"HTTP {APP_HOST}",
         type=MonitorType.HTTP,
-        url=f"{APP_URL}/healthcheck",
+        url=APP_MONITOR_URL,
         interval=60,
         retryInterval=60,
         maxretries=3,
@@ -196,7 +232,7 @@ def main() -> None:
             api, monitors,
             name="Checkmate Test",
             type=MonitorType.PUSH,
-            pushToken=CHECKMATE_PUSH_TOKEN,
+            push_token=CHECKMATE_PUSH_TOKEN,
             interval=CHECKMATE_HEARTBEAT_SECS,
             retryInterval=300,
             maxretries=1,
@@ -213,7 +249,7 @@ def main() -> None:
             api, monitors,
             name="Backend Alerts",
             type=MonitorType.PUSH,
-            pushToken=BACKEND_PUSH_TOKEN,
+            push_token=BACKEND_PUSH_TOKEN,
             interval=ILLEGAL_HEARTBEAT_SECS,
             retryInterval=300,
             maxretries=0,

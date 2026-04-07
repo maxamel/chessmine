@@ -15,9 +15,9 @@ parse_yaml() {
    }'
 }
 
-# read yaml file
-eval $(parse_yaml docker-compose-$1.yml)
-#echo $(parse_yaml docker-compose-dev.yml)
+# Extract only the specific variable needed; eval-ing the whole parsed YAML is
+# unsafe because values like the healthcheck test contain shell metacharacters.
+eval $(parse_yaml docker-compose-$1.yml | grep '^services__game_server__deploy_replicas=')
 count=$services__game_server__deploy_replicas
 
 targets="\"targets\":["

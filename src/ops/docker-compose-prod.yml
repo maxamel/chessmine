@@ -125,7 +125,7 @@ services:
           - "127.0.0.1:3001:3001"
         restart: unless-stopped
         healthcheck:
-          test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
+          test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
           interval: 5s
           timeout: 3s
           retries: 15
@@ -142,6 +142,7 @@ services:
           KUMA_PASSWORD: ${KUMA_PASSWORD}
           APP_HOST: chessmine.xyz
           APP_SCHEME: https
+          APP_MONITOR_URL: http://caddy:2019/config/
           ENABLE_TLS_MONITOR: "true"
           TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
           TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
