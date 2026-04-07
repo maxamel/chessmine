@@ -6,6 +6,8 @@ import time
 import uuid
 from typing import Union, Any
 
+import kuma_alert
+
 from prometheus_client import Counter, Histogram
 from redis.client import Pipeline
 
@@ -275,6 +277,7 @@ class GameServer:
         # turn_start_time equals None if no moves have been played, and zero in case first move has been played
         if player_info.turn_start_time != 'None' and rival_info.turn_start_time != 'None' and player_info.turn_start_time != 0 and rival_info.turn_start_time != 0:
             lgr.info("Illegal attempt by player {} to abort game {} which is already in progress".format(player_info.sid, player_info.game_id))
+            kuma_alert.push(msg=f"Illegal abort by player {player_info.sid}", event_key="illegal_abort")
             return
         rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.NO_GAME)
         self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED)
@@ -319,6 +322,7 @@ class GameServer:
         # Does the color of the move match the color of the player's sid, is it his turn and is the move legal?
         if move["color"] != player_info.color[0] or get_turn_from_fen(board.fen()) != player_info.color or not board.is_legal(the_move):
             lgr.error("Illegal move {} by player {} in game {}".format(move, player_info.sid, player_info.game_id))
+            kuma_alert.push(msg=f"Illegal move by player {player_info.sid}", event_key="illegal_move")
             return None, None
         board.push(the_move)
 

@@ -38,6 +38,8 @@ services:
         environment:
           REDIS_URL: redis
           REDIS_PASSWORD: ${REDIS_PASSWORD}
+          KUMA_PUSH_URL: http://uptime-kuma:3001/api/push/${KUMA_BACKEND_PUSH_TOKEN}
+          KUMA_ALERT_DEDUPE_SECS: "3600"
         volumes:
           - ../backend/game_server/:/usr/app
         depends_on:
@@ -101,3 +103,41 @@ services:
         privileged: true
         depends_on:
           - prometheus
+    uptime-kuma:
+        container_name: "uptime-kuma"
+        image: "louislam/uptime-kuma:1"
+        volumes:
+          - uptime-kuma-data:/app/data
+        ports:
+          - "127.0.0.1:3001:3001"
+        restart: unless-stopped
+        healthcheck:
+          test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
+          interval: 5s
+          timeout: 3s
+          retries: 15
+          start_period: 30s
+        depends_on:
+          - caddy
+    kuma-bootstrap:
+        container_name: "kuma-bootstrap"
+        build:
+          context: ./kuma-bootstrap
+        environment:
+          KUMA_URL: http://uptime-kuma:3001
+          KUMA_USERNAME: ${KUMA_USERNAME}
+          KUMA_PASSWORD: ${KUMA_PASSWORD}
+          APP_HOST: localhost:1443
+          APP_SCHEME: https
+          ENABLE_TLS_MONITOR: "false"
+          TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+          TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+          KUMA_SANITY_PUSH_TOKEN: ${KUMA_SANITY_PUSH_TOKEN}
+          KUMA_BACKEND_PUSH_TOKEN: ${KUMA_BACKEND_PUSH_TOKEN}
+        restart: "no"
+        depends_on:
+          uptime-kuma:
+            condition: service_healthy
+
+volumes:
+    uptime-kuma-data:

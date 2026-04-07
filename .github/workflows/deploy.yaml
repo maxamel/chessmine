@@ -42,7 +42,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: REDIS_PASSWORD
+          envs: REDIS_PASSWORD,KUMA_USERNAME,KUMA_PASSWORD,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,KUMA_SANITY_PUSH_TOKEN,KUMA_BACKEND_PUSH_TOKEN
           script_stop: true
           script: |
             cd ~/chessmine || exit
@@ -54,6 +54,19 @@ jobs:
 
             cd ./src/ops/
             chmod +x spin_up.sh
-            REDIS_PASSWORD="$REDIS_PASSWORD" ./spin_up.sh prod soft
+            REDIS_PASSWORD="$REDIS_PASSWORD" \
+            KUMA_USERNAME="$KUMA_USERNAME" \
+            KUMA_PASSWORD="$KUMA_PASSWORD" \
+            TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
+            TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID" \
+            KUMA_SANITY_PUSH_TOKEN="$KUMA_SANITY_PUSH_TOKEN" \
+            KUMA_BACKEND_PUSH_TOKEN="$KUMA_BACKEND_PUSH_TOKEN" \
+            ./spin_up.sh prod soft
         env:
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          KUMA_USERNAME: ${{ secrets.KUMA_USERNAME }}
+          KUMA_PASSWORD: ${{ secrets.KUMA_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KUMA_SANITY_PUSH_TOKEN: ${{ secrets.KUMA_SANITY_PUSH_TOKEN }}
+          KUMA_BACKEND_PUSH_TOKEN: ${{ secrets.KUMA_BACKEND_PUSH_TOKEN }}
