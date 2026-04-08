@@ -2,11 +2,10 @@ import chess
 import logging
 import requests
 import threading
+import kuma_alert
 import time
 import uuid
 from typing import Union, Any
-
-import kuma_alert
 
 from prometheus_client import Counter, Histogram
 from redis.client import Pipeline
@@ -19,7 +18,7 @@ from player import Player, PlayerMapping, Game, PlayerGameInfo
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from geo_ip_lookup import GeoIpLookup
-from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_from_time_control, GameStatusDetail, \
+from util import get_turn_from_fen, GameStatus, get_opposite_color, GameStatusDetail, \
     piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType, force_players_match
 
 current_milli_time = lambda: int(round(time.time() * 1000))
