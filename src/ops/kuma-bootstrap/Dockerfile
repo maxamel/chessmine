@@ -1,8 +1,11 @@
-FROM python:3.12-alpine
+FROM python:3.10-alpine
 WORKDIR /usr/app/
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 COPY bootstrap.py .
+
+RUN apk add acl
+RUN pip install --no-cache-dir -r requirements.txt
+
 
 RUN adduser -D game
 RUN setfacl -Rdm u:game:rwx /usr/app/
