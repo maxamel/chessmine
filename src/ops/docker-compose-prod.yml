@@ -111,6 +111,10 @@ services:
           - ./dashboard.json:/var/lib/grafana/dashboards/dashboard.json
           - ./redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
           - ./default.yml:/etc/grafana/provisioning/dashboards/default.yml
+        ports:
+          # Loopback-only — NOT reachable from public internet.
+          # Access via SSH tunnel: ssh -L 3000:127.0.0.1:3000 user@server
+          - "127.0.0.1:3000:3000"
         privileged: true
         depends_on:
           - prometheus
