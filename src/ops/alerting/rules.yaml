@@ -1,0 +1,96 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: infrastructure
+    folder: Alerts
+    interval: 1m
+    rules:
+
+      # Alert when any container sustains > 25% of a CPU core for 5 minutes.
+      # game_server replicas are capped at 0.30 CPU each, so 0.25 ≈ 83% saturation.
+      - uid: high-cpu-alert
+        title: High Container CPU Usage
+        condition: threshold
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'max(rate(container_cpu_usage_seconds_total{name!=""}[5m])) by (name)'
+              instant: true
+              refId: A
+          - refId: threshold
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: threshold
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.25
+                    type: gt
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: max
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU on container {{ $labels.name }}
+          description: >
+            Container {{ $labels.name }} has been using more than 0.25 CPU cores
+            for 5 minutes (current: {{ printf "%.3f" $values.threshold.Value }} cores).
+
+      # Alert when any container's memory exceeds 80% of its configured limit.
+      # Uses cAdvisor container_spec_memory_limit_bytes (0 = unlimited, excluded).
+      - uid: high-memory-alert
+        title: High Container Memory Usage
+        condition: threshold
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: >
+                max(
+                  container_memory_usage_bytes{name!=""}
+                  / container_spec_memory_limit_bytes{name!=""} > 0
+                ) by (name)
+              instant: true
+              refId: A
+          - refId: threshold
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: threshold
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.8
+                    type: gt
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: max
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory on container {{ $labels.name }}
+          description: >
+            Container {{ $labels.name }} is using more than 80% of its memory limit
+            (current: {{ printf "%.0f" (mulf $values.threshold.Value 100) }}%).

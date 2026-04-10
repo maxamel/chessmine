@@ -42,8 +42,8 @@ services:
         environment:
           REDIS_URL: redis
           REDIS_PASSWORD: ${REDIS_PASSWORD}
-          KUMA_PUSH_URL: http://uptime-kuma:3001/api/push/${KUMA_BACKEND_PUSH_TOKEN}
-          KUMA_ALERT_DEDUPE_SECS: "3600"
+          TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+          TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
         depends_on:
           - redis
     operator:
@@ -106,11 +106,16 @@ services:
         environment:
           - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
           - DS_PROMETHEUS=prometheus
+          - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+          - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
         volumes:
           - ./datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
           - ./dashboard.json:/var/lib/grafana/dashboards/dashboard.json
           - ./redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
           - ./default.yml:/etc/grafana/provisioning/dashboards/default.yml
+          - ./alerting/contactpoints.yaml:/etc/grafana/provisioning/alerting/contactpoints.yaml
+          - ./alerting/policies.yaml:/etc/grafana/provisioning/alerting/policies.yaml
+          - ./alerting/rules.yaml:/etc/grafana/provisioning/alerting/rules.yaml
         ports:
           # Loopback-only — NOT reachable from public internet.
           # Access via SSH tunnel: ssh -L 3000:127.0.0.1:3000 user@server
@@ -118,44 +123,3 @@ services:
         privileged: true
         depends_on:
           - prometheus
-    uptime-kuma:
-        container_name: "uptime-kuma"
-        image: "louislam/uptime-kuma:1"
-        volumes:
-          - uptime-kuma-data:/app/data
-        ports:
-          # Loopback-only — NOT reachable from public internet.
-          # Access via SSH tunnel: ssh -L 3001:127.0.0.1:3001 user@server
-          - "127.0.0.1:3001:3001"
-        restart: unless-stopped
-        healthcheck:
-          test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
-          interval: 5s
-          timeout: 3s
-          retries: 15
-          start_period: 30s
-        depends_on:
-          - caddy
-    kuma-bootstrap:
-        container_name: "kuma-bootstrap"
-        build:
-          context: ./kuma-bootstrap
-        environment:
-          KUMA_URL: http://uptime-kuma:3001
-          KUMA_USERNAME: ${KUMA_USERNAME}
-          KUMA_PASSWORD: ${KUMA_PASSWORD}
-          APP_HOST: chessmine.xyz
-          APP_SCHEME: https
-          APP_MONITOR_URL: http://caddy:2019/config/
-          ENABLE_TLS_MONITOR: "true"
-          TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-          TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
-          KUMA_SANITY_PUSH_TOKEN: ${KUMA_SANITY_PUSH_TOKEN}
-          KUMA_BACKEND_PUSH_TOKEN: ${KUMA_BACKEND_PUSH_TOKEN}
-        restart: "no"
-        depends_on:
-          uptime-kuma:
-            condition: service_healthy
-
-volumes:
-    uptime-kuma-data:

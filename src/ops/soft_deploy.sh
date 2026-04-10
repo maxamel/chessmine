@@ -90,10 +90,6 @@ done
 docker restart grafana || exit 1
 docker restart prometheus || exit 1
 
-# Re-run kuma bootstrap (idempotent) so any new monitors/secrets take effect.
-docker compose -f docker-compose-$1.yml up --build --no-deps --force-recreate -d kuma-bootstrap \
-  || echo "WARNING: kuma-bootstrap failed; check 'docker logs kuma-bootstrap'"
-
 # Start caddy thingy
 eval $(parse_yaml docker-compose-$1.yml)
 #echo $(parse_yaml docker-compose-dev.yml)
