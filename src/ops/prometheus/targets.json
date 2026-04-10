@@ -1,0 +1,8 @@
+[
+  {
+    "labels": {
+      "job": "game_server"
+    },
+    "targets":[ "chessmine-game_server-1:2019", "chessmine-game_server-2:2019"]
+  }
+]

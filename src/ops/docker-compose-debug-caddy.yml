@@ -55,8 +55,8 @@ services:
         container_name: "prometheus"
         image: "prom/prometheus:latest"
         volumes:
-          - ./prometheus.yml:/etc/prometheus/prometheus.yml
-          - ./targets.json:/etc/prometheus/targets.json
+          - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+          - ./prometheus/targets.json:/etc/prometheus/targets.json
         privileged: true
         depends_on:
           - cadvisor
@@ -69,10 +69,10 @@ services:
           - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
           - DS_PROMETHEUS=prometheus
         volumes:
-          - ./datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-          - ./dashboard.json:/var/lib/grafana/dashboards/dashboard.json
-          - ./redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
-          - ./default.yml:/etc/grafana/provisioning/dashboards/default.yml
+          - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+          - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+          - ./grafana/redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
+          - ./grafana/default.yml:/etc/grafana/provisioning/dashboards/default.yml
         privileged: true
         depends_on:
           - prometheus
