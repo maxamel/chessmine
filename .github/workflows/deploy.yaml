@@ -41,7 +41,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: REDIS_PASSWORD,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID
+          envs: REDIS_PASSWORD,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,GRAFANA_USERNAME,GRAFANA_PASSWORD
           script_stop: true
           script: |
             cd ~/chessmine || exit
@@ -55,8 +55,12 @@ jobs:
             REDIS_PASSWORD="$REDIS_PASSWORD" \
             TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
             TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID" \
+            GRAFANA_USERNAME="$GRAFANA_USERNAME" \
+            GRAFANA_PASSWORD="$GRAFANA_PASSWORD" \
             ./spin_up.sh prod soft
         env:
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GRAFANA_USERNAME: ${{ secrets.GRAFANA_USERNAME }}
+          GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}

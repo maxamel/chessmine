@@ -95,16 +95,13 @@ services:
         environment:
           - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
           - DS_PROMETHEUS=prometheus
-          - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-          - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+          - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME:-admin}
+          - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
         volumes:
           - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
           - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
           - ./grafana/redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
           - ./grafana/default.yml:/etc/grafana/provisioning/dashboards/default.yml
-          - ./grafana/alerting/contactpoints.yaml:/etc/grafana/provisioning/alerting/contactpoints.yaml
-          - ./grafana/alerting/policies.yaml:/etc/grafana/provisioning/alerting/policies.yaml
-          - ./grafana/alerting/rules.yaml:/etc/grafana/provisioning/alerting/rules.yaml
         ports:
           # Loopback-only — NOT reachable from public internet.
           # Access via SSH tunnel: ssh -L 3000:127.0.0.1:3000 user@server
