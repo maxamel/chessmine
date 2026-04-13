@@ -99,8 +99,7 @@ services:
           - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
         volumes:
           - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-          - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
-          - ./grafana/redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
+          - ./grafana/dashboards:/var/lib/grafana/dashboards
           - ./grafana/default.yml:/etc/grafana/provisioning/dashboards/default.yml
         ports:
           # Loopback-only — NOT reachable from public internet.

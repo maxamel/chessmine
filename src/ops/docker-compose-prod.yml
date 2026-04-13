@@ -112,8 +112,7 @@ services:
           - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
         volumes:
           - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-          - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
-          - ./grafana/redis_dashboard.json:/var/lib/grafana/dashboards/redis_dashboard.json
+          - ./grafana/dashboards:/var/lib/grafana/dashboards
           - ./grafana/default.yml:/etc/grafana/provisioning/dashboards/default.yml
           - ./grafana/alerting/contactpoints.yaml:/etc/grafana/provisioning/alerting/contactpoints.yaml
           - ./grafana/alerting/policies.yaml:/etc/grafana/provisioning/alerting/policies.yaml
