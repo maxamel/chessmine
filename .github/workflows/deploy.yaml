@@ -23,7 +23,6 @@ jobs:
 
       - name: Build, Tag, and Push Images
         run: |
-          # Ensure your script uses the Vultr Registry URL for tagging
           cd ./src/ops/
           chmod +x ./prepare_images.sh
           ./prepare_images.sh
@@ -42,17 +41,48 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: REDIS_PASSWORD
+          envs: REDIS_PASSWORD,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,GRAFANA_USERNAME,GRAFANA_PASSWORD
+          script_stop: true
           script: |
             cd ~/chessmine || exit
-            
-            # Update the code on the server
+
             git pull origin master
-            
+
             docker login ${{ secrets.VULTR_REGISTRY_URL }} -u ${{ secrets.VULTR_USERNAME }} -p ${{ secrets.VULTR_API_KEY }}
 
             cd ./src/ops/
             chmod +x spin_up.sh
-            REDIS_PASSWORD="$REDIS_PASSWORD" ./spin_up.sh prod soft
+            REDIS_PASSWORD="$REDIS_PASSWORD" \
+            TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
+            TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID" \
+            GRAFANA_USERNAME="$GRAFANA_USERNAME" \
+            GRAFANA_PASSWORD="$GRAFANA_PASSWORD" \
+            ./spin_up.sh prod soft
         env:
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GRAFANA_USERNAME: ${{ secrets.GRAFANA_USERNAME }}
+          GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
+
+      - name: Notify Telegram — success
+        if: success()
+        run: |
+          curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=✅ Deploy succeeded%0ACommit: ${{ github.sha }}%0ABy: ${{ github.actor }}" \
+            -d "parse_mode=HTML"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Notify Telegram — failure
+        if: failure()
+        run: |
+          curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=❌ Deploy FAILED%0ACommit: ${{ github.sha }}%0ABy: ${{ github.actor }}%0ARun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d "parse_mode=HTML"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

@@ -82,13 +82,14 @@ for service in $services; do
 
     if [ "$health_status" != "healthy" ]; then
       echo "Container $new_container_name did not reach health in time. Status: $health_status. Aborting."
-      break
+      exit 1
     fi
   done
 done
 
-docker restart grafana
-docker restart prometheus
+docker restart grafana || exit 1
+docker restart prometheus || exit 1
+
 # Start caddy thingy
 eval $(parse_yaml docker-compose-$1.yml)
 #echo $(parse_yaml docker-compose-dev.yml)
@@ -113,6 +114,7 @@ rm -r ../frontend/statictemp
 else
 echo COPY FAILED
 rm -r ../frontend/statictemp
+exit 1
 fi
 
 # copy Caddyfile to its destination
@@ -124,4 +126,5 @@ if [ $status = 0 ]; then
 echo RELOAD COMPLETED
 else
 echo RELOAD FAILED
+exit 1
 fi

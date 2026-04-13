@@ -1,3 +1,4 @@
+import os
 import unittest
 import socketio
 
@@ -8,9 +9,9 @@ from base_test_case import BaseTestCase
 class CheckmateTestCase(BaseTestCase):
 
     def test_checkmate(self):
-
+        game_server_url = os.environ.get("GAME_SERVER_URL", "http://localhost:5000")
         sio = socketio.SimpleClient()
-        sio.connect(url='http://localhost:5000/connect', namespace='/connect', transports=['websocket'])
+        sio.connect(url=f'{game_server_url}/connect', namespace='/connect', transports=['websocket'])
 
         @sio.client.on('game_over', namespace='/connect')
         def game_over(data):

@@ -20,6 +20,7 @@ class RedisPlug:
         self.friends_room = "friends_room_"
         self.player_info = "player_session_"
         self.player = "player_mapping_"
+        self.alert_deduplication = "alert_deduplication_"
         self.game = "game_mapping_"
         self.game_moves = "game_moves_"
         self.game_fens = "game_fens_"
@@ -58,6 +59,11 @@ class RedisPlug:
         if not self.get_redis().exists(key):
             return None
         return self.get_redis().hget(key, PGN)
+
+    def alert_dedup(self, alert_uuid: str) -> bool:
+        key = self.alert_deduplication + alert_uuid
+        was_set = self.get_redis().set(key, "1", nx=True, ex=3600)
+        return was_set
 
     # Should be set when user first connects to store his info and cleared when heartbeats are unanswered
     def set_player_session(self, player: Player, pipeline: Pipeline = None):

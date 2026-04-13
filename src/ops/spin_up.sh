@@ -16,7 +16,7 @@ else
     exit 1
 fi
 
-bash build_prometheus_targets.sh $1
+bash prometheus/build_prometheus_targets.sh $1
 
 if [ "$1" == "prod" ]; then
     docker compose -f docker-compose-$1.yml pull

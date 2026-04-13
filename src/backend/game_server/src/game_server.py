@@ -1,5 +1,6 @@
 import chess
 import logging
+import os
 import requests
 import threading
 import time
@@ -9,6 +10,7 @@ from typing import Union, Any
 from prometheus_client import Counter, Histogram
 from redis.client import Pipeline
 
+from alerter.telegram_alerter import TelegramAlerter
 from consts import *
 from elo import EloRating
 from logger import get_logger
@@ -17,7 +19,7 @@ from player import Player, PlayerMapping, Game, PlayerGameInfo
 from redis_plug import RedisPlug
 from server_response import ServerResponse, EndGameInfo
 from geo_ip_lookup import GeoIpLookup
-from util import get_turn_from_fen, GameStatus, get_opposite_color, get_millis_from_time_control, GameStatusDetail, \
+from util import get_turn_from_fen, GameStatus, get_opposite_color, GameStatusDetail, \
     piece_symbol_to_obj, ConnectStatus, Outcome, PlayerType, force_players_match
 
 current_milli_time = lambda: int(round(time.time() * 1000))
@@ -34,7 +36,14 @@ class GameServer:
         self.metric_move_time = Histogram('move_time', 'Move Time')
         self.matcher = RedisSmartMatcher()
         self.geo_ip_lookup = GeoIpLookup()
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+        self.alerter = TelegramAlerter(bot_token, chat_id) if bot_token and chat_id else None
         lgr.info("Initialized Game Server! {}".format("Hello World"))
+
+    def _alert(self, msg: str) -> None:
+        if self.alerter:
+            threading.Thread(target=self.alerter.alert, args=(msg,), daemon=True).start()
 
     def work(self):
         try:
@@ -275,6 +284,7 @@ class GameServer:
         # turn_start_time equals None if no moves have been played, and zero in case first move has been played
         if player_info.turn_start_time != 'None' and rival_info.turn_start_time != 'None' and player_info.turn_start_time != 0 and rival_info.turn_start_time != 0:
             lgr.info("Illegal attempt by player {} to abort game {} which is already in progress".format(player_info.sid, player_info.game_id))
+            self._alert(f"[chessmine] Illegal abort attempt by player {player_info.sid}")
             return
         rating_dict = self._update_ratings(sid, rival_info.sid, player_info.color, outcome=Outcome.NO_GAME)
         self.redis.set_game_status(game_id=player_info.game_id, status=GameStatus.ENDED)
@@ -319,6 +329,7 @@ class GameServer:
         # Does the color of the move match the color of the player's sid, is it his turn and is the move legal?
         if move["color"] != player_info.color[0] or get_turn_from_fen(board.fen()) != player_info.color or not board.is_legal(the_move):
             lgr.error("Illegal move {} by player {} in game {}".format(move, player_info.sid, player_info.game_id))
+            self._alert(f"[chessmine] Illegal move by player {player_info.sid}")
             return None, None
         board.push(the_move)
 

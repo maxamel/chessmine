@@ -5,7 +5,7 @@ from logger import get_logger
 from matcher.matcher import Matcher
 from player import Player
 from redis_plug import RedisPlug
-from util import get_millis_from_time_control, force_players_match
+from util import force_players_match
 
 
 lgr = get_logger(prefix="RedisSmartMatcher", path="/var/log/server.log")
