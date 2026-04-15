@@ -1,0 +1,58 @@
+---
+name: E2E Test
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:         # allow manual runs
+
+permissions: read-all
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: src/frontend/package.json
+
+      - name: Install dependencies
+        working-directory: src/frontend
+        run: npm install
+
+      - name: Install Playwright + Chromium
+        working-directory: src/frontend
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E test
+        id: test
+        working-directory: src/frontend
+        run: node test/e2e_playwright.js
+
+      - name: Upload screenshots on failure
+        if: failure() && steps.test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots-${{ github.run_id }}
+          path: /tmp/e2e-screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Notify Telegram on failure
+        if: failure()
+        run: |
+          curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=[chessmine] ❌ E2E test FAILED
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
