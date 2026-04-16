@@ -87,8 +87,8 @@ for service in $services; do
   done
 done
 
-docker restart grafana || exit 1
-docker restart prometheus || exit 1
+docker compose -f docker-compose-$1.yml up -d --no-deps --force-recreate grafana || exit 1
+docker compose -f docker-compose-$1.yml up -d --no-deps --force-recreate prometheus || exit 1
 
 # Start caddy thingy
 eval $(parse_yaml docker-compose-$1.yml)
