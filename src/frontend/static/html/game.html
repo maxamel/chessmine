@@ -22,13 +22,14 @@
         <!-- main css -->
         <link rel="stylesheet" href="../css/style.css">
         <link rel="stylesheet" href="../css/game.css">
+        <link rel="stylesheet" href="../css/mobile.css">
         <link rel="stylesheet" href="../css/loading.css">
         <link rel="stylesheet" href="../css/endgame.css">
         <link rel="stylesheet" href="../css/invite_friend.css">
         <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
         <!--link rel="stylesheet" href="static/css/clock.css"-->
     </head>
-    <body>
+    <body class="site-page game-page">
         <!--================Header Menu Area =================-->
         <div id="header"></div>
 
@@ -81,118 +82,118 @@
                 <div id="leftMostPane" class="leftmostpane">
                     <div id="settingsHolder" class="settingsClass">
                         <a href="#" class="nav-link myButton settingsButton dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Settings</a>
-                        <ul id="navigator" class="settings-menu dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link" data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#"><span class="settings-icon piece-theme-icon"></span></a>
+                        <ul id="settingsNavigator" class="settings-menu dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
+                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link settings-toggle" role="button" aria-expanded="false" href="#" aria-label="Piece themes"><span class="settings-icon piece-theme-icon"></span></a>
                                         <ul class="dropdown-menu-right">
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#">Classical
-                                                    <div id="classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
 
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Metro
-                                                    <div id="metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Alpha
-                                                    <div id="alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
 
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">American
-                                                    <div id="american" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-american" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Standard
-                                                    <div id="standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Urban
-                                                    <div id="urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wiki
-                                                    <div id="wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="piece-wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wood
-                                                    <div id="wood" style="width: 30%; position: relative;left: 10%;"></div>
+                                                    <div id="piece-wood" style="width: 30%; position: relative;left: 10%;"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                         </ul>
                                     </li>
                                     <li class="liner"></li>
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link" data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#"><span class="settings-icon board-theme-icon"></span></a>
+                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link settings-toggle" role="button" aria-expanded="false" href="#" aria-label="Board themes"><span class="settings-icon board-theme-icon"></span></a>
                                         <ul class="dropdown-menu-right">
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#">Classical
-                                                    <div id="classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
 
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Metro
-                                                    <div id="metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Alpha
-                                                    <div id="alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
 
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">American
-                                                    <div id="american" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-american" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Standard
-                                                    <div id="standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Urban
-                                                    <div id="urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wiki
-                                                    <div id="wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
+                                                    <div id="board-wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                             <li class="nav-item submenu">
                                                 <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wood
-                                                    <div id="wood" style="width: 30%; position: relative;left: 10%;"></div>
+                                                    <div id="board-wood" style="width: 30%; position: relative;left: 10%;"></div>
                                                 </a>
                                             </li>
                                             <li class="liner"></li>
                                         </ul>
                                     </li>
                                     <li class="liner"></li>
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link" data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#"><span class="settings-icon computer-level-icon"></span></a>
+                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link settings-toggle" role="button" aria-expanded="false" href="#" aria-label="Engine strength"><span class="settings-icon computer-level-icon"></span></a>
                                         <ul class="dropdown-menu-right">
                                             <li class="nav-item submenu">
                                                 <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="1">Level 1</a>

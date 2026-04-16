@@ -28,12 +28,12 @@
     #color: black;
 }
 
-#navigator li li {float:left; color: #006633;border-bottom: none;}
+#navigator li li {float:left; color: #1f2940;border-bottom: none;}
 
 #navigator li li a {display:block;font-size:12px;}
 
 #navigator li:hover {
-    background:#003f20;
+    background:#24324e;
     color: #ffffff;
 }
 
@@ -81,7 +81,7 @@
 .sub-nav-link:active {
     text-decoration: none;
     color: white;
-    background: #2f5233;
+    background: #24324e;
 }
 
 .time-control {
@@ -90,7 +90,7 @@
 /* Ensure the submenu opens to the right of the parent item */
 .nav-item.submenu {
     position: relative; /* Make sure the submenu is positioned relative to the parent item */
-    color: #2f5233
+    color: #1f2940
 }
 
 .dropdown-menu-right {
@@ -166,7 +166,7 @@
 .board-sub-nav-link:active {
     text-decoration: none;
     color: white;
-    background: #2f5233;
+    background: #24324e;
 }
 
 .computer-level-link {
@@ -185,14 +185,14 @@
 .computer-level-link:active {
     text-decoration: none;
     color: white;
-    background: #2f5233;
+    background: #24324e;
 }
 
 /* Active/selected state for dropdown items */
 .sub-nav-link.active,
 .board-sub-nav-link.active,
 .computer-level-link.active {
-    background: #81b622 !important;
+    background: #c8a96b !important;
     color: white !important;
     font-weight: bold;
     pointer-events: none;
@@ -202,7 +202,7 @@
 .sub-nav-link.active:hover,
 .board-sub-nav-link.active:hover,
 .computer-level-link.active:hover {
-    background: #81b622 !important;
+    background: #c8a96b !important;
     color: white !important;
 }
 
@@ -336,7 +336,7 @@
 }
 
 /* Settings menu main icons - make containers half size (only the direct icon buttons, not submenu items) */
-.settings-item > .sub-nav-link[data-bs-toggle="dropdown"] {
+.settings-item > .settings-toggle {
     width: 60px !important;
     min-height: 48px !important;
     padding: 8px !important;

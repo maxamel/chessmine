@@ -51,10 +51,10 @@
     cursor: pointer;
 }
 
-/* Labels and copy icon in theme green */
+/* Labels and copy icon aligned to the site palette */
 .invite-url-label,
 .invite-qr-label {
-    color: #81b622;
+    color: var(--site-navy);
     margin-bottom: 10px;
     font-size: 16px;
     font-weight: 500;
@@ -84,21 +84,21 @@
     color: #333;
 }
 
-/* Copy button: icon only, greenish to match theme */
+/* Copy button aligned to the site palette */
 .invite-copy-button {
     padding: 10px 14px;
     font-size: 18px;
     border-radius: 5px;
-    border: 1px solid #81b622;
-    background-color: transparent;
-    color: #81b622;
+    border: 1px solid rgba(31, 41, 64, 0.16);
+    background: linear-gradient(135deg, var(--site-navy), var(--site-navy-soft));
+    color: var(--site-cream-strong);
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .invite-copy-button:hover {
-    background-color: #81b622;
-    color: #fff;
+    background: linear-gradient(135deg, var(--site-gold), var(--site-gold-strong));
+    color: var(--site-navy);
 }
 
 .invite-copy-button:active {
@@ -110,7 +110,7 @@
     text-align: center;
 }
 
-/* QR code stays black/white for scan reliability; container can have theme border */
+/* QR code stays black/white for scan reliability; container uses palette border */
 .invite-qrcode {
     display: inline-block;
     padding: 20px;
@@ -118,7 +118,7 @@
     border-radius: 10px;
     margin: 0 auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid #81b622;
+    border: 1px solid rgba(31, 41, 64, 0.16);
 }
 
 @media (max-width: 768px) {

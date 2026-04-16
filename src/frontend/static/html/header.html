@@ -1,110 +1,115 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <link rel="stylesheet" href="../css/bootstrap.css">
-        <link rel="stylesheet" href="../css/font-awesome.min.css">
-        <link rel="stylesheet" href="../css/magnific-popup.css">
-        <link rel="stylesheet" href="../vendors/animate-css/animate.css">
+<header class="header_area site-header">
+    <div class="main_menu">
+        <nav class="navbar site-navbar">
+            <div class="container site-header-shell">
+                <a class="navbar-brand site-brand" href="/">
+                    <img src="../img/chesspieces/metro/wN.png" alt="Chessmine logo" class="nav-logo">
+                    <span class="second_title">CHESSMINE</span>
+                </a>
 
-        <link rel="stylesheet" type="text/css" href="../css/chessground.base.css" />
-        <link rel="stylesheet" type="text/css" href="../css/chessground.brown.css" />
-        <link rel="stylesheet" type="text/css" href="../css/chessground.cburnett.css" />
-        <!-- main css -->
-        <link rel="stylesheet" href="../css/style.css">
-        <link rel="stylesheet" href="../css/game.css">
-        <link rel="stylesheet" href="../css/loading.css">
-        <link rel="stylesheet" href="../css/endgame.css">
-        <link rel="stylesheet" href="../css/submenu.css">
-    </head>
-    <body>
-        <header class="header_area">
-            <div class="main_menu">
-                <nav class="navbar navbar-expand-lg navbar-light">
-                    <div class="container box_1620">
-                        <!-- Brand and toggle get grouped for better mobile display -->
-                        <img src="../img/chesspieces/metro/wN.png" type="image/png" alt="" width="70" height="60">
-                        <div class="second_title">CHESSMINE</div>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                                            <!-- Collect the nav links, forms, and other content for toggling -->
-                    <div class="collapse navbar-collapse offset">
-                        <ul class="nav navbar-nav menu_nav justify-content-center">
-                            <li class="nav-item"><a class="nav-link" href="../../../..">Home</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
+                <button class="site-menu-toggle d-lg-none" type="button" aria-label="Open menu" data-mobile-menu-toggle>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
 
-                            <li class="nav-item submenu dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Play</a>
-                                <ul id="navigator" class="dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
-                                    <li class="nav-item submenu"><a class="nav-link" href="#">Daily Challenge</a></li>
-                                    <li class="liner"></li>
-                                    <li class="nav-item submenu"><a class="nav-link invite-friend" href="#">Invite a Friend</a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">1 + 0</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">1 + 1</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">3 + 0</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">3 + 3</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">5 + 0</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">5 + 5</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#">30 + 0</a>
-                                        </ul>
-                                    </li>
-                                    <li class="liner"></li>
-                                    <li class="nav-item submenu"><a class="nav-link" href="#">Quick Game</a>
-                                    <!--li><a href="#" target="_self" >SUB SUB LIST >></a-->
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">1 + 0</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">1 + 1</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">3 + 0</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">3 + 3</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">5 + 0</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">5 + 5</a>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#">30 + 0</a>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                    </div>
-                </nav>
+                <div class="site-desktop-nav d-none d-lg-block">
+                    <ul class="nav navbar-nav menu_nav justify-content-end align-items-center">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
+                        <li class="nav-item submenu dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Play</a>
+                            <ul id="navigator" class="dropdown-menu site-play-menu">
+                                <li class="nav-item submenu"><a class="nav-link site-disabled-link" href="#" aria-disabled="true">Daily Challenge</a></li>
+                                <li class="liner"></li>
+                                <li class="nav-item submenu">
+                                    <a class="nav-link" href="#">Invite a Friend</a>
+                                    <ul class="dropdown-menu-right">
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="1 + 0">1 + 0</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="1 + 1">1 + 1</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="3 + 0">3 + 0</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="3 + 3">3 + 3</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="5 + 0">5 + 0</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="5 + 5">5 + 5</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link invite-friend-time" href="#" data-play-action="invite" data-time-control="30 + 0">30 + 0</a></li>
+                                    </ul>
+                                </li>
+                                <li class="liner"></li>
+                                <li class="nav-item submenu">
+                                    <a class="nav-link" href="#">Quick Game</a>
+                                    <ul class="dropdown-menu-right">
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="1 + 0">1 + 0</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="1 + 1">1 + 1</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="3 + 0">3 + 0</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="3 + 3">3 + 3</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="5 + 0">5 + 0</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="5 + 5">5 + 5</a></li>
+                                        <li class="nav-item submenu"><a class="time-control sub-nav-link" href="#" data-play-action="quick" data-time-control="30 + 0">30 + 0</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </header>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-                integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-                integrity="sha512-YUkaLm+KJ5lQXDBdqBqk7EVhJAdxRnVdT2vtCzwPHSweCzyMgYV/tgGF4/dCyqtCC2eCphz0lRQgatGVdfR0ww=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js"
-                integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"
-                integrity="sha512-8ExARjWWkIllMlNzVg7JKq9RKWPlJABQUNq6YvAjE/HobctjH/NA+bSiDMDvouBVjp4Wwnf1VP1OEv7Zgjtuxw=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer">
-        </script>
-        <script type="module" src="../js/header.js"></script>
-    </body>
-</html>
+        </nav>
+    </div>
+
+    <div class="site-mobile-menu" aria-hidden="true">
+        <button class="site-mobile-backdrop" type="button" aria-label="Close menu" data-mobile-menu-close></button>
+        <aside class="site-mobile-panel" aria-label="Mobile navigation">
+            <div class="site-mobile-panel-head">
+                <span class="site-mobile-title">Menu</span>
+                <button class="site-mobile-close" type="button" aria-label="Close menu" data-mobile-menu-close>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+
+            <nav class="site-mobile-nav">
+                <a class="site-mobile-link" href="/">Home</a>
+                <a class="site-mobile-link" href="/about">About</a>
+                <a class="site-mobile-link" href="/pricing">Pricing</a>
+
+                <button class="site-mobile-link site-mobile-toggle" type="button" aria-expanded="false" data-mobile-target="mobilePlayPanel">
+                    <span>Play</span>
+                    <span class="site-mobile-chevron"></span>
+                </button>
+                <div class="site-mobile-subpanel" id="mobilePlayPanel">
+                    <span class="site-mobile-link site-mobile-disabled">Daily Challenge</span>
+
+                    <button class="site-mobile-link site-mobile-toggle" type="button" aria-expanded="false" data-mobile-target="mobileInvitePanel">
+                        <span>Invite a Friend</span>
+                        <span class="site-mobile-chevron"></span>
+                    </button>
+                    <div class="site-mobile-subpanel site-mobile-time-grid" id="mobileInvitePanel">
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="1 + 0">1 + 0</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="1 + 1">1 + 1</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="3 + 0">3 + 0</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="3 + 3">3 + 3</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="5 + 0">5 + 0</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="5 + 5">5 + 5</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="invite" data-time-control="30 + 0">30 + 0</button>
+                    </div>
+
+                    <button class="site-mobile-link site-mobile-toggle" type="button" aria-expanded="false" data-mobile-target="mobileQuickPanel">
+                        <span>Quick Game</span>
+                        <span class="site-mobile-chevron"></span>
+                    </button>
+                    <div class="site-mobile-subpanel site-mobile-time-grid" id="mobileQuickPanel">
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="1 + 0">1 + 0</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="1 + 1">1 + 1</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="3 + 0">3 + 0</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="3 + 3">3 + 3</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="5 + 0">5 + 0</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="5 + 5">5 + 5</button>
+                        <button class="site-mobile-time-control" type="button" data-play-action="quick" data-time-control="30 + 0">30 + 0</button>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+    </div>
+</header>
+
+<script type="module" src="../js/header.js"></script>

@@ -42,6 +42,107 @@ $(document).ready(function () {
     var engine = null;       // stockfish instance
     var engine_sid = null;   // for engine play only
 
+    function getThemeNameFromPreviewId(idValue, prefix) {
+        return idValue.replace(prefix + "-", "").trim().toLowerCase();
+    }
+
+    function renderPiecePreview(childDiv, themeName) {
+        const imagePath = `img/chesspieces/${themeName}/wB.png`;
+        childDiv.style.backgroundImage = `url(${imagePath})`;
+        childDiv.style.backgroundSize = 'contain';
+        childDiv.style.backgroundPosition = 'center';
+        childDiv.style.backgroundRepeat = 'no-repeat';
+    }
+
+    function clearPiecePreview(childDiv) {
+        childDiv.style.backgroundImage = 'none';
+    }
+
+    function renderBoardPreview(childDiv, themeName) {
+        const colorBoard = getBoardColorsByName(themeName);
+        const light = colorBoard[0];
+        const dark = colorBoard[1];
+
+        childDiv.innerHTML = '';
+        childDiv.style.display = 'flex';
+        childDiv.style.flexWrap = 'wrap';
+        childDiv.style.borderRadius = '6px';
+        childDiv.style.overflow = 'hidden';
+        childDiv.style.height = '40px';
+
+        for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 2; col++) {
+                const sq = document.createElement('div');
+                sq.style.width = '50%';
+                sq.style.height = '50%';
+                sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
+                childDiv.appendChild(sq);
+            }
+        }
+    }
+
+    function clearBoardPreview(childDiv) {
+        childDiv.innerHTML = '';
+        childDiv.style.display = '';
+        childDiv.style.height = '';
+    }
+
+    function attachSettingsMenuListeners() {
+        const settingsMenu = document.getElementById('settingsNavigator');
+        if (!settingsMenu) {
+            return;
+        }
+
+        const settingsItems = settingsMenu.querySelectorAll('.settings-item');
+        settingsItems.forEach(item => {
+            const trigger = item.querySelector(':scope > .settings-toggle');
+            if (!trigger) {
+                return;
+            }
+
+            trigger.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const isOpen = item.classList.contains('is-open');
+                settingsItems.forEach(other => {
+                    other.classList.remove('is-open');
+                    const otherTrigger = other.querySelector(':scope > .settings-toggle');
+                    if (otherTrigger) {
+                        otherTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                item.classList.toggle('is-open', !isOpen);
+                trigger.setAttribute('aria-expanded', String(!isOpen));
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!settingsMenu.contains(event.target)) {
+                settingsItems.forEach(item => {
+                    item.classList.remove('is-open');
+                    const trigger = item.querySelector(':scope > .settings-toggle');
+                    if (trigger) {
+                        trigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        });
+
+        const settingsHolder = document.getElementById('settingsHolder');
+        if (settingsHolder) {
+            settingsHolder.addEventListener('hidden.bs.dropdown', function () {
+                settingsItems.forEach(item => {
+                    item.classList.remove('is-open');
+                    const trigger = item.querySelector(':scope > .settings-toggle');
+                    if (trigger) {
+                        trigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+        }
+    }
+
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
     var socket = io("https://APP_URL/connect", {
@@ -352,6 +453,7 @@ $(document).ready(function () {
 
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
+        attachSettingsMenuListeners();
         attachPieceThemeListeners();
         attachColorThemeListener();
         attachComputerLevelListener();
@@ -455,15 +557,16 @@ $(document).ready(function () {
         }
 
         function attachPieceThemeListeners() {
-            const subNavLinks = document.querySelectorAll('.sub-nav-link');
+            const subNavLinks = document.querySelectorAll('.settings-menu .dropdown-menu-right .sub-nav-link');
 
             // Set initial active state based on current pieceTheme
             subNavLinks.forEach(link => {
                 const childDiv = link.querySelector('div');
                 if (childDiv) {
-                    const linkValue = link.textContent.trim().toLowerCase();
-                    if (linkValue === pieceTheme) {
+                    const linkValue = getThemeNameFromPreviewId(childDiv.id, 'piece');
+                    if (linkValue === pieceTheme.toLowerCase()) {
                         link.classList.add('active');
+                        renderPiecePreview(childDiv, linkValue);
                     }
                 }
             });
@@ -478,17 +581,15 @@ $(document).ready(function () {
                     link.addEventListener('mouseover', () => {
                         // Don't show preview if this is the active item
                         if (!link.classList.contains('active')) {
-                            // Change the background image or other properties
-                            const imagePath = `img/chesspieces/${childDiv.id}/wB.png`;
-                            childDiv.style.backgroundImage = `url(${imagePath})`;
-                            childDiv.style.backgroundSize = 'contain';
-                            childDiv.style.backgroundPosition = 'center';
-                            childDiv.style.backgroundRepeat = 'no-repeat';
+                            const themeName = getThemeNameFromPreviewId(childDiv.id, 'piece');
+                            renderPiecePreview(childDiv, themeName);
                         }
                     });
 
                     link.addEventListener('mouseout', () => {
-                        childDiv.style.backgroundImage = 'none'; // Reset or replace with default
+                        if (!link.classList.contains('active')) {
+                            clearPiecePreview(childDiv);
+                        }
                     });
 
                     // Attach a click event listener
@@ -501,7 +602,7 @@ $(document).ready(function () {
                         }
                         
                         console.log(`clicker!`);
-                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        const linkValue = getThemeNameFromPreviewId(childDiv.id, 'piece');
                         console.log(`You clicked on: ${linkValue}`);
                         pieceTheme = linkValue.toLowerCase();
                         
@@ -524,9 +625,16 @@ $(document).ready(function () {
                         setupThemes(pieceTheme, boardTheme);
                         
                         // Remove active class from all piece theme links
-                        subNavLinks.forEach(l => l.classList.remove('active'));
+                        subNavLinks.forEach(l => {
+                            l.classList.remove('active');
+                            const preview = l.querySelector('div');
+                            if (preview) {
+                                clearPiecePreview(preview);
+                            }
+                        });
                         // Add active class to clicked link
                         link.classList.add('active');
+                        renderPiecePreview(childDiv, pieceTheme);
                     });
                 }
             });
@@ -539,9 +647,10 @@ $(document).ready(function () {
             subNavLinks.forEach(link => {
                 const childDiv = link.querySelector('div');
                 if (childDiv) {
-                    const linkValue = link.textContent.trim().toLowerCase();
-                    if (linkValue === boardTheme) {
+                    const linkValue = getThemeNameFromPreviewId(childDiv.id, 'board');
+                    if (linkValue === boardTheme.toLowerCase()) {
                         link.classList.add('active');
+                        renderBoardPreview(childDiv, linkValue);
                     }
                 }
             });
@@ -556,38 +665,16 @@ $(document).ready(function () {
                     link.addEventListener('mouseenter', () => {
                         // Don't show preview if this is the active item
                         if (!link.classList.contains('active')) {
-                            const colorBoard = getBoardColorsByName(childDiv.id);
-                            const light = colorBoard[0];
-                            const dark = colorBoard[1];
-
-                            // Build a 2x2 board preview aligned to the right
-                            // Pattern: top-left is light (like a1 in chess notation)
-                            childDiv.innerHTML = '';
-                            childDiv.style.display = 'flex';
-                            childDiv.style.flexWrap = 'wrap';
-                            childDiv.style.borderRadius = '6px';
-                            childDiv.style.overflow = 'hidden';
-                            childDiv.style.height = '40px';
-
-                            // Create 2x2 grid: (row + col) % 2 === 0 is light square
-                            for (let row = 0; row < 2; row++) {
-                                for (let col = 0; col < 2; col++) {
-                                    const sq = document.createElement('div');
-                                    sq.style.width = '50%';
-                                    sq.style.height = '50%';
-                                    // Match the pattern used in setupBoard: (file + rank) % 2 === 0 is light
-                                    sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
-                                    childDiv.appendChild(sq);
-                                }
-                            }
+                            const themeName = getThemeNameFromPreviewId(childDiv.id, 'board');
+                            renderBoardPreview(childDiv, themeName);
                         }
                     });
 
                     link.addEventListener('mouseleave', () => {
                         // Reset preview
-                        childDiv.innerHTML = '';
-                        childDiv.style.display = '';
-                        childDiv.style.height = '';
+                        if (!link.classList.contains('active')) {
+                            clearBoardPreview(childDiv);
+                        }
                     });
 
                     // Attach a click event listener
@@ -600,7 +687,7 @@ $(document).ready(function () {
                         }
                         
                         console.log(`clicker!`);
-                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        const linkValue = getThemeNameFromPreviewId(childDiv.id, 'board');
                         console.log(`You clicked on: ${linkValue}`);
                         boardTheme = linkValue.toLowerCase();
                         
@@ -623,9 +710,16 @@ $(document).ready(function () {
                         setupBoard(boardTheme);
                         
                         // Remove active class from all board theme links
-                        subNavLinks.forEach(l => l.classList.remove('active'));
+                        subNavLinks.forEach(l => {
+                            l.classList.remove('active');
+                            const preview = l.querySelector('div');
+                            if (preview) {
+                                clearBoardPreview(preview);
+                            }
+                        });
                         // Add active class to clicked link
                         link.classList.add('active');
+                        renderBoardPreview(childDiv, boardTheme);
                     });
                 }
             });
@@ -710,7 +804,7 @@ $(document).ready(function () {
                         resetBoard({"from": promotion_in_progress[0], "to": promotion_in_progress[1]});
                         promotion_in_progress = [];
                     }
-                    elem.style.border = "3px solid #81b622";
+                    elem.style.border = "3px solid #c8a96b";
                     elem.style.color = "white";
                     elem.style.fontWeight = "bolder";
                 }, false);
@@ -1050,7 +1144,7 @@ $(document).ready(function () {
         document.getElementById(arrow).style.display = "inline-block";
         if (orient == 'up') {
             document.getElementById(arrow).innerHTML = "&#x2197(+" + delta +")";
-            document.getElementById(arrow).style.color = "green";
+            document.getElementById(arrow).style.color = "#c8a96b";
         } else if (orient == 'down') {
             document.getElementById(arrow).innerHTML = "&#x2198(" + delta +")";
             document.getElementById(arrow).style.color = "crimson";
@@ -1431,7 +1525,7 @@ $(document).ready(function () {
                 var connect_icons = document.getElementsByClassName("dottop");
                 if (ans.rival_connect_status === 2) {
                     for (const icon of connect_icons)
-                        icon.style.backgroundColor = "#59fb74"
+                        icon.style.backgroundColor = "#c8a96b"
                 } else if (ans.rival_connect_status === 3 && engine_sid != null) {
                     console.log("Rival disconnected")
                     for (const icon of connect_icons)

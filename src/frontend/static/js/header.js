@@ -1,8 +1,6 @@
 $(document).ready(function () {
-    var cookie_data = localStorage.getItem("user_session");
-    var prefs = localStorage.getItem("user_prefs");
     var socket = io("https://APP_URL/connect", {
-        transports: [ "polling", "websocket"],
+        transports: ["polling", "websocket"],
         timestampParam: "timestamp",
         tryAllTransports: true,
         query: {
@@ -10,30 +8,29 @@ $(document).ready(function () {
         }
     });
 
+    function getDefaultPrefs() {
+        return {
+            "time_control": "5+0",
+            "piece_theme": "classical",
+            "board_theme": "classical",
+            "computer_level": 5
+        };
+    }
+
     function getOrInitPrefs() {
-        let storedPrefs = localStorage.getItem("user_prefs");
-        if (storedPrefs == null) {
-            return {
-                "time_control": "5+0",
-                "piece_theme": "classical",
-                "board_theme": "classical",
-                "computer_level": 5
-            };
+        var storedPrefs = localStorage.getItem("user_prefs");
+        if (!storedPrefs) {
+            return getDefaultPrefs();
         }
         try {
-            return JSON.parse(storedPrefs);
+            return JSON.parse(storedPrefs) || getDefaultPrefs();
         } catch (e) {
-            return {
-                "time_control": "5+0",
-                "piece_theme": "classical",
-                "board_theme": "classical",
-                "computer_level": 5
-            };
+            return getDefaultPrefs();
         }
     }
 
     function getOrInitCookie() {
-        let storedCookie = localStorage.getItem("user_session");
+        var storedCookie = localStorage.getItem("user_session");
         if (!storedCookie) {
             return {};
         }
@@ -44,76 +41,150 @@ $(document).ready(function () {
         }
     }
 
-    // Quick Game time controls (all time-control links that are NOT invite-friend-time)
-    var quick_time_controls = document.querySelectorAll(".time-control.sub-nav-link:not(.invite-friend-time)");
-    quick_time_controls.forEach(function (elem) {
-        elem.addEventListener("click", function () {
-            $(".fullpage").fadeIn("fast");
-
-            prefs = getOrInitPrefs();
-            cookie_data = getOrInitCookie();
-
-            console.log("Current prefs:", prefs);
-            console.log("Setting time_control to: " + elem.textContent);
-
-            prefs.time_control = elem.textContent;
-            cookie_data.preferences = prefs;
-            localStorage.setItem("user_prefs", JSON.stringify(prefs));
-
-            socket.emit("/api/play", { "data": cookie_data }, function (ans) {
-                cookie_data.sid = ans;
-                localStorage.setItem("user_session", JSON.stringify(cookie_data));
-                window.location.href = "/game";
-            });
+    function closeMobileMenu() {
+        document.body.classList.remove("site-mobile-menu-open");
+        document.querySelectorAll(".site-mobile-subpanel.is-open").forEach(function (panel) {
+            panel.classList.remove("is-open");
         });
+        document.querySelectorAll(".site-mobile-toggle[aria-expanded='true']").forEach(function (toggle) {
+            toggle.setAttribute("aria-expanded", "false");
+        });
+    }
+
+    function toggleMobilePanel(toggleButton) {
+        var targetId = toggleButton.getAttribute("data-mobile-target");
+        var targetPanel = targetId ? document.getElementById(targetId) : null;
+
+        if (!targetPanel) {
+            return;
+        }
+
+        var isOpen = targetPanel.classList.contains("is-open");
+        var parent = targetPanel.parentElement;
+
+        if (parent) {
+            Array.prototype.forEach.call(parent.children, function (child) {
+                if (child !== targetPanel && child.classList && child.classList.contains("site-mobile-subpanel")) {
+                    child.classList.remove("is-open");
+                }
+                if (child !== toggleButton && child.classList && child.classList.contains("site-mobile-toggle")) {
+                    child.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+
+        targetPanel.querySelectorAll(".site-mobile-subpanel.is-open").forEach(function (panel) {
+            panel.classList.remove("is-open");
+        });
+        targetPanel.querySelectorAll(".site-mobile-toggle[aria-expanded='true']").forEach(function (button) {
+            button.setAttribute("aria-expanded", "false");
+        });
+
+        targetPanel.classList.toggle("is-open", !isOpen);
+        toggleButton.setAttribute("aria-expanded", String(!isOpen));
+    }
+
+    function startQuickGame(timeControl) {
+        var prefs = getOrInitPrefs();
+        var cookieData = getOrInitCookie();
+
+        prefs.time_control = timeControl.replace(/\s+/g, "");
+        cookieData.preferences = prefs;
+        localStorage.setItem("user_prefs", JSON.stringify(prefs));
+
+        socket.emit("/api/play", { "data": cookieData }, function (ans) {
+            cookieData.sid = ans;
+            localStorage.setItem("user_session", JSON.stringify(cookieData));
+            window.location.href = "/game";
+        });
+    }
+
+    function startInvite(timeControl) {
+        var prefs = getOrInitPrefs();
+        var cookieData = getOrInitCookie();
+
+        prefs.time_control = timeControl.replace(/\s+/g, "");
+        cookieData.preferences = prefs;
+
+        if (cookieData.sid) {
+            delete cookieData.sid;
+        }
+
+        localStorage.setItem("user_prefs", JSON.stringify(prefs));
+
+        socket.emit("/api/invite", { "data": cookieData }, function (ans) {
+            var extra = ans && ans.extra_data;
+            if (typeof extra === "string") {
+                try {
+                    extra = JSON.parse(extra);
+                } catch (e) {
+                    extra = {};
+                }
+            }
+
+            var waitingId = (extra && extra.waiting_id) || (ans && ans.waiting_id) || null;
+            if (ans && ans.dst_sid) {
+                cookieData.sid = ans.dst_sid;
+            }
+
+            localStorage.setItem("user_session", JSON.stringify(cookieData));
+
+            if (waitingId) {
+                window.location.href = "/game?waiting_id=" + encodeURIComponent(waitingId) + "&role=host";
+            } else {
+                window.location.href = "/game";
+            }
+        });
+    }
+
+    document.addEventListener("click", function (event) {
+        var menuToggle = event.target.closest("[data-mobile-menu-toggle]");
+        if (menuToggle) {
+            event.preventDefault();
+            document.body.classList.add("site-mobile-menu-open");
+            return;
+        }
+
+        var menuClose = event.target.closest("[data-mobile-menu-close]");
+        if (menuClose) {
+            event.preventDefault();
+            closeMobileMenu();
+            return;
+        }
+
+        var mobileToggle = event.target.closest(".site-mobile-toggle");
+        if (mobileToggle) {
+            event.preventDefault();
+            toggleMobilePanel(mobileToggle);
+            return;
+        }
+
+        var playAction = event.target.closest("[data-play-action][data-time-control]");
+        if (playAction) {
+            event.preventDefault();
+
+            var action = playAction.getAttribute("data-play-action");
+            var timeControl = playAction.getAttribute("data-time-control");
+
+            closeMobileMenu();
+
+            if (action === "invite") {
+                startInvite(timeControl);
+            } else {
+                startQuickGame(timeControl);
+            }
+            return;
+        }
+
+        var link = event.target.closest(".site-mobile-link[href]");
+        if (link) {
+            closeMobileMenu();
+        }
     });
 
-    // Invite Friend time controls
-    var invite_time_controls = document.querySelectorAll(".invite-friend-time");
-    invite_time_controls.forEach(function (elem) {
-        elem.addEventListener("click", function () {
-            $(".fullpage").fadeIn("fast");
-
-            prefs = getOrInitPrefs();
-            cookie_data = getOrInitCookie();
-
-            console.log("Current prefs (invite):", prefs);
-            console.log("Setting time_control for invite to: " + elem.textContent);
-
-            prefs.time_control = elem.textContent;
-            cookie_data.preferences = prefs;
-            // For Invite Friend we always want a fresh room, not to be pulled back
-            // into an existing ongoing game through an old sid.
-            if (cookie_data.sid) {
-                console.log("Clearing existing sid for Invite Friend flow:", cookie_data.sid);
-                delete cookie_data.sid;
-            }
-            localStorage.setItem("user_prefs", JSON.stringify(prefs));
-
-            socket.emit("/api/invite", { "data": cookie_data }, function (ans) {
-                console.log("Response from /api/invite:", ans);
-                // extra_data can be a JSON string (BE returns serialized dict) or an object
-                var extra = ans && ans.extra_data;
-                if (typeof extra === "string") {
-                    try {
-                        extra = JSON.parse(extra);
-                    } catch (e) {
-                        extra = {};
-                    }
-                }
-                var waitingId = (extra && extra.waiting_id) || (ans && ans.waiting_id) || null;
-                if (ans && ans.dst_sid) {
-                    cookie_data.sid = ans.dst_sid;
-                }
-                localStorage.setItem("user_session", JSON.stringify(cookie_data));
-
-                if (waitingId) {
-                    window.location.href = "/game?waiting_id=" + encodeURIComponent(waitingId) + "&role=host";
-                } else {
-                    // Fallback: behave like quick game if something unexpected happens
-                    window.location.href = "/game";
-                }
-            });
-        });
+    window.addEventListener("resize", function () {
+        if (window.innerWidth >= 992) {
+            closeMobileMenu();
+        }
     });
 });

@@ -12,48 +12,50 @@
         <link rel="stylesheet" href="../vendors/animate-css/animate.css">
         <!-- main css -->
         <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/mobile.css">
     </head>
-    <body>
-	<!--================Header Menu Area =================-->
-	<div id="header"></div>
-	<!--================Header Menu Area =================-->
-    <!--================Srart Pricing Area =================-->
-	<section class="price_area section_gap">
-		<div class="container">
-			<div class="row justify-content-center">
-				<div class="col-lg-8 text-center">
-					<div>
-						<div class="geist-mono-maxim" style="margin-top: 60px">The Chessmine Philosophy</div>
-						<div class="third_title">
-                            <p style="color: white">The main goal of the project is to provide a lightweight, hassle-free and minimalist chess experience while keeping it free and open for everyone.
-                                No registrations and no hidden fees. Just hop in, play a game, analyze it on the spot and go about your business.
-                                We don't save your games and analyses and you don't have to worry about registering or setting up and maintaining an account.
-                            </p>
-                        </div>
-                        <div class="third_title">
-                            <p style="color: white">As infrastructure cloud costs are going up, it becomes harder and harder
-                                for developers to put up their free services online. <a href="https://lichess.org/" class="newlink">Lichess</a> yearly costs as of 2024 reached
-                                over <a href="https://docs.google.com/spreadsheets/d/1Si3PMUJGR9KrpE5lngSkHLJKJkb0ZuI4/preview" class="newlink">500K$</a>.
-                                For this reason Chessmine is focused on minimalism and efficiency. There is always a fine balance between simplicity and enjoyability.
-                                Sometimes it is better to keep things simpler, and not get into a feature creep labyrinth which ultimately only hurts
-                                user experience, overly complicates the software and soars the infrastructure costs through the roof.
-                            </p>
-                        </div>
-					</div>
-				</div>
-			</div>
-			</div>
-		</div>
-	</section>
-	<!--================End Pricing Area =================-->
-	<!--================Footer Area =================-->
-	<div id="footer"></div>
-	<!--================End Footer Area =================-->
+    <body class="site-page about-page">
+    <!--================Header Menu Area =================-->
+    <div id="header"></div>
+    <!--================Header Menu Area =================-->
 
+    <!--================About / Philosophy Area =================-->
+    <section class="price_area section_gap">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="geist-mono-maxim">The Chessmine Philosophy</div>
+                    <div class="third_title">
+                        <p>The main goal of the project is to provide a lightweight, hassle-free and
+                            minimalist chess experience while keeping it free and open for everyone.
+                            No registrations and no hidden fees. Just hop in, play a game, analyze it on the spot and go
+                            about your business.
+                            We don't save your games and analyses and you don't have to worry about registering or
+                            setting up and maintaining an account.
+                        </p>
+                    </div>
+                    <div class="third_title">
+                        <p>As infrastructure cloud costs are going up, it becomes harder and harder
+                            for developers to put up their free services online.
+                            <a href="https://lichess.org/" class="newlink">Lichess</a> yearly costs as of 2024 reached
+                            over <a href="https://docs.google.com/spreadsheets/d/1Si3PMUJGR9KrpE5lngSkHLJKJkb0ZuI4/preview" class="newlink">500K$</a>.
+                            For this reason Chessmine is focused on minimalism and efficiency. There is always a fine
+                            balance between simplicity and enjoyability.
+                            Sometimes it is better to keep things simpler, and not get into a feature creep labyrinth
+                            which ultimately only hurts user experience, overly complicates the software and soars the
+                            infrastructure costs through the roof.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End About Area =================-->
 
+    <!--================Footer Area =================-->
+    <div id="footer"></div>
+    <!--================End Footer Area =================-->
 
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"
             integrity="sha512-8ExARjWWkIllMlNzVg7JKq9RKWPlJABQUNq6YvAjE/HobctjH/NA+bSiDMDvouBVjp4Wwnf1VP1OEv7Zgjtuxw=="
             crossorigin="anonymous"
@@ -64,13 +66,9 @@
             crossorigin="anonymous"
             referrerpolicy="no-referrer">
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js"
-            integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ=="
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer">
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
-            integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ=="
+    <!-- Bootstrap bundle includes Popper — no need for separate Popper script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+            integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer">
     </script>
@@ -88,10 +86,10 @@
     <script src="../vendors/counter-up/jquery.counterup.min.js"></script>
     <script src="../js/theme.js"></script>
     <script type="text/javascript">
-            $(function(){
-              $("#header").load("html/header.html");
-              $("#footer").load("html/footer.html");
-            });
+        $(function () {
+            $("#header").load("html/header.html");
+            $("#footer").load("html/footer.html");
+        });
     </script>
     </body>
 </html>

@@ -128,28 +128,28 @@ button:focus {
 /* Start Gradient Area css
 ============================================================================================ */
 .gradient-bg, .header_area .navbar .nav .nav-item.submenu ul .nav-item:hover .nav-link, .blog_right_sidebar .widget_title, .blog_right_sidebar .newsletter_widget .bbtns, .blog_right_sidebar .tag_cloud_widget ul li a:hover, .blog-pagination .page-item.active .page-link, .blog-pagination .page-link:hover, .comments-area .btn-reply:hover, .recent_update_inner .nav.nav-tabs li a.active, .recent_update_inner .nav.nav-tabs li a:hover, .common_style .line:after, .price_item:hover .price_head, .price_item:hover .price_footer, .testimonial_area .active_testimonial .owl-dots, .news_widget .input-group .sub-btn {
-  background: -webkit-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: -moz-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: -o-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: linear-gradient(90deg, #81b622 0%, #ecf87f 100%); }
+  background: -webkit-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: -moz-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: -o-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%); }
 
 .border-gradient {
-  border-image: -webkit-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  border-image: -moz-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  border-image: -o-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  border-image: linear-gradient(90deg, #81b622 0%, #ecf87f 100%); }
+  border-image: -webkit-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  border-image: -moz-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  border-image: -o-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  border-image: linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%); }
 
 .gradient-bg2 {
-  background: -webkit-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: -moz-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: -o-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: linear-gradient(90deg, #81b622 0%, #ecf87f 100%); }
+  background: -webkit-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: -moz-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: -o-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%); }
 
 .gradient-color, .contact_info .info_item i, .recent_update_inner .nav.nav-tabs li a span.lnr {
-  background: -webkit-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: -moz-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: -o-linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
-  background: linear-gradient(90deg, #81b622 0%, #ecf87f 100%);
+  background: -webkit-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: -moz-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: -o-linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
+  background: linear-gradient(90deg, #c8a96b 0%, #d7b97c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent; }
 
@@ -169,21 +169,21 @@ button:focus {
   text-transform: uppercase;
   border: double 2px transparent;
   border-radius: 5px;
-  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #81b622, #ecf87f);
-  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #81b622, #ecf87f);
-  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #81b622, #ecf87f);
-  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #81b622, #ecf87f);
-  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #81b622, #ecf87f);
+  background-image: linear-gradient(white, white), radial-gradient(circle at top left, #c8a96b, #d7b97c);
+  background-image: -webkit-linear-gradient(white, white), -webkit-radial-gradient(circle at top left, #c8a96b, #d7b97c);
+  background-image: -moz-linear-gradient(white, white), -moz-radial-gradient(circle at top left, #c8a96b, #d7b97c);
+  background-image: -ms-linear-gradient(white, white), -ms-radial-gradient(circle at top left, #c8a96b, #d7b97c);
+  background-image: -o-linear-gradient(white, white), -o-radial-gradient(circle at top left, #c8a96b, #d7b97c);
   background-origin: border-box;
   background-clip: content-box, border-box; }
   .primary_btn span {
     padding: 0 35px; }
   .primary_btn:hover {
-    background-image: linear-gradient(to right, #81b622 0%, #ecf87f 100%), radial-gradient(circle at top left, #81b622, #ecf87f);
-    background-image: -webkit-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -webkit-radial-gradient(circle at top left, #81b622, #ecf87f);
-    background-image: -moz-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -moz-radial-gradient(circle at top left, #81b622, #ecf87f);
-    background-image: -ms-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -ms-radial-gradient(circle at top left, #81b622, #ecf87f);
-    background-image: -o-linear-gradient(to right, #81b622 0%, #ecf87f 100%), -o-radial-gradient(circle at top left, #81b622, #ecf87f);
+    background-image: linear-gradient(to right, #c8a96b 0%, #d7b97c 100%), radial-gradient(circle at top left, #c8a96b, #d7b97c);
+    background-image: -webkit-linear-gradient(to right, #c8a96b 0%, #d7b97c 100%), -webkit-radial-gradient(circle at top left, #c8a96b, #d7b97c);
+    background-image: -moz-linear-gradient(to right, #c8a96b 0%, #d7b97c 100%), -moz-radial-gradient(circle at top left, #c8a96b, #d7b97c);
+    background-image: -ms-linear-gradient(to right, #c8a96b 0%, #d7b97c 100%), -ms-radial-gradient(circle at top left, #c8a96b, #d7b97c);
+    background-image: -o-linear-gradient(to right, #c8a96b 0%, #d7b97c 100%), -o-radial-gradient(circle at top left, #c8a96b, #d7b97c);
     color: #fff;
     box-shadow: 0px 10px 30px rgba(130, 82, 250, 0.2);
     border: 2px solid transparent; }
@@ -1287,7 +1287,7 @@ button:focus {
 .gameBox {
   opacity: 1;
   display: none;
-  background-color: #59981a;
+  background-color: #1f2940;
   background-size: cover;
   position: absolute;
   width: 100%;
@@ -1300,7 +1300,7 @@ button:focus {
   #background: -ms-linear-gradient(135deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* ie10+ */
   #background: linear-gradient(315deg, rgba(252,81,133,1) 0%, rgba(54,79,107,1) 52%, rgba(54,79,107,1) 100%, rgba(0,0,0,1) 100%, rgba(54,79,107,1) 100%); /* w3c */
 
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#81b622', endColorstr='#81b622',GradientType=1 ); /* ie6-9 */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1f2940', endColorstr='#1f2940',GradientType=1 ); /* ie6-9 */
 
 }
 
@@ -1309,7 +1309,7 @@ button:focus {
 .bar {
   opacity: 1;
   data-type: "stroke";
-  data-stroke: #81b622;
+  data-stroke: #c8a96b;
   position: absolute;
   z-index: 10;
   width: 100%;
@@ -1321,7 +1321,7 @@ button:focus {
 
 .bar path.mainline {
     stroke-width: 2;
-    stroke: #81b622;
+    stroke: #c8a96b;
     stroke-linecap: round;
   }
 
@@ -1364,7 +1364,7 @@ button:focus {
 .dottop {
   height: 15px;
   width: 15px;
-  background-color: #59fb74;
+  background-color: #c8a96b;
   border: 2px double #E1ECE0;
   border-radius: 50%;
   margin-top: auto;
@@ -1377,7 +1377,7 @@ button:focus {
 .dotbottom {
   height: 15px;
   width: 15px;
-  background-color: #59fb74;
+  background-color: #c8a96b;
   border: 2px double #E1ECE0;
   border-radius: 50%;
   margin-top: auto;
@@ -4230,7 +4230,7 @@ h6 {
 }
 
 .themeContainer:hover {
-    background-color: #81b622;
+    background-color: #c8a96b;
     outline: none;
     cursor: pointer;
 }
@@ -4266,10 +4266,123 @@ h6 {
 
 .themeBox {
     width: 100%;
-    background: #2f5233;
+    background: #1f2940;
     border-radius: 10px;
 }
 
 .settingsClass {
     /* Add any specific styles if needed */
+}
+
+/* Legacy palette sweep */
+:root {
+  --legacy-cream: #f5efe2;
+  --legacy-cream-strong: #fffaf0;
+  --legacy-navy: #1f2940;
+  --legacy-navy-soft: #24324e;
+  --legacy-gold: #c8a96b;
+  --legacy-gold-strong: #d7b97c;
+}
+
+.gradient-bg,
+.gradient-bg2,
+.header_area .navbar .nav .nav-item.submenu ul .nav-item:hover .nav-link,
+.blog_right_sidebar .widget_title,
+.blog_right_sidebar .newsletter_widget .bbtns,
+.blog_right_sidebar .tag_cloud_widget ul li a:hover,
+.blog-pagination .page-item.active .page-link,
+.blog-pagination .page-link:hover,
+.comments-area .btn-reply:hover,
+.recent_update_inner .nav.nav-tabs li a.active,
+.recent_update_inner .nav.nav-tabs li a:hover,
+.common_style .line:after,
+.price_item:hover .price_head,
+.price_item:hover .price_footer,
+.testimonial_area .active_testimonial .owl-dots,
+.news_widget .input-group .sub-btn,
+.blog_btn:hover,
+.white_bg_btn:hover,
+.causes_slider .owl-dots .owl-dot.active,
+.causes_item .causes_img .c_parcent span,
+.causes_item .causes_img .c_parcent span:before,
+.causes_item .causes_bottom a,
+.tags .tag_btn:before,
+.new-button,
+.themeContainer:hover,
+.link-border:before,
+.themeBox {
+  background: linear-gradient(90deg, var(--legacy-gold) 0%, var(--legacy-gold-strong) 100%) !important;
+}
+
+.border-gradient {
+  border-image: linear-gradient(90deg, var(--legacy-gold) 0%, var(--legacy-gold-strong) 100%) 1 !important;
+}
+
+.gradient-color,
+.contact_info .info_item i,
+.recent_update_inner .nav.nav-tabs li a span.lnr {
+  background: linear-gradient(90deg, var(--legacy-gold) 0%, var(--legacy-gold-strong) 100%) !important;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.primary_btn,
+.white_bg_btn:hover,
+.new-button2,
+.donation_button,
+.donation_button_clone {
+  background-image: linear-gradient(white, white), radial-gradient(circle at top left, var(--legacy-gold), var(--legacy-gold-strong)) !important;
+}
+
+.primary_btn:hover,
+.price_item:hover .price_footer .primary_btn,
+.donation_details .filter-search a,
+.new-button:hover,
+.new-button2:hover {
+  background-image: linear-gradient(to right, var(--legacy-gold) 0%, var(--legacy-gold-strong) 100%), radial-gradient(circle at top left, var(--legacy-gold), var(--legacy-gold-strong)) !important;
+}
+
+.newlink:hover,
+.header_area .navbar .nav .nav-item:hover .nav-link,
+.header_area .navbar .nav .nav-item.active .nav-link,
+.causes_item .causes_text h4:hover,
+.categories_post:hover h5,
+.blog_info .post_tag a.active,
+.blog_info .blog_meta li a:hover,
+.blog_details h2:hover,
+.blog_right_sidebar .author_widget .social_icon a:hover,
+.blog_right_sidebar .popular_post_widget .post_item .media-body h3:hover,
+.blog_right_sidebar .post_category_widget .cat-list li:hover a,
+.single-post-area .social-links li a:hover,
+.sample-text-area .title_color,
+.sample-text-area p b,
+.sample-text-area p i,
+.sample-text-area p sup,
+.sample-text-area p sub,
+.sample-text-area p del,
+.sample-text-area p u,
+.link-border,
+.ab_widget p a,
+.social_widget .list li:hover a,
+.copy_right_text p a {
+  color: var(--legacy-gold) !important;
+}
+
+.blog_right_sidebar .post_category_widget .cat-list li:hover,
+.causes_item .causes_bottom a,
+.link-border,
+.custom-circle,
+.profile-avatar {
+  border-color: var(--legacy-gold) !important;
+}
+
+.header_area,
+.footer_area {
+  background: var(--legacy-navy) !important;
+}
+
+.price_area,
+.fullpage,
+#sidebar-wrapper {
+  background-color: var(--legacy-cream) !important;
 }

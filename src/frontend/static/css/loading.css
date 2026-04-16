@@ -25,11 +25,12 @@
 }
 
 .loadButton {
-    border: 1px solid #ecf87f;
+    border: 1px solid var(--site-navy);
     border-radius: 20px;
-    color: #81b622;
+    color: var(--site-cream-strong);
     position: relative;
     margin: auto;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .loadGameCanvas {
@@ -49,14 +50,14 @@
 
 .loadMessage {
     position: relative;
-    color: #81b622;
+    color: var(--site-navy);
     font-weight: lighter;
     margin: auto;
     padding: 20px;
 }
 
 .myloader {
-    background-color: #81b622;
+    background-color: var(--site-navy);
 }
 .lds-ellipsis div:nth-child(1) {
   left: 8px;
