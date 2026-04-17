@@ -1,93 +1,126 @@
+function positionEndGameBox(box) {
+    if (!box) {
+        return;
+    }
+
+    var container = document.getElementById("boardHolder");
+    if (!container) {
+        return;
+    }
+
+    var width = box.offsetWidth || Math.min(container.clientWidth * 0.76, 320);
+    var height = box.offsetHeight || Math.min(container.clientHeight * 0.76, 320);
+    var left = (container.clientWidth - width) / 2;
+    var top = (container.clientHeight - height) / 2;
+
+    box.style.left = "";
+    box.style.top = "";
+    box.style.bottom = "";
+    box.style.transform = "";
+    box.style.left = Math.max(8, left) + "px";
+    box.style.top = Math.max(8, top) + "px";
+}
+
+function updateEndGameCopy(box, msg, my_color) {
+    var message = box.querySelector(".message p");
+    var piece = box.querySelector(".endgame");
+
+    if (message) {
+        message.innerHTML = msg;
+    }
+
+    if (piece) {
+        piece.innerHTML = my_color === "black" ? "&#x265A;" : "&#x2654;";
+    }
+}
+
 function showEndGame(color_win, msg, my_color) {
+    var overlay = document.getElementById("conty");
+    var box = null;
 
-        var y = document.getElementById("conty");
-        y.style.display = "block";
-        y.style.opacity = "0.95";
-        y.style.cursor = "grab"
-        console.log(color_win + " " + my_color);
-        var x = null;
-        if (color_win === 'Draw') {
-            x = document.getElementById("draw-box");
-            x.style.display = "block";
-        } else if (color_win === 'Abort') {
-            x = document.getElementById("abort-box");
-            x.style.display = "block";
-        } else if (my_color === color_win) {
-            x = document.getElementById("win-box");
-            x.style.display = "block";
-        } else {
-            x = document.getElementById("lose-box");
-            x.style.display = "block";
-        }
-        for (var r = 0; r < x.children.length; r++) {
-            if (x.children[r].className === 'message') {
-                var message = x.children[r];
-                for (var t = 0; t < message.children.length; t++) {
-                    if (message.children[t].tagName === 'P') {
-                        message.children[t].innerHTML = msg;
-                        break;
-                    }
-                }
-            }
-            if (x.children[r].className.includes('experiment')) {
-                var exp = x.children[r];
-                for (var t = 0; t < exp.children.length; t++) {
-                    if (exp.children[t].className === 'endgame') {
-                        if (my_color === 'black')
-                            exp.children[t].innerHTML = "&#x265A;";
-                        else
-                            exp.children[t].innerHTML = "&#x2654;";
-                        break;
-                    }
-                }
-            }
-        }
-        dragElement(x);
+    if (color_win === "Draw") {
+        box = document.getElementById("draw-box");
+    } else if (color_win === "Abort") {
+        box = document.getElementById("abort-box");
+    } else if (my_color === color_win) {
+        box = document.getElementById("win-box");
+    } else {
+        box = document.getElementById("lose-box");
     }
 
-    // Make the DIV element draggable:
-    function dragElement(elmnt) {
-      var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-      var element = elmnt
-      if (document.getElementById(elmnt.id + "header")) {
-        // if present, the header is where you move the DIV from:
-        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-      } else {
-        // otherwise, move the DIV from anywhere inside the DIV:
-        elmnt.onmousedown = dragMouseDown;
-      }
-
-      function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // get the mouse cursor position at startup:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        // call a function whenever the cursor moves:
-        document.onmousemove = elementDrag;
-        element.style.cursor = "grabbing"
-      }
-
-      function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        // set the element's new position:
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-      }
-
-      function closeDragElement() {
-        // stop moving when mouse button is released:
-        document.onmouseup = null;
-        document.onmousemove = null;
-        element.style.cursor = "grab"
-      }
+    if (!overlay || !box) {
+        return;
     }
 
-    export { showEndGame }
+    overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+    overlay.querySelectorAll(".endgame-box").forEach(function (item) {
+        item.style.display = "none";
+    });
+
+    updateEndGameCopy(box, msg, my_color);
+    box.style.display = "block";
+    positionEndGameBox(box);
+    dragElement(box);
+}
+
+function dragElement(elmnt) {
+    if (!elmnt || elmnt.dataset.dragInitialized === "true") {
+        return;
+    }
+
+    var handle = elmnt.querySelector("[data-endgame-drag-handle]") || elmnt;
+    var lastClientX = 0;
+    var lastClientY = 0;
+
+    function pointerMove(event) {
+        var deltaX = event.clientX - lastClientX;
+        var deltaY = event.clientY - lastClientY;
+        lastClientX = event.clientX;
+        lastClientY = event.clientY;
+
+        elmnt.style.left = (elmnt.offsetLeft + deltaX) + "px";
+        elmnt.style.top = (elmnt.offsetTop + deltaY) + "px";
+        elmnt.style.bottom = "auto";
+        elmnt.style.transform = "none";
+    }
+
+    function pointerUp() {
+        window.removeEventListener("pointermove", pointerMove);
+        window.removeEventListener("pointerup", pointerUp);
+        elmnt.classList.remove("is-dragging");
+        handle.style.cursor = "grab";
+    }
+
+    handle.addEventListener("pointerdown", function (event) {
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+        }
+
+        event.preventDefault();
+        var rect = elmnt.getBoundingClientRect();
+        var parentRect = elmnt.offsetParent.getBoundingClientRect();
+        lastClientX = event.clientX;
+        lastClientY = event.clientY;
+        elmnt.style.left = rect.left - parentRect.left + "px";
+        elmnt.style.top = rect.top - parentRect.top + "px";
+        elmnt.style.bottom = "auto";
+        elmnt.style.transform = "none";
+        elmnt.classList.add("is-dragging");
+        handle.style.cursor = "grabbing";
+        window.addEventListener("pointermove", pointerMove);
+        window.addEventListener("pointerup", pointerUp, { once: true });
+    });
+
+    elmnt.dataset.dragInitialized = "true";
+}
+
+window.addEventListener("resize", function () {
+    document.querySelectorAll("#conty .endgame-box").forEach(function (box) {
+        if (box.style.display === "block" && !box.classList.contains("is-dragging")) {
+            positionEndGameBox(box);
+        }
+    });
+});
+
+export { showEndGame }

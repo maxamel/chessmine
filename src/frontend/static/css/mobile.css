@@ -1100,3 +1100,27 @@ body.site-page.game-page .settings-item.submenu-flip > .dropdown-menu-right {
         grid-template-columns: 1fr;
     }
 }
+
+body.site-page.game-page .gameActionBar,
+body.site-page.game-page .mobileMoveSection {
+    color: var(--site-text);
+}
+
+body.site-page.game-page .mobileMoveChip {
+    color: var(--site-text);
+}
+
+body.site-page.game-page .mobileMoveChip.selectedCell {
+    background: rgba(200, 169, 107, 0.24);
+}
+
+body.site-page.game-page .mobileMoveIndex,
+body.site-page.game-page .mobileMoveChipMoveNo {
+    color: rgba(31, 41, 64, 0.72);
+}
+
+body.site-page.game-page .mobileNavButton:disabled,
+body.site-page.game-page .mobileNavButton.disabled {
+    background: rgba(31, 41, 64, 0.08);
+    color: rgba(31, 41, 64, 0.4);
+}

@@ -1761,7 +1761,7 @@ th, td {
 
 }
 
-@media screen and (max-width: 1105px){
+@media screen and (max-width: 1199px){
   .rightpane{
     display: none;
   }
@@ -4610,4 +4610,517 @@ h6 {
 .fullpage,
 #sidebar-wrapper {
   background-color: var(--legacy-cream) !important;
+}
+
+/* Responsive game page overhaul */
+body.site-page.game-page {
+  --game-panel-width: 400px;
+  --game-gap: clamp(16px, 2vw, 28px);
+}
+
+body.site-page.game-page .gameContainer {
+  min-height: 100vh;
+  padding: 24px 0 40px;
+}
+
+body.site-page.game-page .gameBox {
+  position: relative;
+  width: min(100%, 1480px);
+  min-height: 0;
+  height: auto;
+  margin: 0 auto;
+  padding: clamp(16px, 2vw, 28px);
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--game-gap);
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+body.site-page.game-page .leftmostpane {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+body.site-page.game-page .settingsClass {
+  height: auto;
+}
+
+body.site-page.game-page .leftpane {
+  flex: 1 1 560px;
+  width: min(100%, 720px);
+  max-width: 720px;
+}
+
+body.site-page.game-page .rightpane {
+  flex: 0 1 var(--game-panel-width);
+  width: min(100%, var(--game-panel-width));
+  align-self: stretch;
+  position: relative;
+}
+
+body.site-page.game-page .boardandclock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  float: none;
+  /* prevent any child (e.g. move reel) from creating page-level horizontal scroll */
+  overflow-x: clip;
+}
+
+body.site-page.game-page .clock {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  opacity: 1;
+  min-height: 0;
+}
+
+body.site-page.game-page #clockdivA {
+  order: 1;
+}
+
+body.site-page.game-page #upperClock {
+  order: 2;
+}
+
+body.site-page.game-page #boardHolder {
+  order: 3;
+}
+
+body.site-page.game-page #bottomClock {
+  order: 4;
+}
+
+body.site-page.game-page #clockdivB {
+  order: 5;
+}
+
+body.site-page.game-page .mobileMoveSection {
+  order: 6;
+}
+
+body.site-page.game-page .gameActionBar {
+  order: 7;
+}
+
+body.site-page.game-page .clockspan {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  min-width: min(100%, 220px);
+  margin: 0;
+}
+
+body.site-page.game-page .boardHolder {
+  position: relative;
+  display: block;
+  width: min(100%, 560px);
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  padding: clamp(10px, 1.6vw, 14px);
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+body.site-page.game-page .board {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  aspect-ratio: 1;
+}
+
+body.site-page.game-page .smallClock {
+  display: none;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  visibility: visible;
+}
+
+body.site-page.game-page .playerInfoSmall {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: 18px;
+  background: rgba(255, 250, 240, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(31, 41, 64, 0.06), 0 10px 24px rgba(31, 41, 64, 0.08);
+}
+
+body.site-page.game-page .playerInfoSmall .label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.site-page.game-page .inlineClock {
+  display: none;
+  flex: 0 0 auto;
+  justify-self: center;
+}
+
+body.site-page.game-page .inlineClock .clockspan {
+  min-width: 0;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 14px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(31, 41, 64, 0.06);
+}
+
+body.site-page.game-page .playerInfoSmall .labelRating,
+body.site-page.game-page .playerInfoSmall .arrowRating {
+  white-space: nowrap;
+}
+
+body.site-page.game-page .playerInfoSmall .labelRating {
+  justify-self: end;
+  text-align: right;
+}
+
+body.site-page.game-page .playerInfoSmall .arrowRating {
+  justify-self: start;
+  font-size: 14px;
+  text-align: left;
+}
+
+body.site-page.game-page .boxesHolder {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+body.site-page.game-page .playerBox {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  min-height: 76px;
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+body.site-page.game-page .playerInfoA,
+body.site-page.game-page .playerInfoB {
+  top: auto;
+  left: auto;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding-right: 16px;
+}
+
+body.site-page.game-page .rightpane .playerBox {
+  min-height: 0;
+  padding: 0;
+}
+
+body.site-page.game-page .rightpane .playerInfoA,
+body.site-page.game-page .rightpane .playerInfoB {
+  min-height: 100%;
+}
+
+body.site-page.game-page .vbottom {
+  position: relative;
+}
+
+body.site-page.game-page .moveBox {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.site-page.game-page .moveTableFooter {
+  flex: 0 0 auto;
+}
+
+body.site-page.game-page .tableWrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow-y: scroll;
+}
+
+/* Both tables live inside the same scroll container so they share identical
+   effective width. table-layout:fixed makes column widths explicit and stable. */
+body.site-page.game-page .moveTableHeader,
+body.site-page.game-page .moveTable {
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Sticky header – pins to the top of the scroll area as moves are added */
+body.site-page.game-page .moveTableHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/*
+  Header has 4 cols:  move-no(5%) | White(47.5%) | Black(42.5%) | indicator(5%)
+  Content has 3 cols: move-no(5%) | white(47.5%)  | black(47.5%)
+
+  Both place the White|Black divider at 5 + 47.5 = 52.5% → perfect alignment.
+*/
+body.site-page.game-page #moveTableHeader colgroup col:nth-child(1) { width: 5%;    }
+body.site-page.game-page #moveTableHeader colgroup col:nth-child(2) { width: 47.5%; }
+body.site-page.game-page #moveTableHeader colgroup col:nth-child(3) { width: 42.5%; }
+body.site-page.game-page #moveTableHeader colgroup col:nth-child(4) { width: 5%;    }
+
+body.site-page.game-page #moveTable colgroup col:nth-child(1) { width: 5%;    }
+body.site-page.game-page #moveTable colgroup col:nth-child(2) { width: 47.5%; }
+body.site-page.game-page #moveTable colgroup col:nth-child(3) { width: 47.5%; }
+
+body.site-page.game-page .gameActionBar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 560px);
+}
+
+body.site-page.game-page .gameButton,
+body.site-page.game-page .drawOffer {
+  float: none;
+  flex: 0 1 auto;
+  min-width: 96px;
+  max-width: 136px;
+}
+
+body.site-page.game-page #drawOfferedButton {
+  width: 100%;
+  margin: 0;
+}
+
+body.site-page.game-page .droppedPane {
+  right: 0;
+  left: auto;
+  margin: 10px 0 0;
+  min-width: 100%;
+  z-index: 30;
+}
+
+body.site-page.game-page .mobileMoveSection {
+  display: none;
+  width: min(100%, 560px);
+  padding: 10px 12px;
+  border-radius: 22px;
+  background: rgba(255, 250, 240, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(31, 41, 64, 0.06), 0 16px 32px rgba(31, 41, 64, 0.1);
+  color: #1f2940;
+  /* prevent reel overflow from spilling out to the page */
+  overflow: hidden;
+}
+
+body.site-page.game-page .mobileMoveHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+body.site-page.game-page .mobileMoveTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #1f2940;
+}
+
+body.site-page.game-page .mobileMoveIndex {
+  font-size: 0.9rem;
+  color: rgba(31, 41, 64, 0.72);
+}
+
+body.site-page.game-page .mobileMoveReel {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 2px 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  /* prevent the reel's horizontal scroll from propagating to the page */
+  overscroll-behavior-x: contain;
+}
+
+body.site-page.game-page .mobileMoveChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-width: 0;
+  border: 1px solid rgba(31, 41, 64, 0.1);
+  border-radius: 12px;
+  background: #fffdfa;
+  color: #1f2940;
+  padding: 6px 8px;
+  text-align: left;
+  scroll-snap-align: start;
+}
+
+body.site-page.game-page .mobileMoveChip.selectedCell {
+  background: rgba(200, 169, 107, 0.25);
+  border-color: rgba(200, 169, 107, 0.8);
+  text-decoration: none;
+}
+
+body.site-page.game-page .mobileMoveChipMoveNo {
+  display: inline;
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
+body.site-page.game-page .mobileMoveChipSan {
+  display: inline;
+  margin-top: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+body.site-page.game-page .mobileMoveChipPlaceholder {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+body.site-page.game-page .mobileMoveFooter {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body.site-page.game-page .mobileNavButton {
+  width: 100%;
+  border: 1px solid rgba(31, 41, 64, 0.08);
+  border-radius: 14px;
+}
+
+body.site-page.game-page .moveTableFooter .navCell.disabled,
+body.site-page.game-page .mobileNavButton.disabled,
+body.site-page.game-page .mobileNavButton:disabled {
+  background: rgba(31, 41, 64, 0.08) !important;
+  color: rgba(31, 41, 64, 0.38) !important;
+  border-color: rgba(31, 41, 64, 0.08);
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+
+body.site-page.game-page .moveTableFooter .navCell:not(.disabled) {
+  color: #1f2940;
+}
+
+@media screen and (max-width: 1199px) {
+  /* Hard-stop any element from making the page scrollable horizontally. */
+  body.site-page.game-page {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  body.site-page.game-page .gameBox {
+    justify-content: center;
+  }
+
+  body.site-page.game-page .leftmostpane,
+  body.site-page.game-page .leftpane,
+  body.site-page.game-page .rightpane {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  body.site-page.game-page .leftmostpane {
+    display: flex;
+    justify-content: center;
+  }
+
+  body.site-page.game-page .settingsButton {
+    margin: 0 auto;
+  }
+
+  body.site-page.game-page .rightpane {
+    display: none;
+  }
+
+  body.site-page.game-page .boardHolder {
+    width: min(100%, calc(100vw - 32px));
+  }
+
+  body.site-page.game-page .smallClock {
+    display: flex;
+  }
+
+  body.site-page.game-page .clock {
+    display: none;
+  }
+
+  body.site-page.game-page .inlineClock {
+    display: block;
+  }
+
+  body.site-page.game-page .boardandclock {
+    gap: 8px;
+  }
+
+  body.site-page.game-page .mobileMoveSection {
+    display: block;
+  }
+
+  body.site-page.game-page .mobileMoveHeader {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  body.site-page.game-page .mobileMoveSection {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  body.site-page.game-page .gameContainer {
+    padding-top: 16px;
+  }
+
+  body.site-page.game-page .gameBox {
+    padding: 12px;
+  }
+
+  body.site-page.game-page .boardHolder {
+    width: min(100%, calc(100vw - 24px));
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  body.site-page.game-page .gameActionBar {
+    gap: 10px;
+  }
+
+  body.site-page.game-page .gameButton,
+  body.site-page.game-page .drawOffer {
+    min-width: 90px;
+    max-width: 120px;
+  }
+
+  body.site-page.game-page .mobileMoveSection {
+    padding: 8px 10px;
+    border-radius: 18px;
+  }
+
+  body.site-page.game-page .mobileMoveChip {
+    padding: 5px 7px;
+  }
 }
