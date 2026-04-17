@@ -87,15 +87,146 @@ $(document).ready(function () {
         childDiv.style.height = '';
     }
 
+    function setActiveSettingLink(links, activeLink) {
+        links.forEach(link => {
+            const isActive = link === activeLink;
+            link.classList.toggle('active', isActive);
+
+            if (isActive) {
+                link.setAttribute('aria-current', 'true');
+                link.setAttribute('aria-disabled', 'true');
+            } else {
+                link.removeAttribute('aria-current');
+                link.removeAttribute('aria-disabled');
+            }
+        });
+    }
+
+    function settingsUsePersistentPreviews() {
+        return window.matchMedia('(hover: none), (pointer: coarse), (max-width: 991px)').matches;
+    }
+
     function attachSettingsMenuListeners() {
         const settingsMenu = document.getElementById('settingsNavigator');
         if (!settingsMenu) {
             return;
         }
 
-        const settingsItems = settingsMenu.querySelectorAll('.settings-item');
+        const settingsHolder = document.getElementById('settingsHolder');
+        const settingsButton = document.getElementById('settingsMenuButton');
+        const settingsItems = Array.from(settingsMenu.querySelectorAll('.settings-item'));
+        const closeTimers = new WeakMap();
+
+        function getTrigger(item) {
+            return item.querySelector(':scope > .settings-toggle');
+        }
+
+        function getSubmenu(item) {
+            return item.querySelector(':scope > .dropdown-menu-right');
+        }
+
+        function supportsDesktopHover() {
+            return window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 992px)').matches;
+        }
+
+        function closeItem(item) {
+            clearCloseTimer(item);
+            const trigger = getTrigger(item);
+            item.classList.remove('is-open', 'submenu-inline', 'submenu-flip');
+
+            if (trigger) {
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function closeAllItems() {
+            settingsItems.forEach(closeItem);
+        }
+
+        function clearCloseTimer(item) {
+            const timerId = closeTimers.get(item);
+            if (timerId) {
+                window.clearTimeout(timerId);
+                closeTimers.delete(item);
+            }
+        }
+
+        function scheduleClose(item) {
+            clearCloseTimer(item);
+            closeTimers.set(item, window.setTimeout(() => {
+                closeTimers.delete(item);
+                closeItem(item);
+            }, 900));
+        }
+
+        function syncSubmenuLayout(item) {
+            const submenu = getSubmenu(item);
+            const trigger = getTrigger(item);
+            if (!submenu || !trigger) {
+                return;
+            }
+
+            item.classList.remove('submenu-inline', 'submenu-flip');
+
+            if (window.matchMedia('(max-width: 991px)').matches) {
+                item.classList.add('submenu-inline');
+                return;
+            }
+
+            const submenuWidth = Math.max(submenu.offsetWidth, submenu.scrollWidth, 220);
+            const triggerRect = trigger.getBoundingClientRect();
+            const viewportPadding = 16;
+            const spaceRight = window.innerWidth - triggerRect.right - viewportPadding;
+            const spaceLeft = triggerRect.left - viewportPadding;
+
+            if (spaceRight >= submenuWidth) {
+                return;
+            }
+
+            if (spaceLeft >= submenuWidth) {
+                item.classList.add('submenu-flip');
+                return;
+            }
+
+            item.classList.add('submenu-inline');
+        }
+
+        function openItem(item, focusFirstOption) {
+            const trigger = getTrigger(item);
+            if (!trigger) {
+                return;
+            }
+
+            const wasOpen = item.classList.contains('is-open');
+            closeAllItems();
+
+            if (wasOpen) {
+                return;
+            }
+
+            item.classList.add('is-open');
+            trigger.setAttribute('aria-expanded', 'true');
+            syncSubmenuLayout(item);
+
+            if (focusFirstOption) {
+                const firstOption = getSubmenu(item)?.querySelector('a, button');
+                if (firstOption) {
+                    window.requestAnimationFrame(() => firstOption.focus());
+                }
+            }
+        }
+
+        function toggleItem(item) {
+            if (item.classList.contains('is-open')) {
+                closeItem(item);
+            } else {
+                openItem(item, false);
+            }
+        }
+
         settingsItems.forEach(item => {
-            const trigger = item.querySelector(':scope > .settings-toggle');
+            const trigger = getTrigger(item);
+            const submenu = getSubmenu(item);
             if (!trigger) {
                 return;
             }
@@ -103,42 +234,103 @@ $(document).ready(function () {
             trigger.addEventListener('click', function (event) {
                 event.preventDefault();
                 event.stopPropagation();
+                toggleItem(item);
+            });
 
-                const isOpen = item.classList.contains('is-open');
-                settingsItems.forEach(other => {
-                    other.classList.remove('is-open');
-                    const otherTrigger = other.querySelector(':scope > .settings-toggle');
-                    if (otherTrigger) {
-                        otherTrigger.setAttribute('aria-expanded', 'false');
+            item.addEventListener('mouseenter', function () {
+                if (supportsDesktopHover()) {
+                    clearCloseTimer(item);
+                    openItem(item, false);
+                }
+            });
+
+            item.addEventListener('mouseleave', function () {
+                if (supportsDesktopHover()) {
+                    scheduleClose(item);
+                }
+            });
+
+            if (submenu) {
+                submenu.addEventListener('mouseenter', function () {
+                    if (supportsDesktopHover()) {
+                        clearCloseTimer(item);
                     }
                 });
-                item.classList.toggle('is-open', !isOpen);
-                trigger.setAttribute('aria-expanded', String(!isOpen));
-            });
-        });
 
-        document.addEventListener('click', function (event) {
-            if (!settingsMenu.contains(event.target)) {
-                settingsItems.forEach(item => {
-                    item.classList.remove('is-open');
-                    const trigger = item.querySelector(':scope > .settings-toggle');
-                    if (trigger) {
-                        trigger.setAttribute('aria-expanded', 'false');
+                submenu.addEventListener('mouseleave', function () {
+                    if (supportsDesktopHover()) {
+                        scheduleClose(item);
+                    }
+                });
+            }
+
+            trigger.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleItem(item);
+                    return;
+                }
+
+                if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    openItem(item, true);
+                    return;
+                }
+
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeItem(item);
+                    trigger.focus();
+                }
+            });
+
+            if (submenu) {
+                submenu.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        closeItem(item);
+                        trigger.focus();
                     }
                 });
             }
         });
 
-        const settingsHolder = document.getElementById('settingsHolder');
+        settingsMenu.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeAllItems();
+
+                if (settingsButton && typeof bootstrap !== 'undefined') {
+                    bootstrap.Dropdown.getOrCreateInstance(settingsButton).hide();
+                } else if (settingsButton) {
+                    settingsButton.focus();
+                }
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (settingsHolder && !settingsHolder.contains(event.target)) {
+                closeAllItems();
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            const openItemNode = settingsItems.find(item => item.classList.contains('is-open'));
+            if (openItemNode) {
+                syncSubmenuLayout(openItemNode);
+            }
+        });
+
         if (settingsHolder) {
+            settingsHolder.addEventListener('shown.bs.dropdown', function () {
+                const openItemNode = settingsItems.find(item => item.classList.contains('is-open'));
+                if (openItemNode) {
+                    syncSubmenuLayout(openItemNode);
+                }
+            });
+
             settingsHolder.addEventListener('hidden.bs.dropdown', function () {
-                settingsItems.forEach(item => {
-                    item.classList.remove('is-open');
-                    const trigger = item.querySelector(':scope > .settings-toggle');
-                    if (trigger) {
-                        trigger.setAttribute('aria-expanded', 'false');
-                    }
-                });
+                closeAllItems();
             });
         }
     }
@@ -559,17 +751,37 @@ $(document).ready(function () {
         function attachPieceThemeListeners() {
             const subNavLinks = document.querySelectorAll('.settings-menu .dropdown-menu-right .sub-nav-link');
 
+            function syncPiecePreviews() {
+                const showAllPreviews = settingsUsePersistentPreviews();
+
+                subNavLinks.forEach(link => {
+                    const childDiv = link.querySelector('div');
+                    if (!childDiv) {
+                        return;
+                    }
+
+                    const themeName = getThemeNameFromPreviewId(childDiv.id, 'piece');
+                    if (showAllPreviews || link.classList.contains('active')) {
+                        renderPiecePreview(childDiv, themeName);
+                    } else {
+                        clearPiecePreview(childDiv);
+                    }
+                });
+            }
+
             // Set initial active state based on current pieceTheme
             subNavLinks.forEach(link => {
                 const childDiv = link.querySelector('div');
                 if (childDiv) {
                     const linkValue = getThemeNameFromPreviewId(childDiv.id, 'piece');
                     if (linkValue === pieceTheme.toLowerCase()) {
-                        link.classList.add('active');
-                        renderPiecePreview(childDiv, linkValue);
+                        setActiveSettingLink(subNavLinks, link);
                     }
                 }
             });
+
+            syncPiecePreviews();
+            window.addEventListener('resize', syncPiecePreviews);
 
             // Iterate over each sub-nav-link
             subNavLinks.forEach(link => {
@@ -579,6 +791,10 @@ $(document).ready(function () {
                 if (childDiv) {
                     // Attach a hover event listener
                     link.addEventListener('mouseover', () => {
+                        if (settingsUsePersistentPreviews()) {
+                            return;
+                        }
+
                         // Don't show preview if this is the active item
                         if (!link.classList.contains('active')) {
                             const themeName = getThemeNameFromPreviewId(childDiv.id, 'piece');
@@ -587,7 +803,7 @@ $(document).ready(function () {
                     });
 
                     link.addEventListener('mouseout', () => {
-                        if (!link.classList.contains('active')) {
+                        if (!settingsUsePersistentPreviews() && !link.classList.contains('active')) {
                             clearPiecePreview(childDiv);
                         }
                     });
@@ -623,18 +839,9 @@ $(document).ready(function () {
                         prefs = JSON.stringify(preferences);
                         localStorage.setItem("user_prefs", prefs);
                         setupThemes(pieceTheme, boardTheme);
-                        
-                        // Remove active class from all piece theme links
-                        subNavLinks.forEach(l => {
-                            l.classList.remove('active');
-                            const preview = l.querySelector('div');
-                            if (preview) {
-                                clearPiecePreview(preview);
-                            }
-                        });
-                        // Add active class to clicked link
-                        link.classList.add('active');
-                        renderPiecePreview(childDiv, pieceTheme);
+
+                        setActiveSettingLink(subNavLinks, link);
+                        syncPiecePreviews();
                     });
                 }
             });
@@ -642,6 +849,24 @@ $(document).ready(function () {
 
         function attachColorThemeListener() {
             const subNavLinks = document.querySelectorAll('.board-sub-nav-link');
+
+            function syncBoardPreviews() {
+                const showAllPreviews = settingsUsePersistentPreviews();
+
+                subNavLinks.forEach(link => {
+                    const childDiv = link.querySelector('div');
+                    if (!childDiv) {
+                        return;
+                    }
+
+                    const themeName = getThemeNameFromPreviewId(childDiv.id, 'board');
+                    if (showAllPreviews || link.classList.contains('active')) {
+                        renderBoardPreview(childDiv, themeName);
+                    } else {
+                        clearBoardPreview(childDiv);
+                    }
+                });
+            }
             
             // Set initial active state based on current boardTheme
             subNavLinks.forEach(link => {
@@ -649,11 +874,13 @@ $(document).ready(function () {
                 if (childDiv) {
                     const linkValue = getThemeNameFromPreviewId(childDiv.id, 'board');
                     if (linkValue === boardTheme.toLowerCase()) {
-                        link.classList.add('active');
-                        renderBoardPreview(childDiv, linkValue);
+                        setActiveSettingLink(subNavLinks, link);
                     }
                 }
             });
+
+            syncBoardPreviews();
+            window.addEventListener('resize', syncBoardPreviews);
             
             // Iterate over each sub-nav-link
             subNavLinks.forEach(link => {
@@ -663,6 +890,10 @@ $(document).ready(function () {
                 if (childDiv) {
                     // Attach a hover event listener
                     link.addEventListener('mouseenter', () => {
+                        if (settingsUsePersistentPreviews()) {
+                            return;
+                        }
+
                         // Don't show preview if this is the active item
                         if (!link.classList.contains('active')) {
                             const themeName = getThemeNameFromPreviewId(childDiv.id, 'board');
@@ -672,7 +903,7 @@ $(document).ready(function () {
 
                     link.addEventListener('mouseleave', () => {
                         // Reset preview
-                        if (!link.classList.contains('active')) {
+                        if (!settingsUsePersistentPreviews() && !link.classList.contains('active')) {
                             clearBoardPreview(childDiv);
                         }
                     });
@@ -708,18 +939,9 @@ $(document).ready(function () {
                         prefs = JSON.stringify(preferences);
                         localStorage.setItem("user_prefs", prefs);
                         setupBoard(boardTheme);
-                        
-                        // Remove active class from all board theme links
-                        subNavLinks.forEach(l => {
-                            l.classList.remove('active');
-                            const preview = l.querySelector('div');
-                            if (preview) {
-                                clearBoardPreview(preview);
-                            }
-                        });
-                        // Add active class to clicked link
-                        link.classList.add('active');
-                        renderBoardPreview(childDiv, boardTheme);
+
+                        setActiveSettingLink(subNavLinks, link);
+                        syncBoardPreviews();
                     });
                 }
             });
@@ -732,7 +954,7 @@ $(document).ready(function () {
             levelLinks.forEach(link => {
                 const level = parseInt(link.getAttribute('data-level'));
                 if (level === computerLevel) {
-                    link.classList.add('active');
+                    setActiveSettingLink(levelLinks, link);
                 }
             });
             
@@ -772,10 +994,7 @@ $(document).ready(function () {
                         stockfish_set_skill_level(computerLevel);
                     }
                     
-                    // Remove active class from all computer level links
-                    levelLinks.forEach(l => l.classList.remove('active'));
-                    // Add active class to clicked link
-                    link.classList.add('active');
+                    setActiveSettingLink(levelLinks, link);
                 });
             });
         }

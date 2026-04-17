@@ -81,154 +81,172 @@
             <div id="gameBox" class="gameBox row">
                 <div id="leftMostPane" class="leftmostpane">
                     <div id="settingsHolder" class="settingsClass">
-                        <a href="#" class="nav-link myButton settingsButton dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Settings</a>
-                        <ul id="settingsNavigator" class="settings-menu dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link settings-toggle" role="button" aria-expanded="false" href="#" aria-label="Piece themes"><span class="settings-icon piece-theme-icon"></span></a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#">Classical
-                                                    <div id="piece-classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Metro
-                                                    <div id="piece-metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Alpha
-                                                    <div id="piece-alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">American
-                                                    <div id="piece-american" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Standard
-                                                    <div id="piece-standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Urban
-                                                    <div id="piece-urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wiki
-                                                    <div id="piece-wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wood
-                                                    <div id="piece-wood" style="width: 30%; position: relative;left: 10%;"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                        </ul>
+                        <button id="settingsMenuButton" type="button" class="nav-link myButton settingsButton dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Settings</button>
+                        <ul id="settingsNavigator" class="settings-menu dropdown-menu" aria-labelledby="settingsMenuButton">
+                            <li class="nav-item submenu settings-item">
+                                <button type="button" class="widener nav-link sub-nav-link settings-toggle" aria-expanded="false" aria-controls="pieceThemeMenu" aria-label="Piece themes">
+                                    <span class="settings-icon piece-theme-icon" aria-hidden="true"></span>
+                                </button>
+                                <ul id="pieceThemeMenu" class="dropdown-menu-right settings-submenu" aria-label="Piece theme options">
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Classical</span>
+                                            <div id="piece-classical" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
                                     </li>
                                     <li class="liner"></li>
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link settings-toggle" role="button" aria-expanded="false" href="#" aria-label="Board themes"><span class="settings-icon board-theme-icon"></span></a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#">Classical
-                                                    <div id="board-classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Metro
-                                                    <div id="board-metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Alpha
-                                                    <div id="board-alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">American
-                                                    <div id="board-american" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Standard
-                                                    <div id="board-standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Urban
-                                                    <div id="board-urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wiki
-                                                    <div id="board-wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wood
-                                                    <div id="board-wood" style="width: 30%; position: relative;left: 10%;"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                        </ul>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Metro</span>
+                                            <div id="piece-metro" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
                                     </li>
                                     <li class="liner"></li>
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link settings-toggle" role="button" aria-expanded="false" href="#" aria-label="Engine strength"><span class="settings-icon computer-level-icon"></span></a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="1">Level 1</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="2">Level 2</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="3">Level 3</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="4">Level 4</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="5">Level 5</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="6">Level 6</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="7">Level 7</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="8">Level 8</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                        </ul>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Alpha</span>
+                                            <div id="piece-alpha" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
                                     </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">American</span>
+                                            <div id="piece-american" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Standard</span>
+                                            <div id="piece-standard" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Urban</span>
+                                            <div id="piece-urban" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wiki</span>
+                                            <div id="piece-wiki" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wood</span>
+                                            <div id="piece-wood" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="liner"></li>
+                            <li class="nav-item submenu settings-item">
+                                <button type="button" class="widener nav-link sub-nav-link settings-toggle" aria-expanded="false" aria-controls="boardThemeMenu" aria-label="Board themes">
+                                    <span class="settings-icon board-theme-icon" aria-hidden="true"></span>
+                                </button>
+                                <ul id="boardThemeMenu" class="dropdown-menu-right settings-submenu" aria-label="Board theme options">
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Classical</span>
+                                            <div id="board-classical" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Metro</span>
+                                            <div id="board-metro" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Alpha</span>
+                                            <div id="board-alpha" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">American</span>
+                                            <div id="board-american" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Standard</span>
+                                            <div id="board-standard" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Urban</span>
+                                            <div id="board-urban" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wiki</span>
+                                            <div id="board-wiki" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wood</span>
+                                            <div id="board-wood" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="liner"></li>
+                            <li class="nav-item submenu settings-item">
+                                <button type="button" class="widener nav-link sub-nav-link settings-toggle" aria-expanded="false" aria-controls="engineLevelMenu" aria-label="Engine strength">
+                                    <span class="settings-icon computer-level-icon" aria-hidden="true"></span>
+                                </button>
+                                <ul id="engineLevelMenu" class="dropdown-menu-right settings-submenu" aria-label="Engine strength options">
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="1"><span class="settings-option-label">Level 1</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="2"><span class="settings-option-label">Level 2</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="3"><span class="settings-option-label">Level 3</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="4"><span class="settings-option-label">Level 4</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="5"><span class="settings-option-label">Level 5</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="6"><span class="settings-option-label">Level 6</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="7"><span class="settings-option-label">Level 7</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="8"><span class="settings-option-label">Level 8</span></a>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
                             <!--div id="settingsButton" class="nav-item submenu">
                                     <a class="nav-link dropdown-toggle myButtonClone settingsButton" href="#">Settings</a>

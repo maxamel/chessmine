@@ -886,21 +886,13 @@ body.site-page.game-page .settings-menu .liner {
     display: none;
 }
 
-body.site-page.game-page .settings-menu > li:hover > .dropdown-menu-right {
-    display: none !important;
-}
-
-body.site-page.game-page .settings-menu li:hover ul ul {
-    display: none !important;
-}
-
 body.site-page.game-page .settings-menu > li.is-open > .dropdown-menu-right {
     display: block !important;
 }
 
 body.site-page.game-page .settings-menu .dropdown-menu-right {
     min-width: 220px;
-    left: calc(100% + 12px) !important;
+    left: 100% !important;
     right: auto !important;
     top: 0 !important;
     margin-top: 0 !important;
@@ -917,13 +909,19 @@ body.site-page.game-page .settings-menu > li > .settings-toggle {
     display: flex !important;
     align-items: center;
     justify-content: center;
+    width: 64px;
     min-height: 52px;
+    padding: 0;
+    border: 0;
     border-radius: 14px;
     background: rgba(31, 41, 64, 0.06);
 }
 
+body.site-page.game-page .settings-menu > li > .settings-toggle:hover,
+body.site-page.game-page .settings-menu > li > .settings-toggle:focus-visible,
 body.site-page.game-page .settings-menu > li > .settings-toggle[aria-expanded="true"] {
-    background: rgba(200, 169, 107, 0.18);
+    background: linear-gradient(135deg, var(--site-navy), var(--site-navy-soft));
+    color: #fff !important;
 }
 
 body.site-page.game-page .settings-menu .dropdown-menu-right .sub-nav-link,
@@ -935,9 +933,33 @@ body.site-page.game-page .settings-menu .dropdown-menu-right .computer-level-lin
 }
 
 body.site-page.game-page .settings-menu .dropdown-menu-right .sub-nav-link:hover,
+body.site-page.game-page .settings-menu .dropdown-menu-right .sub-nav-link:focus-visible,
 body.site-page.game-page .settings-menu .dropdown-menu-right .board-sub-nav-link:hover,
-body.site-page.game-page .settings-menu .dropdown-menu-right .computer-level-link:hover {
+body.site-page.game-page .settings-menu .dropdown-menu-right .board-sub-nav-link:focus-visible,
+body.site-page.game-page .settings-menu .dropdown-menu-right .computer-level-link:hover,
+body.site-page.game-page .settings-menu .dropdown-menu-right .computer-level-link:focus-visible {
     background: rgba(200, 169, 107, 0.18) !important;
+}
+
+body.site-page.game-page .settings-menu .dropdown-menu-right .sub-nav-link.active,
+body.site-page.game-page .settings-menu .dropdown-menu-right .board-sub-nav-link.active,
+body.site-page.game-page .settings-menu .dropdown-menu-right .computer-level-link.active {
+    background: linear-gradient(135deg, var(--site-gold), var(--site-gold-strong)) !important;
+    color: #fff !important;
+}
+
+body.site-page.game-page .settings-item.submenu-inline > .dropdown-menu-right {
+    position: static;
+    left: auto !important;
+    right: auto !important;
+    min-width: min(280px, calc(100vw - 48px));
+    width: 100%;
+    margin-top: 12px !important;
+}
+
+body.site-page.game-page .settings-item.submenu-flip > .dropdown-menu-right {
+    left: auto !important;
+    right: 100% !important;
 }
 
 @media (max-width: 991px) {
