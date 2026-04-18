@@ -4713,6 +4713,9 @@ body.site-page.game-page .clockspan {
   width: auto;
   min-width: min(100%, 220px);
   margin: 0;
+  background: #E1ECE0;
+  box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+  color: black;
 }
 
 body.site-page.game-page .boardHolder {
@@ -5076,6 +5079,23 @@ body.site-page.game-page .moveTableFooter .navCell:not(.disabled) {
 
   body.site-page.game-page .inlineClock {
     display: block;
+  }
+
+  body.site-page.game-page .playerInfoSmall {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: 6px;
+  }
+
+  body.site-page.game-page .playerInfoSmall .label {
+    font-size: 16px;
+  }
+
+  body.site-page.game-page .playerInfoSmall .labelRating {
+    font-size: 14px;
+  }
+
+  body.site-page.game-page .playerInfoSmall .arrowRating {
+    display: none;
   }
 
   body.site-page.game-page .boardandclock {

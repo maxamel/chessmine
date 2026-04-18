@@ -123,8 +123,9 @@ async function run() {
     await page1.click('#header a.dropdown-toggle:has-text("Play")');
     await sleep(400);
 
-    // Hover "Invite a Friend" to reveal its CSS sub-menu
-    await page1.hover('#header a.nav-link.invite-friend');
+    // Hover the Invite a Friend submenu entry by text; the mobile-header refactor
+    // removed the old helper class from the desktop nav item.
+    await page1.hover('#header #navigator > li.submenu > a.nav-link:has-text("Invite a Friend")');
     await sleep(400);
 
     // Click "5 + 0" — force:true bypasses the visibility guard on the sub-menu

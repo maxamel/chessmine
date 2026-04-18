@@ -4,6 +4,19 @@ set -e  # Exit immediately if a command fails
 
 echo "=== Chessmine environment setup ==="
 
+START_DIR="$(pwd)"
+SECRETS_SOURCE="$START_DIR/.secrets"
+
+########################################
+# 0. Verify secrets file presence
+########################################
+
+if [ ! -f "$SECRETS_SOURCE" ]; then
+  echo ".secrets file not found in the current directory."
+  echo "Please add a .secrets file to the current directory and run this script again."
+  exit 1
+fi
+
 ########################################
 # 1. Clone the repository
 ########################################
@@ -72,25 +85,11 @@ else
 fi
 
 ########################################
-# 4. Verify secrets file presence
+# 4. Copy secrets file into repository
 ########################################
 
-echo
-read -p "Have you copied the secrets file (.secrets) into this repository? (Y/N): " answer
-
-case "$answer" in
-  Y|y)
-    echo "Continuing setup..."
-    ;;
-  N|n)
-    echo "Secrets file missing. Aborting setup."
-    exit 1
-    ;;
-  *)
-    echo "Invalid input. Please answer Y or N."
-    exit 1
-    ;;
-esac
+cp "$SECRETS_SOURCE" .secrets
+echo "Copied .secrets into the repository."
 
 ########################################
 # 5. Run the workflow job locally
@@ -98,6 +97,7 @@ esac
 
 echo "Running GitHub workflow job..."
 
-act push -j prepare-images --secret-file .secrets
+# act push -j prepare-images --secret-file .secrets
+act workflow_dispatch -W .github/workflows/e2e_test.yaml --secret-file .secrets
 
 echo "=== Setup complete ==="
