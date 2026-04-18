@@ -50,9 +50,13 @@ jobs:
       - name: Notify Telegram on failure
         if: failure()
         run: |
+          MESSAGE="[chessmine] ❌ E2E test FAILED
+          Commit: ${{ github.sha }}
+          By: ${{ github.actor }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=[chessmine] ❌ E2E test FAILED
+            --data-urlencode "text=${MESSAGE}"
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

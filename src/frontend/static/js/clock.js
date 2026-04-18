@@ -6,6 +6,19 @@ import { getTimeRemaining } from './utils.js'
     var timecolorintervalB = null
     var clockStatus = false;
     var clockGlow = false;
+    var idleClockBackground = "#E1ECE0";
+    var idleClockText = "black";
+    var idleClockShadow = "inset 0px 0px 10px 5px #c2d0c1";
+
+    function applyIdleClockStyle(clockspan) {
+        if (!clockspan) {
+            return;
+        }
+
+        clockspan.style.backgroundColor = idleClockBackground;
+        clockspan.style.color = idleClockText;
+        clockspan.style.boxShadow = idleClockShadow;
+    }
 
     function getMirrorClockId(id) {
         if (id === "clockdivA") {
@@ -67,9 +80,7 @@ import { getTimeRemaining } from './utils.js'
 
         function changeClockColor() {
             if (clockStatus) {
-                clockspan.style.backgroundColor = "#E1ECE0";
-                clockspan.style.color = "black";
-                clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
+                applyIdleClockStyle(clockspan);
                 clockStatus = !clockStatus;
             } else {
                 clockspan.style.backgroundColor = "black";
@@ -129,9 +140,7 @@ import { getTimeRemaining } from './utils.js'
             clearInterval(timecolorintervalB);
             var clock = document.getElementById("clockdivB");
             var clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
-            clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
+            applyIdleClockStyle(clockspan);
             timecolorintervalB = null;
             syncMirrorClock("clockdivB");
         }
@@ -140,9 +149,7 @@ import { getTimeRemaining } from './utils.js'
             clearInterval(timecolorintervalA);
             clock = document.getElementById("clockdivA");
             clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
-            clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
+            applyIdleClockStyle(clockspan);
             timecolorintervalA = null;
             syncMirrorClock("clockdivA");
         }
@@ -156,14 +163,12 @@ import { getTimeRemaining } from './utils.js'
 
             clock = document.getElementById("clockdivA");
             clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
+            applyIdleClockStyle(clockspan);
             syncMirrorClock("clockdivA");
 
             clock = document.getElementById("clockdivB");
             clockspan = clock.children.item(0);
-            clockspan.style.color = "black";
-            clockspan.style.backgroundColor = "#E1ECE0";
+            applyIdleClockStyle(clockspan);
             syncMirrorClock("clockdivB");
         }
     }

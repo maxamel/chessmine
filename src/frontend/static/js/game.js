@@ -1446,20 +1446,13 @@ $(document).ready(function () {
         if (orient == 'up') {
             document.getElementById(arrow).innerHTML = "&#x2197(+" + delta +")";
             document.getElementById(arrow).style.color = "#c8a96b";
-            if (arrowSmall) {
-                arrowSmall.innerHTML = "&#x2197(+" + delta +")";
-                arrowSmall.style.color = "#c8a96b";
-            }
         } else if (orient == 'down') {
             document.getElementById(arrow).innerHTML = "&#x2198(" + delta +")";
             document.getElementById(arrow).style.color = "crimson";
-            if (arrowSmall) {
-                arrowSmall.innerHTML = "&#x2198(" + delta +")";
-                arrowSmall.style.color = "crimson";
-            }
         }
         if (arrowSmall) {
-            arrowSmall.style.display = "inline-block";
+            arrowSmall.innerHTML = "";
+            arrowSmall.style.display = "none";
         }
         document.getElementById(label).innerHTML = rating;
         if (labelSmall) {

@@ -749,7 +749,6 @@ body.site-page.game-page .gameBox {
 body.site-page.game-page .boardHolder,
 body.site-page.game-page .playerBox,
 body.site-page.game-page .boxesHolder,
-body.site-page.game-page .clockspan,
 body.site-page.game-page .moveBox {
     background: rgba(255, 250, 240, 0.95);
     box-shadow: inset 0 0 0 1px rgba(31, 41, 64, 0.06), 0 16px 32px rgba(31, 41, 64, 0.1);
@@ -759,11 +758,16 @@ body.site-page.game-page .moveBox {
 body.site-page.game-page .label,
 body.site-page.game-page .labelRating,
 body.site-page.game-page .arrowRating,
-body.site-page.game-page .clockspan,
 body.site-page.game-page .moveTable,
 body.site-page.game-page .moveTableHeader,
 body.site-page.game-page .moveTableFooter {
     color: var(--site-text);
+}
+
+body.site-page.game-page .clockspan {
+    background: #E1ECE0;
+    box-shadow: inset 0px 0px 10px 5px #c2d0c1;
+    color: black;
 }
 
 body.site-page.game-page th,
