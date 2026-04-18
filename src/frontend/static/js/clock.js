@@ -7,6 +7,40 @@ import { getTimeRemaining } from './utils.js'
     var clockStatus = false;
     var clockGlow = false;
 
+    function getMirrorClockId(id) {
+        if (id === "clockdivA") {
+            return "mobileClockA";
+        }
+        if (id === "clockdivB") {
+            return "mobileClockB";
+        }
+        return null;
+    }
+
+    function syncMirrorClock(id) {
+        var mirrorId = getMirrorClockId(id);
+        if (!mirrorId) {
+            return;
+        }
+
+        var sourceClock = document.getElementById(id);
+        var mirrorClock = document.getElementById(mirrorId);
+        if (!sourceClock || !mirrorClock) {
+            return;
+        }
+
+        var sourceSpan = sourceClock.querySelector(".clockspan");
+        var mirrorSpan = mirrorClock.querySelector(".clockspan");
+        if (!sourceSpan || !mirrorSpan) {
+            return;
+        }
+
+        mirrorSpan.innerHTML = sourceSpan.innerHTML;
+        mirrorSpan.style.backgroundColor = sourceSpan.style.backgroundColor;
+        mirrorSpan.style.color = sourceSpan.style.color;
+        mirrorSpan.style.boxShadow = sourceSpan.style.boxShadow;
+    }
+
     function setTime(id, endtime) {
         var clock = document.getElementById(id);
         var minutesSpan = clock.querySelector(".minutes");
@@ -16,6 +50,7 @@ import { getTimeRemaining } from './utils.js'
         minutesSpan.innerHTML = ("0" + t.minutes).slice(-2);
         secondsSpan.innerHTML = ("0" + t.seconds).slice(-2);
         millisSpan.innerHTML = ("0" + t.millis).slice(-2);
+        syncMirrorClock(id);
     }
 
     function setClockGlow(clock_glow) {
@@ -42,6 +77,7 @@ import { getTimeRemaining } from './utils.js'
                 clockspan.style.color = "#E1ECE0";
                 clockStatus = !clockStatus;
             }
+            syncMirrorClock(id);
         }
 
         function updateClock() {
@@ -70,6 +106,7 @@ import { getTimeRemaining } from './utils.js'
             minutesSpan.innerHTML = ("0" + t.minutes).slice(-2);
             secondsSpan.innerHTML = ("0" + t.seconds).slice(-2);
             millisSpan.innerHTML = ("0" + t.millis).slice(-2);
+            syncMirrorClock(id);
         }
 
         updateClock();
@@ -96,6 +133,7 @@ import { getTimeRemaining } from './utils.js'
             clockspan.style.backgroundColor = "#E1ECE0";
             clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
             timecolorintervalB = null;
+            syncMirrorClock("clockdivB");
         }
         else if (str === 'A') {
             clearInterval(timeintervalA);
@@ -106,6 +144,7 @@ import { getTimeRemaining } from './utils.js'
             clockspan.style.backgroundColor = "#E1ECE0";
             clockspan.style.boxShadow = "inset 0px 0px 10px 5px #c2d0c1";
             timecolorintervalA = null;
+            syncMirrorClock("clockdivA");
         }
         else {
             clearInterval(timeintervalA);
@@ -119,11 +158,13 @@ import { getTimeRemaining } from './utils.js'
             clockspan = clock.children.item(0);
             clockspan.style.color = "black";
             clockspan.style.backgroundColor = "#E1ECE0";
+            syncMirrorClock("clockdivA");
 
             clock = document.getElementById("clockdivB");
             clockspan = clock.children.item(0);
             clockspan.style.color = "black";
             clockspan.style.backgroundColor = "#E1ECE0";
+            syncMirrorClock("clockdivB");
         }
     }
 

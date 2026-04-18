@@ -39,8 +39,302 @@ $(document).ready(function () {
     var heartbeatOK = false;
     var abort_button = null;
     var attached_listeners = false;
+    var currentMoveIndex = -1;
     var engine = null;       // stockfish instance
     var engine_sid = null;   // for engine play only
+
+    function getThemeNameFromPreviewId(idValue, prefix) {
+        return idValue.replace(prefix + "-", "").trim().toLowerCase();
+    }
+
+    function renderPiecePreview(childDiv, themeName) {
+        const imagePath = `img/chesspieces/${themeName}/wB.png`;
+        childDiv.style.backgroundImage = `url(${imagePath})`;
+        childDiv.style.backgroundSize = 'contain';
+        childDiv.style.backgroundPosition = 'center';
+        childDiv.style.backgroundRepeat = 'no-repeat';
+    }
+
+    function clearPiecePreview(childDiv) {
+        childDiv.style.backgroundImage = 'none';
+    }
+
+    function renderBoardPreview(childDiv, themeName) {
+        const colorBoard = getBoardColorsByName(themeName);
+        const light = colorBoard[0];
+        const dark = colorBoard[1];
+
+        childDiv.innerHTML = '';
+        childDiv.style.display = 'flex';
+        childDiv.style.flexWrap = 'wrap';
+        childDiv.style.borderRadius = '6px';
+        childDiv.style.overflow = 'hidden';
+        childDiv.style.height = '40px';
+
+        for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 2; col++) {
+                const sq = document.createElement('div');
+                sq.style.width = '50%';
+                sq.style.height = '50%';
+                sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
+                childDiv.appendChild(sq);
+            }
+        }
+    }
+
+    function clearBoardPreview(childDiv) {
+        childDiv.innerHTML = '';
+        childDiv.style.display = '';
+        childDiv.style.height = '';
+    }
+
+    function setActiveSettingLink(links, activeLink) {
+        links.forEach(link => {
+            const isActive = link === activeLink;
+            link.classList.toggle('active', isActive);
+
+            if (isActive) {
+                link.setAttribute('aria-current', 'true');
+                link.setAttribute('aria-disabled', 'true');
+            } else {
+                link.removeAttribute('aria-current');
+                link.removeAttribute('aria-disabled');
+            }
+        });
+    }
+
+    function settingsUsePersistentPreviews() {
+        return window.matchMedia('(hover: none), (pointer: coarse), (max-width: 991px)').matches;
+    }
+
+    function attachSettingsMenuListeners() {
+        const settingsMenu = document.getElementById('settingsNavigator');
+        if (!settingsMenu) {
+            return;
+        }
+
+        const settingsHolder = document.getElementById('settingsHolder');
+        const settingsButton = document.getElementById('settingsMenuButton');
+        const settingsItems = Array.from(settingsMenu.querySelectorAll('.settings-item'));
+        const closeTimers = new WeakMap();
+
+        function getTrigger(item) {
+            return item.querySelector(':scope > .settings-toggle');
+        }
+
+        function getSubmenu(item) {
+            return item.querySelector(':scope > .dropdown-menu-right');
+        }
+
+        function supportsDesktopHover() {
+            return window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 992px)').matches;
+        }
+
+        function closeItem(item) {
+            clearCloseTimer(item);
+            const trigger = getTrigger(item);
+            item.classList.remove('is-open', 'submenu-inline', 'submenu-flip');
+
+            if (trigger) {
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function closeAllItems() {
+            settingsItems.forEach(closeItem);
+        }
+
+        function clearCloseTimer(item) {
+            const timerId = closeTimers.get(item);
+            if (timerId) {
+                window.clearTimeout(timerId);
+                closeTimers.delete(item);
+            }
+        }
+
+        function scheduleClose(item) {
+            clearCloseTimer(item);
+            closeTimers.set(item, window.setTimeout(() => {
+                closeTimers.delete(item);
+                closeItem(item);
+            }, 900));
+        }
+
+        function syncSubmenuLayout(item) {
+            const submenu = getSubmenu(item);
+            const trigger = getTrigger(item);
+            if (!submenu || !trigger) {
+                return;
+            }
+
+            item.classList.remove('submenu-inline', 'submenu-flip');
+
+            if (window.matchMedia('(max-width: 991px)').matches) {
+                item.classList.add('submenu-inline');
+                return;
+            }
+
+            const submenuWidth = Math.max(submenu.offsetWidth, submenu.scrollWidth, 220);
+            const triggerRect = trigger.getBoundingClientRect();
+            const viewportPadding = 16;
+            const spaceRight = window.innerWidth - triggerRect.right - viewportPadding;
+            const spaceLeft = triggerRect.left - viewportPadding;
+
+            if (spaceRight >= submenuWidth) {
+                return;
+            }
+
+            if (spaceLeft >= submenuWidth) {
+                item.classList.add('submenu-flip');
+                return;
+            }
+
+            item.classList.add('submenu-inline');
+        }
+
+        function openItem(item, focusFirstOption) {
+            const trigger = getTrigger(item);
+            if (!trigger) {
+                return;
+            }
+
+            const wasOpen = item.classList.contains('is-open');
+            closeAllItems();
+
+            if (wasOpen) {
+                return;
+            }
+
+            item.classList.add('is-open');
+            trigger.setAttribute('aria-expanded', 'true');
+            syncSubmenuLayout(item);
+
+            if (focusFirstOption) {
+                const firstOption = getSubmenu(item)?.querySelector('a, button');
+                if (firstOption) {
+                    window.requestAnimationFrame(() => firstOption.focus());
+                }
+            }
+        }
+
+        function toggleItem(item) {
+            if (item.classList.contains('is-open')) {
+                closeItem(item);
+            } else {
+                openItem(item, false);
+            }
+        }
+
+        settingsItems.forEach(item => {
+            const trigger = getTrigger(item);
+            const submenu = getSubmenu(item);
+            if (!trigger) {
+                return;
+            }
+
+            trigger.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleItem(item);
+            });
+
+            item.addEventListener('mouseenter', function () {
+                if (supportsDesktopHover()) {
+                    clearCloseTimer(item);
+                    openItem(item, false);
+                }
+            });
+
+            item.addEventListener('mouseleave', function () {
+                if (supportsDesktopHover()) {
+                    scheduleClose(item);
+                }
+            });
+
+            if (submenu) {
+                submenu.addEventListener('mouseenter', function () {
+                    if (supportsDesktopHover()) {
+                        clearCloseTimer(item);
+                    }
+                });
+
+                submenu.addEventListener('mouseleave', function () {
+                    if (supportsDesktopHover()) {
+                        scheduleClose(item);
+                    }
+                });
+            }
+
+            trigger.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleItem(item);
+                    return;
+                }
+
+                if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    openItem(item, true);
+                    return;
+                }
+
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeItem(item);
+                    trigger.focus();
+                }
+            });
+
+            if (submenu) {
+                submenu.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        closeItem(item);
+                        trigger.focus();
+                    }
+                });
+            }
+        });
+
+        settingsMenu.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeAllItems();
+
+                if (settingsButton && typeof bootstrap !== 'undefined') {
+                    bootstrap.Dropdown.getOrCreateInstance(settingsButton).hide();
+                } else if (settingsButton) {
+                    settingsButton.focus();
+                }
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (settingsHolder && !settingsHolder.contains(event.target)) {
+                closeAllItems();
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            const openItemNode = settingsItems.find(item => item.classList.contains('is-open'));
+            if (openItemNode) {
+                syncSubmenuLayout(openItemNode);
+            }
+        });
+
+        if (settingsHolder) {
+            settingsHolder.addEventListener('shown.bs.dropdown', function () {
+                const openItemNode = settingsItems.find(item => item.classList.contains('is-open'));
+                if (openItemNode) {
+                    syncSubmenuLayout(openItemNode);
+                }
+            });
+
+            settingsHolder.addEventListener('hidden.bs.dropdown', function () {
+                closeAllItems();
+            });
+        }
+    }
 
     var prefs = localStorage.getItem("user_prefs");
     var cookie_data = localStorage.getItem("user_session");
@@ -345,6 +639,12 @@ $(document).ready(function () {
         console.log('setting board to fen ' + the_game_fen);
         board = Chessground($board, conf);
         setupThemes(pieceTheme, boardTheme);
+        // Defer layout sync so the browser finishes its first paint before we measure.
+        requestAnimationFrame(function() {
+            syncBoardRelatedLayout();
+            // Second pass in case fonts/images shifted things slightly.
+            setTimeout(syncBoardRelatedLayout, 150);
+        });
 
         insertBulkMoves(the_game_moves, ttl_time);
 
@@ -352,6 +652,7 @@ $(document).ready(function () {
 
         var isStart = the_game_moves.length < 2;
         if (!isStart) abort_button = false;
+        attachSettingsMenuListeners();
         attachPieceThemeListeners();
         attachColorThemeListener();
         attachComputerLevelListener();
@@ -421,7 +722,11 @@ $(document).ready(function () {
         for (var t = 0; t < dots.length; t++) {
             var dot = dots.item(t);
             dot.addEventListener("click", function (evt) {
-                evt.target.parentElement.style.display = "none";
+                var endgameBox = evt.currentTarget.closest(".endgame-box");
+                if (endgameBox) {
+                    endgameBox.style.display = "none";
+                }
+                hideEndGameBoxes();
                 var json = {
                     "data": {
                         "sid": player_id,
@@ -455,18 +760,39 @@ $(document).ready(function () {
         }
 
         function attachPieceThemeListeners() {
-            const subNavLinks = document.querySelectorAll('.sub-nav-link');
+            const subNavLinks = document.querySelectorAll('.settings-menu .dropdown-menu-right .sub-nav-link');
+
+            function syncPiecePreviews() {
+                const showAllPreviews = settingsUsePersistentPreviews();
+
+                subNavLinks.forEach(link => {
+                    const childDiv = link.querySelector('div');
+                    if (!childDiv) {
+                        return;
+                    }
+
+                    const themeName = getThemeNameFromPreviewId(childDiv.id, 'piece');
+                    if (showAllPreviews || link.classList.contains('active')) {
+                        renderPiecePreview(childDiv, themeName);
+                    } else {
+                        clearPiecePreview(childDiv);
+                    }
+                });
+            }
 
             // Set initial active state based on current pieceTheme
             subNavLinks.forEach(link => {
                 const childDiv = link.querySelector('div');
                 if (childDiv) {
-                    const linkValue = link.textContent.trim().toLowerCase();
-                    if (linkValue === pieceTheme) {
-                        link.classList.add('active');
+                    const linkValue = getThemeNameFromPreviewId(childDiv.id, 'piece');
+                    if (linkValue === pieceTheme.toLowerCase()) {
+                        setActiveSettingLink(subNavLinks, link);
                     }
                 }
             });
+
+            syncPiecePreviews();
+            window.addEventListener('resize', syncPiecePreviews);
 
             // Iterate over each sub-nav-link
             subNavLinks.forEach(link => {
@@ -476,19 +802,21 @@ $(document).ready(function () {
                 if (childDiv) {
                     // Attach a hover event listener
                     link.addEventListener('mouseover', () => {
+                        if (settingsUsePersistentPreviews()) {
+                            return;
+                        }
+
                         // Don't show preview if this is the active item
                         if (!link.classList.contains('active')) {
-                            // Change the background image or other properties
-                            const imagePath = `img/chesspieces/${childDiv.id}/wB.png`;
-                            childDiv.style.backgroundImage = `url(${imagePath})`;
-                            childDiv.style.backgroundSize = 'contain';
-                            childDiv.style.backgroundPosition = 'center';
-                            childDiv.style.backgroundRepeat = 'no-repeat';
+                            const themeName = getThemeNameFromPreviewId(childDiv.id, 'piece');
+                            renderPiecePreview(childDiv, themeName);
                         }
                     });
 
                     link.addEventListener('mouseout', () => {
-                        childDiv.style.backgroundImage = 'none'; // Reset or replace with default
+                        if (!settingsUsePersistentPreviews() && !link.classList.contains('active')) {
+                            clearPiecePreview(childDiv);
+                        }
                     });
 
                     // Attach a click event listener
@@ -501,7 +829,7 @@ $(document).ready(function () {
                         }
                         
                         console.log(`clicker!`);
-                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        const linkValue = getThemeNameFromPreviewId(childDiv.id, 'piece');
                         console.log(`You clicked on: ${linkValue}`);
                         pieceTheme = linkValue.toLowerCase();
                         
@@ -522,11 +850,9 @@ $(document).ready(function () {
                         prefs = JSON.stringify(preferences);
                         localStorage.setItem("user_prefs", prefs);
                         setupThemes(pieceTheme, boardTheme);
-                        
-                        // Remove active class from all piece theme links
-                        subNavLinks.forEach(l => l.classList.remove('active'));
-                        // Add active class to clicked link
-                        link.classList.add('active');
+
+                        setActiveSettingLink(subNavLinks, link);
+                        syncPiecePreviews();
                     });
                 }
             });
@@ -534,17 +860,38 @@ $(document).ready(function () {
 
         function attachColorThemeListener() {
             const subNavLinks = document.querySelectorAll('.board-sub-nav-link');
+
+            function syncBoardPreviews() {
+                const showAllPreviews = settingsUsePersistentPreviews();
+
+                subNavLinks.forEach(link => {
+                    const childDiv = link.querySelector('div');
+                    if (!childDiv) {
+                        return;
+                    }
+
+                    const themeName = getThemeNameFromPreviewId(childDiv.id, 'board');
+                    if (showAllPreviews || link.classList.contains('active')) {
+                        renderBoardPreview(childDiv, themeName);
+                    } else {
+                        clearBoardPreview(childDiv);
+                    }
+                });
+            }
             
             // Set initial active state based on current boardTheme
             subNavLinks.forEach(link => {
                 const childDiv = link.querySelector('div');
                 if (childDiv) {
-                    const linkValue = link.textContent.trim().toLowerCase();
-                    if (linkValue === boardTheme) {
-                        link.classList.add('active');
+                    const linkValue = getThemeNameFromPreviewId(childDiv.id, 'board');
+                    if (linkValue === boardTheme.toLowerCase()) {
+                        setActiveSettingLink(subNavLinks, link);
                     }
                 }
             });
+
+            syncBoardPreviews();
+            window.addEventListener('resize', syncBoardPreviews);
             
             // Iterate over each sub-nav-link
             subNavLinks.forEach(link => {
@@ -554,40 +901,22 @@ $(document).ready(function () {
                 if (childDiv) {
                     // Attach a hover event listener
                     link.addEventListener('mouseenter', () => {
+                        if (settingsUsePersistentPreviews()) {
+                            return;
+                        }
+
                         // Don't show preview if this is the active item
                         if (!link.classList.contains('active')) {
-                            const colorBoard = getBoardColorsByName(childDiv.id);
-                            const light = colorBoard[0];
-                            const dark = colorBoard[1];
-
-                            // Build a 2x2 board preview aligned to the right
-                            // Pattern: top-left is light (like a1 in chess notation)
-                            childDiv.innerHTML = '';
-                            childDiv.style.display = 'flex';
-                            childDiv.style.flexWrap = 'wrap';
-                            childDiv.style.borderRadius = '6px';
-                            childDiv.style.overflow = 'hidden';
-                            childDiv.style.height = '40px';
-
-                            // Create 2x2 grid: (row + col) % 2 === 0 is light square
-                            for (let row = 0; row < 2; row++) {
-                                for (let col = 0; col < 2; col++) {
-                                    const sq = document.createElement('div');
-                                    sq.style.width = '50%';
-                                    sq.style.height = '50%';
-                                    // Match the pattern used in setupBoard: (file + rank) % 2 === 0 is light
-                                    sq.style.backgroundColor = (row + col) % 2 === 0 ? light : dark;
-                                    childDiv.appendChild(sq);
-                                }
-                            }
+                            const themeName = getThemeNameFromPreviewId(childDiv.id, 'board');
+                            renderBoardPreview(childDiv, themeName);
                         }
                     });
 
                     link.addEventListener('mouseleave', () => {
                         // Reset preview
-                        childDiv.innerHTML = '';
-                        childDiv.style.display = '';
-                        childDiv.style.height = '';
+                        if (!settingsUsePersistentPreviews() && !link.classList.contains('active')) {
+                            clearBoardPreview(childDiv);
+                        }
                     });
 
                     // Attach a click event listener
@@ -600,7 +929,7 @@ $(document).ready(function () {
                         }
                         
                         console.log(`clicker!`);
-                        const linkValue = link.textContent.trim(); // Get the text of the link
+                        const linkValue = getThemeNameFromPreviewId(childDiv.id, 'board');
                         console.log(`You clicked on: ${linkValue}`);
                         boardTheme = linkValue.toLowerCase();
                         
@@ -621,11 +950,9 @@ $(document).ready(function () {
                         prefs = JSON.stringify(preferences);
                         localStorage.setItem("user_prefs", prefs);
                         setupBoard(boardTheme);
-                        
-                        // Remove active class from all board theme links
-                        subNavLinks.forEach(l => l.classList.remove('active'));
-                        // Add active class to clicked link
-                        link.classList.add('active');
+
+                        setActiveSettingLink(subNavLinks, link);
+                        syncBoardPreviews();
                     });
                 }
             });
@@ -638,7 +965,7 @@ $(document).ready(function () {
             levelLinks.forEach(link => {
                 const level = parseInt(link.getAttribute('data-level'));
                 if (level === computerLevel) {
-                    link.classList.add('active');
+                    setActiveSettingLink(levelLinks, link);
                 }
             });
             
@@ -678,10 +1005,7 @@ $(document).ready(function () {
                         stockfish_set_skill_level(computerLevel);
                     }
                     
-                    // Remove active class from all computer level links
-                    levelLinks.forEach(l => l.classList.remove('active'));
-                    // Add active class to clicked link
-                    link.classList.add('active');
+                    setActiveSettingLink(levelLinks, link);
                 });
             });
         }
@@ -710,7 +1034,7 @@ $(document).ready(function () {
                         resetBoard({"from": promotion_in_progress[0], "to": promotion_in_progress[1]});
                         promotion_in_progress = [];
                     }
-                    elem.style.border = "3px solid #81b622";
+                    elem.style.border = "3px solid #c8a96b";
                     elem.style.color = "white";
                     elem.style.fontWeight = "bolder";
                 }, false);
@@ -1020,6 +1344,75 @@ $(document).ready(function () {
     function hideArrows() {
         document.getElementById("arrowRatingA").style.display = "none";
         document.getElementById("arrowRatingB").style.display = "none";
+        var smallTop = document.getElementById("arrowRatingASmall");
+        var smallBottom = document.getElementById("arrowRatingBSmall");
+        if (smallTop) {
+            smallTop.style.display = "none";
+        }
+        if (smallBottom) {
+            smallBottom.style.display = "none";
+        }
+    }
+
+    function syncBoardRelatedLayout() {
+        var boardHolder = document.getElementById("boardHolder");
+        var boxesHolder = document.getElementById("boxesHolder");
+        var moveBox = document.getElementById("boxZ");
+        var rightPane = document.getElementById("rightPane");
+
+        if (!boardHolder || !boxesHolder || !moveBox || !rightPane) {
+            return;
+        }
+
+        if (window.matchMedia("(min-width: 1200px)").matches) {
+            // Read positions from the fully-laid-out DOM.
+            // getBoundingClientRect() forces a synchronous layout so values are accurate.
+            var boardRect = boardHolder.getBoundingClientRect();
+            var rightRect = rightPane.getBoundingClientRect();
+
+            var boardHeight = boardRect.height;
+            if (!boardHeight) { return; }
+
+            var topOffset = boardRect.top - rightRect.top;   // distance from rightPane top to board top
+
+            // Safety guard: if rightPane has somehow wrapped below the board (topOffset < 0),
+            // bail out so we don't place boxesHolder over the board.
+            if (topOffset < 0) {
+                boxesHolder.style.position = "";
+                boxesHolder.style.top = "";
+                boxesHolder.style.left = "";
+                boxesHolder.style.right = "";
+                boxesHolder.style.height = "";
+                boxesHolder.style.marginTop = "";
+                moveBox.style.height = "";
+                return;
+            }
+
+            // Position boxesHolder absolutely so it sits exactly over the board area.
+            // rightPane must be position:relative (set in CSS).
+            boxesHolder.style.position = "absolute";
+            boxesHolder.style.top = topOffset + "px";
+            boxesHolder.style.left = "0";
+            boxesHolder.style.right = "0";
+            boxesHolder.style.height = boardHeight + "px";
+            boxesHolder.style.marginTop = "";
+
+            // moveBox fills whatever remains after the two player-box rows (auto height).
+            // CSS grid-template-rows: auto 1fr auto handles this automatically.
+            moveBox.style.height = "";
+        } else {
+            boxesHolder.style.position = "";
+            boxesHolder.style.top = "";
+            boxesHolder.style.left = "";
+            boxesHolder.style.right = "";
+            boxesHolder.style.height = "";
+            boxesHolder.style.marginTop = "";
+            moveBox.style.height = "";
+        }
+
+        if (board && typeof board.resize === "function") {
+            board.resize();
+        }
     }
 
     function setRatings(dict) {
@@ -1048,14 +1441,30 @@ $(document).ready(function () {
 
     function setRating(arrow, label, orient, rating, delta) {
         document.getElementById(arrow).style.display = "inline-block";
+        var arrowSmall = document.getElementById(arrow + "Small");
+        var labelSmall = document.getElementById(label + "Small");
         if (orient == 'up') {
             document.getElementById(arrow).innerHTML = "&#x2197(+" + delta +")";
-            document.getElementById(arrow).style.color = "green";
+            document.getElementById(arrow).style.color = "#c8a96b";
+            if (arrowSmall) {
+                arrowSmall.innerHTML = "&#x2197(+" + delta +")";
+                arrowSmall.style.color = "#c8a96b";
+            }
         } else if (orient == 'down') {
             document.getElementById(arrow).innerHTML = "&#x2198(" + delta +")";
             document.getElementById(arrow).style.color = "crimson";
+            if (arrowSmall) {
+                arrowSmall.innerHTML = "&#x2198(" + delta +")";
+                arrowSmall.style.color = "crimson";
+            }
+        }
+        if (arrowSmall) {
+            arrowSmall.style.display = "inline-block";
         }
         document.getElementById(label).innerHTML = rating;
+        if (labelSmall) {
+            labelSmall.innerHTML = rating;
+        }
     }
 
     function disableGameButtons() {
@@ -1170,7 +1579,113 @@ $(document).ready(function () {
         }
     }
 
+    function updateMobileMoveIndex(currentIndex) {
+        var mobileMoveIndex = document.getElementById("mobileMoveIndex");
+        if (!mobileMoveIndex) {
+            return;
+        }
+
+        if (!the_game_fens.length || currentIndex >= the_game_fens.length - 1) {
+            mobileMoveIndex.textContent = "Live position";
+            return;
+        }
+
+        mobileMoveIndex.textContent = "Move " + (currentIndex + 1) + " of " + the_game_fens.length;
+    }
+
+    function clearSelectedMoves() {
+        document.querySelectorAll("#moveTable .selectedCell, #mobileMoveReel .selectedCell").forEach(function (element) {
+            element.classList.remove("selectedCell");
+        });
+    }
+
+    function highlightSelectedMove(position_in_array) {
+        var row = Math.floor(position_in_array / 2);
+        var cellIndex = (position_in_array % 2) + 1;
+        var table = document.getElementById("moveTable");
+        var reel = document.getElementById("mobileMoveReel");
+
+        if (table.rows[row] && table.rows[row].cells[cellIndex]) {
+            table.rows[row].cells[cellIndex].classList.add("selectedCell");
+        }
+
+        if (reel) {
+            var chip = reel.querySelector('[data-move-index="' + position_in_array + '"]');
+            if (chip) {
+                chip.classList.add("selectedCell");
+                // Scroll only the reel — never the page.
+                // scrollIntoView with inline:"center" would scroll ALL ancestors including body.
+                var chipLeft = chip.offsetLeft;
+                var chipWidth = chip.offsetWidth;
+                var reelWidth = reel.offsetWidth;
+                var target = chipLeft - (reelWidth / 2) + (chipWidth / 2);
+                reel.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+            }
+        }
+
+        updateMobileMoveIndex(position_in_array);
+    }
+
+    function renderMobileMoves() {
+        var reel = document.getElementById("mobileMoveReel");
+        if (!reel) {
+            return;
+        }
+
+        reel.innerHTML = "";
+
+        if (!the_game_moves.length) {
+            updateMobileMoveIndex(the_game_fens.length - 1);
+            return;
+        }
+
+        the_game_moves.forEach(function (move, index) {
+            var moveButton = document.createElement("button");
+            moveButton.type = "button";
+            moveButton.className = "mobileMoveChip";
+            moveButton.dataset.moveIndex = index.toString();
+            moveButton.innerHTML =
+                '<span class="mobileMoveChipMoveNo">' + (index + 1) + '</span>' +
+                '<span class="mobileMoveChipSan">' + move + "</span>";
+            moveButton.addEventListener("click", clickedCell, false);
+            reel.appendChild(moveButton);
+        });
+    }
+
+    function applyMovePosition(position_in_array) {
+        if (position_in_array < 0 || position_in_array >= the_game_fens.length) {
+            return;
+        }
+
+        currentMoveIndex = position_in_array;
+        var selected_fen = the_game_fens[position_in_array];
+        conf.fen = selected_fen;
+        clearSelectedMoves();
+        highlightSelectedMove(position_in_array);
+
+        if (position_in_array < the_game_fens.length - 1) {
+            removeCheckAndMate();
+            conf.highlight.lastMove = false;
+            conf.movable.dests = new Map();
+            conf.movable.color = undefined;
+            $board.style.opacity = 0.8;
+        } else {
+            conf.highlight.lastMove = true;
+            conf.movable.dests = getMovesMap();
+            conf.movable.color = my_color;
+            conf.turnColor = getColorFromTurn();
+            highlight_check_mate();
+            $board.style.opacity = 1;
+        }
+
+        board.set(conf);
+        setupThemes(pieceTheme, boardTheme);
+        updateNavigationButtons();
+    }
+
     function insertMove(move) {
+        var previousIndex = getCurrentMoveIndex();
+        var wasAtLive = previousIndex >= the_game_fens.length - 1;
         var index = 0;
         if (game.turn() === "b") {
             document.getElementById("moveTable").insertRow(-1);
@@ -1183,6 +1698,10 @@ $(document).ready(function () {
         if (abort_button)
             enableGameButtons();
         handle_move(move.san, index, 30000, true);
+        currentMoveIndex = wasAtLive ? the_game_fens.length - 1 : previousIndex;
+        renderMobileMoves();
+        clearSelectedMoves();
+        highlightSelectedMove(currentMoveIndex);
         updateNavigationButtons();
     }
 
@@ -1202,6 +1721,12 @@ $(document).ready(function () {
                 index = 2;
             }
             handle_move(moves[i], index, ttl, moves.length === 1);
+        }
+        currentMoveIndex = the_game_fens.length - 1;
+        renderMobileMoves();
+        clearSelectedMoves();
+        if (currentMoveIndex >= 0) {
+            highlightSelectedMove(currentMoveIndex);
         }
         updateNavigationButtons();
     }
@@ -1248,158 +1773,115 @@ $(document).ready(function () {
     }
 
     function clickedCell(cell) {
-        var row = cell.srcElement.parentElement.rowIndex;
-        var index = cell.srcElement.cellIndex;
-        var normalized_index = index - 1;
-        var position_in_array = row * 2 + normalized_index;
-        var selected_fen = the_game_fens[position_in_array];
-        conf.fen = selected_fen
-        $("td").removeClass("selectedCell");
-        if (position_in_array < the_game_fens.length - 1) {
-            cell.target.classList.add("selectedCell");
-            removeCheckAndMate();
-            conf.highlight.lastMove = false;
-            conf.movable.dests = new Map();
-            conf.movable.color = undefined;
-            $board.style.opacity = 0.5
-        } else {
-            conf.highlight.lastMove = true;
-            conf.movable.dests = getMovesMap();
-            conf.movable.color = my_color;
-            conf.turnColor = getColorFromTurn();
-            highlight_check_mate();
-            $board.style.opacity = 1
+        var target = cell.currentTarget || cell.target;
+        var position_in_array = -1;
+
+        if (target && target.dataset && target.dataset.moveIndex !== undefined) {
+            position_in_array = parseInt(target.dataset.moveIndex, 10);
+        } else if (target && target.parentElement) {
+            var row = target.parentElement.rowIndex;
+            var index = target.cellIndex;
+            position_in_array = row * 2 + (index - 1);
         }
-        board.set(conf);
-        setupThemes(pieceTheme, boardTheme);
-        updateNavigationButtons();
+
+        navigateToMove(position_in_array);
     }
 
     function getCurrentMoveIndex() {
-        // Find the currently selected cell
-        var selectedCell = document.querySelector('.selectedCell');
+        if (currentMoveIndex >= 0) {
+            return currentMoveIndex;
+        }
+
+        var selectedCell = document.querySelector('#moveTable .selectedCell, #mobileMoveReel .selectedCell');
         if (selectedCell) {
+            if (selectedCell.dataset && selectedCell.dataset.moveIndex !== undefined) {
+                return parseInt(selectedCell.dataset.moveIndex, 10);
+            }
+
             var row = selectedCell.parentElement.rowIndex;
             var index = selectedCell.cellIndex;
-            var normalized_index = index - 1;
-            return row * 2 + normalized_index;
+            return row * 2 + (index - 1);
         }
-        // If no cell is selected, return the last move
         return the_game_fens.length - 1;
     }
 
     function navigateToMove(position_in_array) {
-        if (position_in_array < 0 || position_in_array >= the_game_fens.length) {
-            return;
-        }
-
-        var selected_fen = the_game_fens[position_in_array];
-        conf.fen = selected_fen;
-        
-        // Remove all selected cells
-        $("td").removeClass("selectedCell");
-        
-        // Calculate row and cell index from position
-        var row = Math.floor(position_in_array / 2);
-        var cellIndex = (position_in_array % 2) + 1; // +1 because first cell is the row number
-        
-        // Add selected class to the appropriate cell
-        var table = document.getElementById("moveTable");
-        if (table.rows[row] && table.rows[row].cells[cellIndex]) {
-            var cell = table.rows[row].cells[cellIndex];
-            
-            if (position_in_array < the_game_fens.length - 1) {
-                cell.classList.add("selectedCell");
-                removeCheckAndMate();
-                conf.highlight.lastMove = false;
-                conf.movable.dests = new Map();
-                conf.movable.color = undefined;
-                $board.style.opacity = 0.8;
-            } else {
-                conf.highlight.lastMove = true;
-                conf.movable.dests = getMovesMap();
-                conf.movable.color = my_color;
-                conf.turnColor = getColorFromTurn();
-                highlight_check_mate();
-                $board.style.opacity = 1;
-            }
-        }
-        
-        board.set(conf);
-        setupThemes(pieceTheme, boardTheme);
-        updateNavigationButtons();
+        applyMovePosition(position_in_array);
     }
 
     function updateNavigationButtons() {
         var currentIndex = getCurrentMoveIndex();
-        var firstBtn = document.getElementById("firstMoveBtn");
-        var prevBtn = document.getElementById("prevMoveBtn");
-        var nextBtn = document.getElementById("nextMoveBtn");
-        var lastBtn = document.getElementById("lastMoveBtn");
-        
-        if (firstBtn && prevBtn && nextBtn && lastBtn) {
-            // Disable first/prev if at the beginning
-            if (currentIndex <= 0) {
-                firstBtn.classList.add('disabled');
-                prevBtn.classList.add('disabled');
-            } else {
-                firstBtn.classList.remove('disabled');
-                prevBtn.classList.remove('disabled');
-            }
-            
-            // Disable next/last if at the end
-            if (currentIndex >= the_game_fens.length - 1) {
-                nextBtn.classList.add('disabled');
-                lastBtn.classList.add('disabled');
-            } else {
-                nextBtn.classList.remove('disabled');
-                lastBtn.classList.remove('disabled');
-            }
-        }
+        var groups = [
+            ["firstMoveBtn", "mobileFirstMoveBtn"],
+            ["prevMoveBtn", "mobilePrevMoveBtn"],
+            ["nextMoveBtn", "mobileNextMoveBtn"],
+            ["lastMoveBtn", "mobileLastMoveBtn"]
+        ];
+
+        groups.forEach(function (ids, groupIndex) {
+            ids.forEach(function (id) {
+                var button = document.getElementById(id);
+                if (!button) {
+                    return;
+                }
+
+                var shouldDisable = the_game_fens.length < 1;
+                if (!shouldDisable) {
+                    if (groupIndex < 2) {
+                        shouldDisable = currentIndex <= 0;
+                    } else {
+                        shouldDisable = currentIndex >= the_game_fens.length - 1;
+                    }
+                }
+
+                button.classList.toggle("disabled", shouldDisable);
+                if (button.tagName === "BUTTON") {
+                    button.disabled = shouldDisable;
+                } else {
+                    button.style.opacity = shouldDisable ? "0.45" : "1";
+                }
+            });
+        });
     }
 
     function attachNavigationListeners() {
-        var firstBtn = document.getElementById("firstMoveBtn");
-        var prevBtn = document.getElementById("prevMoveBtn");
-        var nextBtn = document.getElementById("nextMoveBtn");
-        var lastBtn = document.getElementById("lastMoveBtn");
-        
-        if (firstBtn) {
-            firstBtn.addEventListener("click", function() {
-                if (!firstBtn.classList.contains('disabled')) {
-                    navigateToMove(0);
+        var actions = {
+            firstMoveBtn: function () { navigateToMove(0); },
+            mobileFirstMoveBtn: function () { navigateToMove(0); },
+            prevMoveBtn: function () { navigateToMove(getCurrentMoveIndex() - 1); },
+            mobilePrevMoveBtn: function () { navigateToMove(getCurrentMoveIndex() - 1); },
+            nextMoveBtn: function () { navigateToMove(getCurrentMoveIndex() + 1); },
+            mobileNextMoveBtn: function () { navigateToMove(getCurrentMoveIndex() + 1); },
+            lastMoveBtn: function () { navigateToMove(the_game_fens.length - 1); },
+            mobileLastMoveBtn: function () { navigateToMove(the_game_fens.length - 1); }
+        };
+
+        Object.keys(actions).forEach(function (id) {
+            var button = document.getElementById(id);
+            if (!button) {
+                return;
+            }
+
+            button.addEventListener("click", function () {
+                if (!button.classList.contains("disabled") && !button.disabled) {
+                    actions[id]();
                 }
             });
-        }
-        
-        if (prevBtn) {
-            prevBtn.addEventListener("click", function() {
-                if (!prevBtn.classList.contains('disabled')) {
-                    var currentIndex = getCurrentMoveIndex();
-                    navigateToMove(currentIndex - 1);
-                }
-            });
-        }
-        
-        if (nextBtn) {
-            nextBtn.addEventListener("click", function() {
-                if (!nextBtn.classList.contains('disabled')) {
-                    var currentIndex = getCurrentMoveIndex();
-                    navigateToMove(currentIndex + 1);
-                }
-            });
-        }
-        
-        if (lastBtn) {
-            lastBtn.addEventListener("click", function() {
-                if (!lastBtn.classList.contains('disabled')) {
-                    navigateToMove(the_game_fens.length - 1);
-                }
-            });
-        }
-        
+        });
+
         updateNavigationButtons();
     }
+
+    // Debounce resize so we only measure after the browser has finished
+    // settling the layout. Firing on every pixel of a drag-resize gives
+    // stale getBoundingClientRect values and causes the table to jump.
+    var _syncLayoutTimer = null;
+    window.addEventListener("resize", function () {
+        clearTimeout(_syncLayoutTimer);
+        _syncLayoutTimer = setTimeout(function () {
+            requestAnimationFrame(syncBoardRelatedLayout);
+        }, 120);
+    });
 
     function heartbeat(force) {
         var d = new Date();
@@ -1431,7 +1913,7 @@ $(document).ready(function () {
                 var connect_icons = document.getElementsByClassName("dottop");
                 if (ans.rival_connect_status === 2) {
                     for (const icon of connect_icons)
-                        icon.style.backgroundColor = "#59fb74"
+                        icon.style.backgroundColor = "#c8a96b"
                 } else if (ans.rival_connect_status === 3 && engine_sid != null) {
                     console.log("Rival disconnected")
                     for (const icon of connect_icons)

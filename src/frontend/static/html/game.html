@@ -22,13 +22,14 @@
         <!-- main css -->
         <link rel="stylesheet" href="../css/style.css">
         <link rel="stylesheet" href="../css/game.css">
+        <link rel="stylesheet" href="../css/mobile.css">
         <link rel="stylesheet" href="../css/loading.css">
         <link rel="stylesheet" href="../css/endgame.css">
         <link rel="stylesheet" href="../css/invite_friend.css">
         <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
         <!--link rel="stylesheet" href="static/css/clock.css"-->
     </head>
-    <body>
+    <body class="site-page game-page">
         <!--================Header Menu Area =================-->
         <div id="header"></div>
 
@@ -80,154 +81,172 @@
             <div id="gameBox" class="gameBox row">
                 <div id="leftMostPane" class="leftmostpane">
                     <div id="settingsHolder" class="settingsClass">
-                        <a href="#" class="nav-link myButton settingsButton dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Settings</a>
-                        <ul id="navigator" class="settings-menu dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link" data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#"><span class="settings-icon piece-theme-icon"></span></a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#">Classical
-                                                    <div id="classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Metro
-                                                    <div id="metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Alpha
-                                                    <div id="alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">American
-                                                    <div id="american" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Standard
-                                                    <div id="standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Urban
-                                                    <div id="urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wiki
-                                                    <div id="wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wood
-                                                    <div id="wood" style="width: 30%; position: relative;left: 10%;"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                        </ul>
+                        <button id="settingsMenuButton" type="button" class="nav-link myButton settingsButton dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Settings</button>
+                        <ul id="settingsNavigator" class="settings-menu dropdown-menu" aria-labelledby="settingsMenuButton">
+                            <li class="nav-item submenu settings-item">
+                                <button type="button" class="widener nav-link sub-nav-link settings-toggle" aria-expanded="false" aria-controls="pieceThemeMenu" aria-label="Piece themes">
+                                    <span class="settings-icon piece-theme-icon" aria-hidden="true"></span>
+                                </button>
+                                <ul id="pieceThemeMenu" class="dropdown-menu-right settings-submenu" aria-label="Piece theme options">
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Classical</span>
+                                            <div id="piece-classical" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
                                     </li>
                                     <li class="liner"></li>
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link" data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#"><span class="settings-icon board-theme-icon"></span></a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#">Classical
-                                                    <div id="classical" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Metro
-                                                    <div id="metro" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Alpha
-                                                    <div id="alpha" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">American
-                                                    <div id="american" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Standard
-                                                    <div id="standard" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Urban
-                                                    <div id="urban" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wiki
-                                                    <div id="wiki" style="width: 30%; position: relative;    padding-right: 10%"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="board-sub-nav-link" style="display:inline-flex; position: relative;padding-left: 20%;" href="#">Wood
-                                                    <div id="wood" style="width: 30%; position: relative;left: 10%;"></div>
-                                                </a>
-                                            </li>
-                                            <li class="liner"></li>
-                                        </ul>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Metro</span>
+                                            <div id="piece-metro" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
                                     </li>
                                     <li class="liner"></li>
-                                    <li class="nav-item submenu settings-item"><a class="widener nav-link sub-nav-link" data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#"><span class="settings-icon computer-level-icon"></span></a>
-                                        <ul class="dropdown-menu-right">
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="1">Level 1</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="2">Level 2</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="3">Level 3</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="4">Level 4</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="5">Level 5</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="6">Level 6</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="7">Level 7</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                            <li class="nav-item submenu">
-                                                <a class="computer-level-link" style="display:inline-flex; position: relative; padding-left: 20%;" href="#" data-level="8">Level 8</a>
-                                            </li>
-                                            <li class="liner"></li>
-                                        </ul>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Alpha</span>
+                                            <div id="piece-alpha" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
                                     </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">American</span>
+                                            <div id="piece-american" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Standard</span>
+                                            <div id="piece-standard" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Urban</span>
+                                            <div id="piece-urban" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wiki</span>
+                                            <div id="piece-wiki" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wood</span>
+                                            <div id="piece-wood" class="settings-option-preview piece-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="liner"></li>
+                            <li class="nav-item submenu settings-item">
+                                <button type="button" class="widener nav-link sub-nav-link settings-toggle" aria-expanded="false" aria-controls="boardThemeMenu" aria-label="Board themes">
+                                    <span class="settings-icon board-theme-icon" aria-hidden="true"></span>
+                                </button>
+                                <ul id="boardThemeMenu" class="dropdown-menu-right settings-submenu" aria-label="Board theme options">
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Classical</span>
+                                            <div id="board-classical" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Metro</span>
+                                            <div id="board-metro" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Alpha</span>
+                                            <div id="board-alpha" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">American</span>
+                                            <div id="board-american" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Standard</span>
+                                            <div id="board-standard" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Urban</span>
+                                            <div id="board-urban" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wiki</span>
+                                            <div id="board-wiki" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="board-sub-nav-link settings-option-link" href="#">
+                                            <span class="settings-option-label">Wood</span>
+                                            <div id="board-wood" class="settings-option-preview board-option-preview" aria-hidden="true"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="liner"></li>
+                            <li class="nav-item submenu settings-item">
+                                <button type="button" class="widener nav-link sub-nav-link settings-toggle" aria-expanded="false" aria-controls="engineLevelMenu" aria-label="Engine strength">
+                                    <span class="settings-icon computer-level-icon" aria-hidden="true"></span>
+                                </button>
+                                <ul id="engineLevelMenu" class="dropdown-menu-right settings-submenu" aria-label="Engine strength options">
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="1"><span class="settings-option-label">Level 1</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="2"><span class="settings-option-label">Level 2</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="3"><span class="settings-option-label">Level 3</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="4"><span class="settings-option-label">Level 4</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="5"><span class="settings-option-label">Level 5</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="6"><span class="settings-option-label">Level 6</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="7"><span class="settings-option-label">Level 7</span></a>
+                                    </li>
+                                    <li class="liner"></li>
+                                    <li class="nav-item submenu">
+                                        <a class="computer-level-link settings-option-link" href="#" data-level="8"><span class="settings-option-label">Level 8</span></a>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
                             <!--div id="settingsButton" class="nav-item submenu">
                                     <a class="nav-link dropdown-toggle myButtonClone settingsButton" href="#">Settings</a>
@@ -251,7 +270,7 @@
                     </div>
                 </div>
                 <div id="leftPane" class="leftpane">
-                    <span id="boardandclock" class="boardandclock">
+                    <div id="boardandclock" class="boardandclock">
                         <div id="clockdivA" class="clock">
                               <span class="clockspan">
                                 <span class="minutes"></span> :
@@ -259,65 +278,115 @@
                                 <span class="millis"></span>
                               </span>
                         </div>
+                        <div id="upperClock" class="smallClock">
+                             <div id="playerInfoASmall" class="playerInfoSmall row">
+                                <div id="connectIconTopSmall" class="dottop"></div>
+                                <div id="labelTitleASmall" class="label"></div>
+                                <div id="mobileClockA" class="inlineClock">
+                                    <span class="clockspan">
+                                        <span class="minutes"></span> :
+                                        <span class="seconds"></span> .
+                                        <span class="millis"></span>
+                                    </span>
+                                </div>
+                                <div id="labelRatingASmall" class="labelRating"></div>
+                                <div id="arrowRatingASmall" class="arrowRating"></div>
+                            </div>
+                        </div>
                         <div id="boardHolder" class="boardHolder">
-                            <div id="upperClock" class="smallClock">
-                                 <div id="playerInfoASmall" class="playerInfoSmall row">
-                                    <div id="connectIconTopSmall" class="dottop"></div>
-                                    <div id="labelTitleASmall" class="label"></div>
-                                    <div id="labelRatingASmall" class="labelRating"></div>
-                                </div>
-                            </div>
                             <div id="myBoard" class="board"></div>
-                            <div id="bottomClock" class="smallClock">
-                                 <div id="playerInfoBSmall" class="playerInfoSmall row">
-                                    <div id="connectIconBottomSmall" class="dotbottom"></div>
-                                    <div id="labelTitleBSmall" class="label"></div>
-                                    <div id="labelRatingBSmall" class="labelRating"></div>
-                                </div>
-                            </div>
 
-                            <div id="conty">
-                                  <div id="win-box">
-                                    <div class="dot"></div>
-                                    <!--div class="dot two"></div-->
+                            <div id="conty" aria-live="polite">
+                                  <div id="win-box" class="endgame-box" role="dialog" aria-modal="true" aria-labelledby="win-title">
+                                    <div class="endgame-box-header" data-endgame-drag-handle>
+                                        <div class="endgame-drag-handle" aria-hidden="true"></div>
+                                        <button type="button" class="dot endgame-close" aria-label="Close end game panel"></button>
+                                    </div>
                                     <div class="experiment face">
                                         <div class="endgame">&#9818;</div>
                                     </div>
                                     <div class="shadow scale"></div>
-                                    <div class="message"><h1 class="alert">You Win!</h1><p class="paragraph_style">Black won by checkmate!</p></div>
+                                    <div class="message"><h1 id="win-title" class="alert">You Win!</h1><p class="paragraph_style">Black won by checkmate!</p></div>
                                     <button class="button-box"><h1 class="rematch green">Rematch</h1></button>
                                   </div>
-                                  <div id="lose-box">
-                                        <div class="dot"></div>
-                                        <!--div class="dot two"></div-->
+                                  <div id="lose-box" class="endgame-box" role="dialog" aria-modal="true" aria-labelledby="lose-title">
+                                        <div class="endgame-box-header" data-endgame-drag-handle>
+                                            <div class="endgame-drag-handle" aria-hidden="true"></div>
+                                            <button type="button" class="dot endgame-close" aria-label="Close end game panel"></button>
+                                        </div>
                                         <div class="experiment face2">
                                             <div class="endgame">&#9818;</div>
                                         </div>
                                         <div class="shadow move"></div>
-                                        <div class="message"><h1 class="alert">You Lose!</h1><p class="paragraph_style">Black lost on time!</div>
+                                        <div class="message"><h1 id="lose-title" class="alert">You Lose!</h1><p class="paragraph_style">Black lost on time!</p></div>
                                         <button class="button-box"><h1 class="rematch red">Rematch</h1></button>
                                   </div>
-                                  <div id="draw-box">
-                                        <div class="dot"></div>
-                                        <!--div class="dot two"></div-->
+                                  <div id="draw-box" class="endgame-box" role="dialog" aria-modal="true" aria-labelledby="draw-title">
+                                        <div class="endgame-box-header" data-endgame-drag-handle>
+                                            <div class="endgame-drag-handle" aria-hidden="true"></div>
+                                            <button type="button" class="dot endgame-close" aria-label="Close end game panel"></button>
+                                        </div>
                                         <div class="experiment face3">
                                             <div class="endgame">&#9818;</div>
                                         </div>
                                         <div class="shadow"></div>
-                                        <div class="message"><h1 class="alert">Draw!</h1><p class="paragraph_style">Draw by agreement!</div>
+                                        <div class="message"><h1 id="draw-title" class="alert">Draw!</h1><p class="paragraph_style">Draw by agreement!</p></div>
                                         <button class="button-box"><h1 class="rematch red">Rematch</h1></button>
                                   </div>
-                                  <div id="abort-box">
-                                        <div class="dot"></div>
-                                        <!--div class="dot two"></div-->
+                                  <div id="abort-box" class="endgame-box" role="dialog" aria-modal="true" aria-labelledby="abort-title">
+                                        <div class="endgame-box-header" data-endgame-drag-handle>
+                                            <div class="endgame-drag-handle" aria-hidden="true"></div>
+                                            <button type="button" class="dot endgame-close" aria-label="Close end game panel"></button>
+                                        </div>
                                         <div class="experiment face3">
                                             <div class="endgame">&#9818;</div>
                                         </div>
                                         <div class="shadow"></div>
-                                        <div class="message"><h1 class="alert">Aborted!</h1><p class="paragraph_style">Game Aborted!</div>
+                                        <div class="message"><h1 id="abort-title" class="alert">Aborted!</h1><p class="paragraph_style">Game Aborted!</p></div>
                                         <button class="button-box"><h1 class="rematch red">Rematch</h1></button>
                                   </div>
                             </div>
+                        </div>
+                        <div id="bottomClock" class="smallClock">
+                             <div id="playerInfoBSmall" class="playerInfoSmall row">
+                                <div id="connectIconBottomSmall" class="dotbottom"></div>
+                                <div id="labelTitleBSmall" class="label"></div>
+                                <div id="mobileClockB" class="inlineClock">
+                                    <span class="clockspan">
+                                        <span class="minutes"></span> :
+                                        <span class="seconds"></span> .
+                                        <span class="millis"></span>
+                                    </span>
+                                </div>
+                                <div id="labelRatingBSmall" class="labelRating"></div>
+                                <div id="arrowRatingBSmall" class="arrowRating"></div>
+                            </div>
+                        </div>
+                        <section id="mobileMoveSection" class="mobileMoveSection" aria-label="Move history">
+                            <div class="mobileMoveHeader">
+                                <h2 class="mobileMoveTitle">Moves</h2>
+                                <div id="mobileMoveIndex" class="mobileMoveIndex">Live position</div>
+                            </div>
+                            <div id="mobileMoveReel" class="mobileMoveReel" aria-label="Move list"></div>
+                            <div class="mobileMoveFooter" aria-label="Move navigation">
+                                <button type="button" class="navCell mobileNavButton" id="mobileFirstMoveBtn" title="First move">⏮</button>
+                                <button type="button" class="navCell mobileNavButton" id="mobilePrevMoveBtn" title="Previous move">◀</button>
+                                <button type="button" class="navCell mobileNavButton" id="mobileNextMoveBtn" title="Next move">▶</button>
+                                <button type="button" class="navCell mobileNavButton" id="mobileLastMoveBtn" title="Last move">⏭</button>
+                            </div>
+                        </section>
+                        <div id="gameActionBar" class="gameActionBar" aria-label="Game actions">
+                            <div id="resignButton" class="gameButton myButton">Resign</div>
+                            <div id="drawButton" class="gameButton myButton">Draw</div>
+                            <div id="drawOffer" class="drawOffer">
+                                <div id="drawOfferedButton" class="myButtonClone dropButton nav-item submenu">Draw
+                                    <ul id="droppedDrawOffer" class="droppedPane">
+                                        <li id="acceptDraw" class="nav-item submenu dropped"><a class="sub-nav-link" href="#">Accept</a></li>
+                                        <li id="declineDraw" class="nav-item submenu dropped"><a class="sub-nav-link" href="#">Decline</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div id="abortButton" class="gameButton myButton">Abort</div>
                         </div>
                         <div id="clockdivB" class="clock">
                           <span class="clockspan">
@@ -326,7 +395,7 @@
                             <span class="millis"></span>
                           </span>
                         </div>
-                    </span>
+                    </div>
                 </div>
                 <div id="rightPane" class="rightpane">
                     <div id="boxesHolder" class="boxesHolder">
@@ -339,18 +408,24 @@
                             </div>
                         </div>
                         <div id="boxZ" class="moveBox">
-                            <table id="moveTableHeader" class="moveTableHeader">
-                                <thead>
-                                  <tr>
-                                    <th class="edgeCell whiteCell"></th>
-                                    <th>White</th>
-                                    <th>Black</th>
-                                    <th class="edgeCell blackCell"></th>
-                                  </tr>
-                                </thead>
-                            </table>
                             <div id="tableWrapper" class="tableWrapper">
-                                <table id="moveTable" class="moveTable"></table>
+                                <table id="moveTableHeader" class="moveTableHeader">
+                                    <colgroup>
+                                        <col><col><col>
+                                    </colgroup>
+                                    <thead>
+                                      <tr>
+                                        <th class="edgeCell whiteCell"></th>
+                                        <th>White</th>
+                                        <th>Black</th>
+                                      </tr>
+                                    </thead>
+                                </table>
+                                <table id="moveTable" class="moveTable">
+                                    <colgroup>
+                                        <col><col><col>
+                                    </colgroup>
+                                </table>
                             </div>
                             <table id="moveTableFooter" class="moveTableFooter">
                                 <tbody>
@@ -371,39 +446,6 @@
                                 <div id="arrowRatingB" class="arrowRating">&#8600;</div>
                             </div>
                         </div>
-                    </div>
-                    <div id="resignButton" class="gameButton myButton">Resign
-                        <!--span class="downmenu"></span-->
-                    </div>
-                    <div id="drawButton" class="gameButton myButton">Draw
-                        <!--span class="downmenu"></span-->
-                    </div>
-
-                    <!--li class="nav-item submenu"><a class="nav-link" href="#">Quick Game</a>
-                        <ul>
-                            <li class="nav-item submenu time-control"><a class="sub-nav-link" href="#">1 + 0</a>
-                            <li class="nav-item submenu time-control"><a class="sub-nav-link" href="#">3 + 0</a>
-                            <li class="nav-item submenu time-control"><a class="sub-nav-link" href="#">5 + 0</a>
-                            <li class="nav-item submenu time-control"><a class="sub-nav-link" href="#">15 + 0</a>
-                            <li class="nav-item submenu time-control"><a class="sub-nav-link" href="#">30 + 0</a>
-                        </ul>
-                    </li-->
-
-                    <div id="drawOffer" class="drawOffer">
-                        <div id="drawOfferedButton" class="myButtonClone dropButton nav-item submenu">Draw
-                            <ul id="droppedDrawOffer" class="droppedPane">
-                                <li id="acceptDraw" class="nav-item submenu dropped"><a class="sub-nav-link" href="#">Accept</a>
-                                <li id="declineDraw" class="nav-item submenu dropped"><a class="sub-nav-link" href="#">Decline</a>
-                            </ul>
-                        </div>
-                        <!--div id="droppedDrawOffer" class="droppedPane">
-                            <div id="acceptDraw" class="dropped">Accept</div>
-                            <div class="liner"></div>
-                            <div id="declineDraw" class="dropped">Decline</div>
-                        </div-->
-                    </div>
-                    <div id="abortButton" class="gameButton myButton">Abort
-                        <!--span class="downmenu"></span-->
                     </div>
                 </div>
             </div>
