@@ -78,7 +78,6 @@ def game_over():
 
 @app.route('/abort', methods=['POST'])
 def abort():
-    lgr.info(f"The request: {request.get_json()}")
     payload = request.get_json()
     lgr.info(f"Game aborted with content: {payload}")
     response = game_server.abort(payload)
