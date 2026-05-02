@@ -521,6 +521,8 @@ $(document).ready(function () {
         var the_game_fen = the_game.position;
         if (parseInt(rival_time) === 0 || parseInt(my_time) === 0 || game_status === 3) {
             game_over = true;
+        }   else {
+            game_over = false;
         }
         my_color = my_color.slice(1, -1);       // remove quotes from both sides
         if (my_color === "black") {        // swap objects
@@ -547,18 +549,12 @@ $(document).ready(function () {
         document.getElementById("labelTitleBSmall").innerText = me.name;
         document.getElementById("labelRatingBSmall").innerText = me.rating;
         
-        // Display country flags or Stockfish logo
-        console.log('=== FLAG DISPLAY DEBUG ===');
-        console.log('Rival data:', { player_type: rival.player_type, country_code: rival.country_code, name: rival.name });
-        console.log('Me data:', { player_type: me.player_type, country_code: me.country_code, name: me.name });
-        
         if (rival.player_type === 1) {
             // Rival is Stockfish engine
             console.log('Rival is Stockfish engine');
             displayStockfishLogo("labelTitleA");
             displayStockfishLogo("labelTitleASmall");
         } else if (rival.country_code && rival.country_code !== 'None') {
-            console.log('Displaying rival flag:', rival.country_code);
             displayFlag("labelTitleA", rival.country_code);
             displayFlag("labelTitleASmall", rival.country_code);
         } else {
@@ -571,7 +567,6 @@ $(document).ready(function () {
             displayStockfishLogo("labelTitleB");
             displayStockfishLogo("labelTitleBSmall");
         } else if (me.country_code && me.country_code !== 'None') {
-            console.log('Displaying my flag:', me.country_code);
             displayFlag("labelTitleB", me.country_code);
             displayFlag("labelTitleBSmall", me.country_code);
         } else {

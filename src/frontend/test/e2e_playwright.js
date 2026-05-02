@@ -12,6 +12,8 @@
  *   7. White resigns
  *   8. Verify white sees lose-box and black sees win-box
  *   9. Verify resign message text
+ *  10. Both players accept a rematch
+ *  11. Verify the rematched board is fresh, replay the same flow, and verify endgame again
  *
  * Exit 0 on pass, exit 1 on any failure.
  * Screenshots are saved to SCREENSHOT_DIR on any error step.
@@ -97,6 +99,179 @@ async function boardIsWhite(page) {
   });
 }
 
+async function getPagesByColor(page1, page2) {
+  const p1IsWhite = await boardIsWhite(page1);
+  return {
+    p1IsWhite,
+    whitePage: p1IsWhite ? page1 : page2,
+    blackPage: p1IsWhite ? page2 : page1,
+  };
+}
+
+async function waitForMoveTable(page, predicate, timeoutMs, failureMessage) {
+  await page.waitForFunction(predicate, { timeout: timeoutMs }).catch(() => {
+    throw new Error(failureMessage);
+  });
+}
+
+async function playOpeningWithLatency(whitePage, blackPage, label, errors) {
+  console.log(`[${label}] White: e2→e4`);
+  const t1 = Date.now();
+  await makeMove(whitePage, 'e2', 'e4', true);
+  await waitForMoveTable(
+    blackPage,
+    () => {
+      const t = document.getElementById('moveTable');
+      return t && t.rows.length > 0 && t.rows[0].cells.length >= 2;
+    },
+    MAX_LATENCY_MS,
+    `${label} move 1 (e2-e4): black page did not update within ${MAX_LATENCY_MS} ms`,
+  );
+  const latency1 = Date.now() - t1;
+  console.log(`     latency: ${latency1} ms`);
+  if (latency1 > MAX_LATENCY_MS) errors.push(`${label} move 1 latency ${latency1} ms exceeds ${MAX_LATENCY_MS} ms`);
+
+  await sleep(500);
+
+  console.log(`[${label}] Black: e7→e5`);
+  const t2 = Date.now();
+  await makeMove(blackPage, 'e7', 'e5', false);
+  await waitForMoveTable(
+    whitePage,
+    () => {
+      const t = document.getElementById('moveTable');
+      return t && t.rows.length > 0 && t.rows[0].cells.length >= 3;
+    },
+    MAX_LATENCY_MS,
+    `${label} move 2 (e7-e5): white page did not update within ${MAX_LATENCY_MS} ms`,
+  );
+  const latency2 = Date.now() - t2;
+  console.log(`     latency: ${latency2} ms`);
+  if (latency2 > MAX_LATENCY_MS) errors.push(`${label} move 2 latency ${latency2} ms exceeds ${MAX_LATENCY_MS} ms`);
+
+  await sleep(500);
+
+  console.log(`[${label}] White: d2→d4`);
+  const t3 = Date.now();
+  await makeMove(whitePage, 'd2', 'd4', true);
+  await waitForMoveTable(
+    blackPage,
+    () => {
+      const t = document.getElementById('moveTable');
+      return t && t.rows.length >= 2;
+    },
+    MAX_LATENCY_MS,
+    `${label} move 3 (d2-d4): black page did not update within ${MAX_LATENCY_MS} ms`,
+  );
+  const latency3 = Date.now() - t3;
+  console.log(`     latency: ${latency3} ms`);
+  if (latency3 > MAX_LATENCY_MS) errors.push(`${label} move 3 latency ${latency3} ms exceeds ${MAX_LATENCY_MS} ms`);
+
+  await sleep(500);
+}
+
+async function waitForResignButtonActive(page, label) {
+  console.log(`[${label}] Waiting for resign button to be active…`);
+  await page.waitForFunction(
+    () => {
+      const btn = document.getElementById('resignButton');
+      return btn
+        && btn.style.display !== 'none'
+        && parseFloat(btn.style.opacity || '1') >= 1;
+    },
+    { timeout: 10000 },
+  );
+}
+
+async function verifyEndgameState(whitePage, blackPage, label, errors) {
+  console.log(`[${label}] Verifying endgame state…`);
+
+  await whitePage.waitForSelector('#conty', { state: 'visible', timeout: 12000 })
+    .catch(() => { throw new Error(`${label}: endgame overlay (#conty) never appeared on white's page`); });
+  await blackPage.waitForSelector('#conty', { state: 'visible', timeout: 12000 })
+    .catch(() => { throw new Error(`${label}: endgame overlay (#conty) never appeared on black's page`); });
+
+  const whiteEndgame = await whitePage.evaluate(() => {
+    const loseBox = document.getElementById('lose-box');
+    const winBox = document.getElementById('win-box');
+    const title = document.querySelector('#lose-box .message h1');
+    const message = document.querySelector('#lose-box .message p');
+    return {
+      loseVisible: !!loseBox && loseBox.style.display !== 'none',
+      winVisible: !!winBox && winBox.style.display !== 'none',
+      title: title ? title.textContent.trim() : '',
+      message: message ? message.textContent.trim() : '',
+    };
+  });
+
+  if (!whiteEndgame.loseVisible || whiteEndgame.winVisible) {
+    await screenshot(whitePage, `${label}-white-endgame-unexpected`);
+    throw new Error(`${label}: white should see only lose-box after resigning`);
+  }
+  if (!whiteEndgame.title.toLowerCase().includes('lose')) {
+    errors.push(`${label}: expected white endgame title to mention loss, got: "${whiteEndgame.title}"`);
+  }
+  if (!whiteEndgame.message.toLowerCase().includes('resign')) {
+    errors.push(`${label}: expected white endgame message to mention "resign", got: "${whiteEndgame.message}"`);
+  }
+
+  const blackEndgame = await blackPage.evaluate(() => {
+    const winBox = document.getElementById('win-box');
+    const loseBox = document.getElementById('lose-box');
+    const title = document.querySelector('#win-box .message h1');
+    const message = document.querySelector('#win-box .message p');
+    return {
+      winVisible: !!winBox && winBox.style.display !== 'none',
+      loseVisible: !!loseBox && loseBox.style.display !== 'none',
+      title: title ? title.textContent.trim() : '',
+      message: message ? message.textContent.trim() : '',
+    };
+  });
+
+  if (!blackEndgame.winVisible || blackEndgame.loseVisible) {
+    await screenshot(blackPage, `${label}-black-endgame-unexpected`);
+    throw new Error(`${label}: black should see only win-box after opponent resigns`);
+  }
+  if (!blackEndgame.title.toLowerCase().includes('win')) {
+    errors.push(`${label}: expected black endgame title to mention win, got: "${blackEndgame.title}"`);
+  }
+  if (!blackEndgame.message.toLowerCase().includes('resign')) {
+    errors.push(`${label}: expected black endgame message to mention "resign", got: "${blackEndgame.message}"`);
+  }
+
+  console.log(`[${label}] Endgame verified ✓`);
+}
+
+async function resignAndVerifyEndgame(whitePage, blackPage, label, errors) {
+  await waitForResignButtonActive(whitePage, label);
+  console.log(`[${label}] Clicking Resign…`);
+  await whitePage.click('#resignButton');
+  await verifyEndgameState(whitePage, blackPage, label, errors);
+}
+
+async function clickVisibleRematchButton(page, label) {
+  console.log(`[${label}] Clicking visible rematch button…`);
+  const button = page.locator('#conty .endgame-box:visible .button-box').first();
+  await button.waitFor({ state: 'visible', timeout: 10000 });
+  await button.click();
+}
+
+async function waitForFreshGameAfterRematch(page, label) {
+  console.log(`  [wait] rematched game ready on ${label}…`);
+  await page.waitForFunction(
+    () => {
+      const overlay = document.getElementById('conty');
+      const moveTable = document.getElementById('moveTable');
+      const board = document.querySelector('cg-board');
+      const overlayHidden = !overlay || overlay.style.display === 'none' || getComputedStyle(overlay).display === 'none';
+      const noMoves = !moveTable || moveTable.rows.length === 0;
+      return overlayHidden && noMoves && !!board;
+    },
+    { timeout: MATCH_TIMEOUT_MS },
+  );
+  console.log(`  [ok]   rematched game ready on ${label}`);
+}
+
 // ─── main test ────────────────────────────────────────────────────────────────
 
 async function run() {
@@ -154,128 +329,31 @@ async function run() {
     // Extra breathing room for Chessground to render fully
     await sleep(800);
 
-    // ── 4. Determine board orientations ───────────────────────────────────
-    const p1IsWhite = await boardIsWhite(page1);
-    const whitePage = p1IsWhite ? page1 : page2;
-    const blackPage = p1IsWhite ? page2 : page1;
-    console.log(`[4] host is ${p1IsWhite ? 'WHITE' : 'BLACK'}`);
+    // ── 4. First game ─────────────────────────────────────────────────────
+    let colors = await getPagesByColor(page1, page2);
+    console.log(`[4] host is ${colors.p1IsWhite ? 'WHITE' : 'BLACK'}`);
+    await playOpeningWithLatency(colors.whitePage, colors.blackPage, 'game 1', errors);
+    await resignAndVerifyEndgame(colors.whitePage, colors.blackPage, 'game 1', errors);
 
-    // ── 5. Play moves, measure latency ────────────────────────────────────
+    // ── 5. Rematch ────────────────────────────────────────────────────────
+    console.log('[5] Requesting rematch on both pages…');
+    await Promise.all([
+      clickVisibleRematchButton(page1, 'host'),
+      clickVisibleRematchButton(page2, 'guest'),
+    ]);
 
-    // — Move 1: White e2-e4
-    console.log('[5] White: e2→e4');
-    const t1 = Date.now();
-    await makeMove(whitePage, 'e2', 'e4', true);
-    // Wait until black's page shows at least one move in the table
-    await blackPage.waitForFunction(
-      () => {
-        const t = document.getElementById('moveTable');
-        return t && t.rows.length > 0 && t.rows[0].cells.length >= 2;
-      },
-      { timeout: MAX_LATENCY_MS },
-    ).catch(() => {
-      throw new Error(`Move 1 (e2-e4): black page did not update within ${MAX_LATENCY_MS} ms`);
-    });
-    const latency1 = Date.now() - t1;
-    console.log(`     latency: ${latency1} ms`);
-    if (latency1 > MAX_LATENCY_MS) errors.push(`Move 1 latency ${latency1} ms exceeds ${MAX_LATENCY_MS} ms`);
+    await Promise.all([
+      waitForFreshGameAfterRematch(page1, 'host'),
+      waitForFreshGameAfterRematch(page2, 'guest'),
+    ]);
 
-    await sleep(500);
+    // Rematch may swap colors, so re-detect orientation before moving.
+    colors = await getPagesByColor(page1, page2);
+    console.log(`[5] after rematch host is ${colors.p1IsWhite ? 'WHITE' : 'BLACK'}`);
 
-    // — Move 2: Black e7-e5
-    console.log('[5] Black: e7→e5');
-    const t2 = Date.now();
-    await makeMove(blackPage, 'e7', 'e5', false);
-    // Wait until white's page shows both moves in row 0 (counter + white + black = 3 cells)
-    await whitePage.waitForFunction(
-      () => {
-        const t = document.getElementById('moveTable');
-        return t && t.rows.length > 0 && t.rows[0].cells.length >= 3;
-      },
-      { timeout: MAX_LATENCY_MS },
-    ).catch(() => {
-      throw new Error(`Move 2 (e7-e5): white page did not update within ${MAX_LATENCY_MS} ms`);
-    });
-    const latency2 = Date.now() - t2;
-    console.log(`     latency: ${latency2} ms`);
-    if (latency2 > MAX_LATENCY_MS) errors.push(`Move 2 latency ${latency2} ms exceeds ${MAX_LATENCY_MS} ms`);
-
-    await sleep(500);
-
-    // — Move 3: White d2-d4
-    console.log('[5] White: d2→d4');
-    const t3 = Date.now();
-    await makeMove(whitePage, 'd2', 'd4', true);
-    // Second move for white → a new table row should appear
-    await blackPage.waitForFunction(
-      () => {
-        const t = document.getElementById('moveTable');
-        return t && t.rows.length >= 2;
-      },
-      { timeout: MAX_LATENCY_MS },
-    ).catch(() => {
-      throw new Error(`Move 3 (d2-d4): black page did not update within ${MAX_LATENCY_MS} ms`);
-    });
-    const latency3 = Date.now() - t3;
-    console.log(`     latency: ${latency3} ms`);
-    if (latency3 > MAX_LATENCY_MS) errors.push(`Move 3 latency ${latency3} ms exceeds ${MAX_LATENCY_MS} ms`);
-
-    await sleep(500);
-
-    // ── 6. White resigns ──────────────────────────────────────────────────
-    console.log('[6] Waiting for resign button to be active…');
-    // After ≥2 total moves the game.js enableGameButtons() shows #resignButton
-    await whitePage.waitForFunction(
-      () => {
-        const btn = document.getElementById('resignButton');
-        return btn
-          && btn.style.display !== 'none'
-          && parseFloat(btn.style.opacity || '1') >= 1;
-      },
-      { timeout: 10000 },
-    );
-    console.log('[6] Clicking Resign…');
-    await whitePage.click('#resignButton');
-
-    // ── 7. Verify endgame boxes ───────────────────────────────────────────
-    console.log('[7] Verifying endgame state…');
-
-    await whitePage.waitForSelector('#conty', { state: 'visible', timeout: 12000 })
-      .catch(() => { throw new Error('Endgame overlay (#conty) never appeared on white\'s page'); });
-    await blackPage.waitForSelector('#conty', { state: 'visible', timeout: 12000 })
-      .catch(() => { throw new Error('Endgame overlay (#conty) never appeared on black\'s page'); });
-
-    // White (who resigned) must see #lose-box
-    const whiteSeesLose = await whitePage.evaluate(() => {
-      const b = document.getElementById('lose-box');
-      return b && b.style.display !== 'none';
-    });
-    if (!whiteSeesLose) {
-      await screenshot(whitePage, 'white-endgame-unexpected');
-      throw new Error('White should see lose-box after resigning, but it is not visible');
-    }
-
-    // Black (who wins) must see #win-box
-    const blackSeesWin = await blackPage.evaluate(() => {
-      const b = document.getElementById('win-box');
-      return b && b.style.display !== 'none';
-    });
-    if (!blackSeesWin) {
-      await screenshot(blackPage, 'black-endgame-unexpected');
-      throw new Error('Black should see win-box after opponent resigns, but it is not visible');
-    }
-
-    // Check that the message text mentions resignation
-    const resignMsg = await whitePage.evaluate(() => {
-      const p = document.querySelector('#lose-box .message p');
-      return p ? p.textContent.trim() : '';
-    });
-    console.log(`[7] Resign message: "${resignMsg}"`);
-    if (!resignMsg.toLowerCase().includes('resign')) {
-      errors.push(`Expected resign message to mention "resign", got: "${resignMsg}"`);
-    }
-
-    console.log('[7] Endgame verified ✓');
+    // ── 6. Rematched game ─────────────────────────────────────────────────
+    await playOpeningWithLatency(colors.whitePage, colors.blackPage, 'game 2 rematch', errors);
+    await resignAndVerifyEndgame(colors.whitePage, colors.blackPage, 'game 2 rematch', errors);
 
   } catch (err) {
     errors.push(err.message);
