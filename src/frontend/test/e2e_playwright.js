@@ -28,6 +28,7 @@ const BASE_URL         = 'https://chessmine.xyz';
 const MAX_LATENCY_MS   = 1000;   // alert if any move round-trip exceeds this
 const SCREENSHOT_DIR   = '/tmp/e2e-screenshots';
 const MATCH_TIMEOUT_MS = 10000;  // time to wait for matchmaking
+const REMATCH_TIMEOUT_MS = 30000; // rematch creates a new game asynchronously
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,30 @@ async function screenshot(page, label) {
     await page.screenshot({ path: file, fullPage: true });
     console.log(`  [screenshot] saved → ${file}`);
   } catch (_) { /* best-effort */ }
+}
+
+/**
+ * Seed localStorage with default user preferences before any page script runs.
+ *
+ * The frontend's load_cookies() reads localStorage.user_prefs and copies it into
+ * the cookie_data.preferences sent on every full heartbeat. With an empty
+ * localStorage (default for fresh Playwright contexts) the server's session is
+ * repeatedly overwritten with empty preferences, which then crashes the
+ * server-side rematch-agreed branch when it dereferences
+ * session.preferences['time_control']. Real users always have these prefs set,
+ * so we replicate that here.
+ */
+async function seedUserPrefs(context) {
+  await context.addInitScript(() => {
+    if (!localStorage.getItem('user_prefs')) {
+      localStorage.setItem('user_prefs', JSON.stringify({
+        time_control: '5+0',
+        piece_theme: 'classical',
+        board_theme: 'classical',
+        computer_level: 5,
+      }));
+    }
+  });
 }
 
 /**
@@ -253,7 +278,29 @@ async function clickVisibleRematchButton(page, label) {
   console.log(`[${label}] Clicking visible rematch button…`);
   const button = page.locator('#conty .endgame-box:visible .button-box').first();
   await button.waitFor({ state: 'visible', timeout: 10000 });
-  await button.click();
+  // The rematch-offered button throbs with an infinite "scale" animation, so
+  // Playwright's default stability check would wait forever. force:true skips
+  // the actionability checks (stability, enabled, receives events) but still
+  // dispatches a real CDP-driven mouse click that triggers the page's click
+  // listener — unlike HTMLElement.click(), which is a synthetic event some
+  // handlers refuse to treat as a user gesture.
+  await button.click({ force: true, timeout: 10000 });
+}
+
+async function waitForRematchOffer(page, label) {
+  console.log(`  [wait] rematch offer visible on ${label}…`);
+  await page.waitForFunction(
+    () => {
+      const button = document.querySelector('#conty .endgame-box[style*="display: block"] .button-box');
+      return button
+        && button.style.display !== 'none'
+        && button.style.pointerEvents !== 'none'
+        && button.style.animation.includes('scale');
+    },
+    undefined,
+    { timeout: 10000 },
+  );
+  console.log(`  [ok]   rematch offer visible on ${label}`);
 }
 
 async function waitForFreshGameAfterRematch(page, label) {
@@ -267,7 +314,8 @@ async function waitForFreshGameAfterRematch(page, label) {
       const noMoves = !moveTable || moveTable.rows.length === 0;
       return overlayHidden && noMoves && !!board;
     },
-    { timeout: MATCH_TIMEOUT_MS },
+    undefined,
+    { timeout: REMATCH_TIMEOUT_MS },
   );
   console.log(`  [ok]   rematched game ready on ${label}`);
 }
@@ -283,6 +331,8 @@ async function run() {
 
     const ctx1  = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const ctx2  = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await seedUserPrefs(ctx1);
+    await seedUserPrefs(ctx2);
     const page1 = await ctx1.newPage();
     const page2 = await ctx2.newPage();
 
@@ -337,10 +387,9 @@ async function run() {
 
     // ── 5. Rematch ────────────────────────────────────────────────────────
     console.log('[5] Requesting rematch on both pages…');
-    await Promise.all([
-      clickVisibleRematchButton(page1, 'host'),
-      clickVisibleRematchButton(page2, 'guest'),
-    ]);
+    await clickVisibleRematchButton(page1, 'host');
+    await waitForRematchOffer(page2, 'guest');
+    await clickVisibleRematchButton(page2, 'guest');
 
     await Promise.all([
       waitForFreshGameAfterRematch(page1, 'host'),
