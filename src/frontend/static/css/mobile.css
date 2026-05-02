@@ -967,6 +967,25 @@ body.site-page.game-page .settings-item.submenu-flip > .dropdown-menu-right {
 }
 
 @media (max-width: 991px) {
+    body.site-page.game-page .settings-menu {
+        transform: none !important;
+    }
+
+    body.site-page.game-page .settings-menu .dropdown-menu-right,
+    body.site-page.game-page .settings-item.submenu-inline > .dropdown-menu-right,
+    body.site-page.game-page .settings-item.submenu-flip > .dropdown-menu-right {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
+        width: 100%;
+        min-width: min(280px, calc(100vw - 48px));
+        margin-top: 12px !important;
+    }
+}
+
+@media (max-width: 991px) {
     body.site-page .site-header-shell {
         min-height: 72px;
     }

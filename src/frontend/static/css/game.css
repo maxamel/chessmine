@@ -4737,12 +4737,62 @@ body.site-page.game-page .board {
   aspect-ratio: 1;
 }
 
+body.site-page.game-page .board cg-wrap,
+body.site-page.game-page .board cg-board {
+  overflow: hidden;
+}
+
+body.site-page.game-page .board coords {
+  font-size: clamp(8px, 2.4vw, 11px);
+  user-select: none;
+  pointer-events: none;
+}
+
+body.site-page.game-page .board coords.ranks {
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+body.site-page.game-page .board coords.ranks coord {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 12.5%;
+  padding-right: clamp(3px, 0.9vw, 7px);
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+body.site-page.game-page .board coords.files {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+}
+
+body.site-page.game-page .board coords.files coord {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 12.5%;
+  min-width: 0;
+  height: 100%;
+  padding-right: clamp(2px, 0.1vw, 2px);
+  padding-bottom: clamp(2px, 0.1vw, 2px);
+  line-height: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 body.site-page.game-page .smallClock {
   display: none;
   width: 100%;
   height: auto;
   margin: 0;
   visibility: visible;
+
 }
 
 body.site-page.game-page .playerInfoSmall {

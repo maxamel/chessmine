@@ -124,6 +124,7 @@ class RedisPlug:
     def set_game_endgame(self, game_id, end_game: EndGameInfo, pipeline: Pipeline = None):
         key = self.game_endgame + game_id
         self.get_redis(pipeline).hmset(key, end_game.to_dict())
+        self.get_redis(pipeline).expire(key, 3600)  # expire in one hour
 
     def get_game_endgame(self, game_id):
         key = self.game_endgame + game_id
