@@ -1241,6 +1241,7 @@ $(document).ready(function () {
                     }
                     insertMove(move);
                     changeDrawButton('enabled');
+                    removeCheckAndMate();
                     handleMoveOnBoard(move);
                     highlight_check_mate();
 
