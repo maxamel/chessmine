@@ -2028,6 +2028,8 @@ $(document).ready(function () {
         if (source !== target) {
             futureMoveData = {from: source, to: target};
             const moves = game.moves();
+            const movesToTarget = moves.filter(move => move.to === target);
+            moves = movesToTarget.length > 0 ? movesToTarget : moves
             const randomMove = moves[Math.floor(Math.random() * moves.length)];
             game.move(randomMove);
             try {
