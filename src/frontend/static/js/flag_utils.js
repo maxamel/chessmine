@@ -27,7 +27,6 @@ export function countryCodeToFlag(countryCode) {
  * @param {string} countryCode - Two-letter country code
  */
 export function displayFlag(elementId, countryCode) {
-    console.log('displayFlag called:', elementId, countryCode);
     const element = document.getElementById(elementId);
     if (!element) {
         console.log('Element not found:', elementId);
@@ -35,7 +34,6 @@ export function displayFlag(elementId, countryCode) {
     }
     
     const flagHtml = countryCodeToFlag(countryCode);
-    console.log('Converted flag HTML:', flagHtml);
     if (flagHtml) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = flagHtml;
@@ -54,7 +52,6 @@ export function displayFlag(elementId, countryCode) {
  * @param {string} elementId - ID of the element to add logo to
  */
 export function displayStockfishLogo(elementId) {
-    console.log('displayStockfishLogo called:', elementId);
     const element = document.getElementById(elementId);
     if (!element) {
         console.log('Element not found:', elementId);
@@ -67,7 +64,6 @@ export function displayStockfishLogo(elementId) {
     
     // Insert logo before the text content
     element.insertBefore(logoSpan, element.firstChild);
-    console.log('Stockfish logo inserted successfully');
 }
 
 /**
