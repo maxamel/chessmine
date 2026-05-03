@@ -2,13 +2,21 @@ var stockfish = null;
 var currentSkillLevel = 5; // Default skill level, updated when user changes it
 var cachedDeviceScore = null;
 
-const BASE_MOVE_TIME_MS = 1000;
-const MIN_MOVE_TIME_MS = 500
-const MAX_MOVE_TIME_MS = 5000
+// Think-time budget at the reference device. The goal is to equalize engine
+// playing strength across devices: a weaker device gets MORE time so it can
+// reach a similar search depth, a stronger device gets LESS time because it
+// reaches the same depth faster. Both directions are bounded by MIN/MAX.
+const BASE_MOVE_TIME_MS = 1500;
+const MIN_MOVE_TIME_MS = 500;
+const MAX_MOVE_TIME_MS = 4000;
 const DEVICE_BENCHMARK_MS = 90;
 const DEVICE_SCORE_CACHE_KEY = 'stockfish_device_score_v1';
 const DEVICE_SCORE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const REFERENCE_DEVICE_SCORE = 150000;
+// Effective score (deviceScore * sqrt(threads)) of a typical mid-range device
+// at which the engine is given exactly BASE_MOVE_TIME_MS to think. Devices
+// below it get proportionally more time, devices above it get less. Modern
+// phones land below this number, modern desktops above it.
+const REFERENCE_DEVICE_SCORE = 1000000;
 
 function stockfish_load() {
   if (!stockfish) {
@@ -90,10 +98,23 @@ function getDeviceScore() {
 
 function getCalibratedMoveTime() {
     let deviceScore = getDeviceScore();
-    let threadFactor = Math.sqrt(getStockfishThreadCount());
+    let threads = getStockfishThreadCount();
+    // Stockfish scales sub-linearly with threads; sqrt() is a coarse proxy.
+    let threadFactor = Math.sqrt(threads);
     let effectiveScore = Math.max(1, deviceScore * threadFactor);
-    let moveTime = Math.round(BASE_MOVE_TIME_MS * REFERENCE_DEVICE_SCORE / effectiveScore);
-    return clamp(moveTime, MIN_MOVE_TIME_MS, MAX_MOVE_TIME_MS);
+    // Equalize engine strength across devices: total work done ~=
+    // movetime * effectiveScore, so we hold that constant at
+    // BASE_MOVE_TIME_MS * REFERENCE_DEVICE_SCORE. Slower devices get more
+    // wall-clock time, faster devices get less.
+    let rawMoveTime = Math.round(BASE_MOVE_TIME_MS * REFERENCE_DEVICE_SCORE / effectiveScore);
+    let clampedMoveTime = clamp(rawMoveTime, MIN_MOVE_TIME_MS, MAX_MOVE_TIME_MS);
+    console.log(
+        `Stockfish calibration: deviceScore=${deviceScore} ops/ms, threads=${threads}, ` +
+        `threadFactor=${threadFactor.toFixed(2)}, effectiveScore=${Math.round(effectiveScore)}, ` +
+        `referenceScore=${REFERENCE_DEVICE_SCORE}, rawMoveTime=${rawMoveTime}ms, ` +
+        `clampedMoveTime=${clampedMoveTime}ms`
+    );
+    return clampedMoveTime;
 }
 
 function stockfish_start(fen, rating, customSkillLevel = null) {
