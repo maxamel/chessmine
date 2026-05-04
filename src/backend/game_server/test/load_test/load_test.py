@@ -69,12 +69,10 @@ def test(results: list, index: int, players_per_thread: int, endpoint: str, redi
                     if move_hash not in util.seen_moves and util.color != the_move.get('color') and util.line_index < len(lines):
                         util.seen_moves.add(move_hash)
                         try:
-                            if not util.last_heartbeat or time.time() - util.last_heartbeat > 3:
-                                # heartbeat only in case of no prior heartbeats or previous heartbeat was over 3 seconds ago
-                                sio.emit('/api/heartbeat', {'checkin': True,
-                                                            'data': {'sid': util.player_sid,
-                                                                     'preferences': {
-                                                                         'time_control': '5+0'}}},
+                            if not util.last_heartbeat or time.time() - util.last_heartbeat > 5:
+                                # short heartbeat only when no prior or previous one was over 5 seconds ago
+                                sio.emit('/api/heartbeat',
+                                         {'data': {'sid': util.player_sid, 'type': 'short'}},
                                          namespace='/connect')
                                 util.last_heartbeat = time.time()
                             # The relation between seen_moves and line_index follow a specific formula.

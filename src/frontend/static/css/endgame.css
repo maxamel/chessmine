@@ -311,6 +311,8 @@ body.site-page.game-page .endgame-box {
   touch-action: none;
   user-select: none;
   pointer-events: auto;
+  /* enable container query units (cqi) for fluid text inside the box */
+  container-type: inline-size;
 }
 
 body.site-page.game-page #win-box,
@@ -359,7 +361,7 @@ body.site-page.game-page .experiment {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(32px, 10vw, 50px);
+  font-size: clamp(28px, 18cqi, 50px);
   line-height: 1;
 }
 
@@ -369,31 +371,69 @@ body.site-page.game-page .endgame {
   line-height: 1;
 }
 
+/* Message zone is bounded both top and bottom so wrapped text cannot
+   bleed into the rematch button area on small screens. */
 body.site-page.game-page .message {
-  width: calc(100% - 16px);
-  left: 8px;
-  top: 42%;
+  position: absolute;
+  top: 50%;
+  bottom: 26%;
+  left: 6px;
+  right: 6px;
+  width: auto;
   height: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  text-align: center;
 }
 
 body.site-page.game-page .endgame-box .alert {
-  font-size: 0.78em;
-  letter-spacing: 2px;
+  margin: 0;
+  padding: 0;
+  font-size: clamp(10px, 7cqi, 15px);
+  letter-spacing: clamp(0.5px, 0.6cqi, 2px);
+  line-height: 1.1;
 }
 
 body.site-page.game-page .endgame-box .paragraph_style {
   margin: 4px 0 0;
-  font-size: 0.78em;
+  padding: 0 2px;
+  font-size: clamp(8px, 5.2cqi, 12px);
+  letter-spacing: clamp(0px, 0.3cqi, 1px);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
+/* Anchor the rematch button to the bottom of the box so the message above
+   can wrap to multiple lines without overlapping it. Center via left/width
+   (not a transform) so the existing "scale" glow animation and :hover
+   scale don't conflict with horizontal centering. */
 body.site-page.game-page .button-box {
-  width: 62%;
-  height: 16%;
-  left: 19%;
-  top: 78%;
+  position: absolute;
+  left: 15%;
+  top: auto;
+  bottom: 6%;
+  width: 70%;
+  height: auto;
+  min-height: 28px;
+  padding: 6px 8px;
   border-radius: 14px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+body.site-page.game-page .button-box .rematch {
+  margin: 0;
+  padding: 0;
+  font-size: clamp(11px, 7cqi, 16px);
+  letter-spacing: clamp(1px, 0.6cqi, 3px);
+  line-height: 1;
 }
 
 @media screen and (max-width: 767px) {
@@ -401,28 +441,20 @@ body.site-page.game-page .button-box {
   body.site-page.game-page #lose-box,
   body.site-page.game-page #draw-box,
   body.site-page.game-page #abort-box {
-    width: min(52%, 200px);
-    height: min(52%, 200px);
+    width: min(60%, 220px);
+    height: min(60%, 220px);
     border-radius: 18px;
   }
 
   body.site-page.game-page .face,
   body.site-page.game-page .face2,
   body.site-page.game-page .face3 {
-    width: 28%;
-    height: 28%;
-    top: 24%;
-    left: 36%;
-  }
-
-  body.site-page.game-page .face2 {
-    font-size: clamp(30px, 9vw, 46px);
+    width: 24%;
+    height: 24%;
   }
 
   body.site-page.game-page .shadow {
-    width: 26%;
-    height: 4%;
-    left: 37%;
-    top: 44%;
+    width: 22%;
+    height: 3.5%;
   }
 }

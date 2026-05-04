@@ -143,15 +143,29 @@ def play(payload):
     return response.dst_sid
 
 
+def _push_game_state(sid):
+    """Emit a 'game' event to `sid` with their current authoritative game
+    state. Used by handlers that already know they need to re-sync the
+    client (e.g. after a rematch is agreed)."""
+    response = game_server.get_player_game_state(sid)
+    if response is None or not response.extra_data or "game" not in response.extra_data:
+        return
+    socketio.emit("game", {'color': response.src_color, 'game': response.extra_data["game"]}, namespace='/connect', room=sid)
+
+
 @socketio.on('/api/heartbeat', namespace='/connect')
 def heartbeat(payload):
     try:
+        # Long heartbeats already update LAST_SEEN inside game_server.heartbeat.
+        # Short heartbeats are themselves the liveness signal.
         response = game_server.heartbeat(payload)
         join_room(response.dst_sid)
         if not response.extra_data:
             return {}
         elif "game" not in response.extra_data:
             return response.extra_data
+        # Long heartbeat with full game state: push via "game" event so the
+        # rest of the client's game-event pipeline handles it uniformly.
         socketio.emit("game", {'color': response.src_color, 'game': response.extra_data["game"]}, namespace='/connect', room=response.dst_sid)
         return {}
     except Exception as e:
@@ -162,7 +176,11 @@ def heartbeat(payload):
 @socketio.on('/api/move', namespace='/connect')
 def move(payload):
     send_to, data = game_server.move(payload)
-    if send_to is None:     # quitting due to game over/bad move
+    if send_to == 'illegal':
+        # Reject the move and hand the sender the authoritative state so they
+        # can roll back the speculative move locally — no heartbeat resync needed.
+        return data
+    if send_to is None:     # game already ended or move arrived after timeout
         return False
     origin_sid = data.pop('sid', None)
     socketio.emit("move", data, namespace='/connect', room=send_to)
@@ -197,10 +215,16 @@ def rematch(payload):
     response = game_server.rematch(payload)
     if response is None:     # quitting due to game over/bad move
         return False
-    else:
-        socketio.emit("rematch", {"color": response.src_color, "flag": response.game_status_detail.value}, namespace='/connect', room=response.dst_sid)
-        # send back to sender in case he has more than one page open
-        socketio.emit("rematch", {"color": response.src_color, "flag": response.game_status_detail.value}, namespace='/connect', room=response.src_sid)
+    socketio.emit("rematch", {"color": response.src_color, "flag": response.game_status_detail.value}, namespace='/connect', room=response.dst_sid)
+    # send back to sender in case he has more than one page open
+    socketio.emit("rematch", {"color": response.src_color, "flag": response.game_status_detail.value}, namespace='/connect', room=response.src_sid)
+    if response.game_status_detail == GameStatusDetail.REMATCH_AGREED:
+        # The new game has already been created synchronously by
+        # game_server.rematch -> force_players_match. Push the full game state
+        # to both players so the client doesn't have to fire a long heartbeat
+        # to learn the new game exists.
+        _push_game_state(response.src_sid)
+        _push_game_state(response.dst_sid)
     return True
 
 

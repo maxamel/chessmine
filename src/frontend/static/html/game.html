@@ -378,12 +378,14 @@
                         <div id="gameActionBar" class="gameActionBar" aria-label="Game actions">
                             <div id="resignButton" class="gameButton myButton">Resign</div>
                             <div id="drawButton" class="gameButton myButton">Draw</div>
-                            <div id="drawOffer" class="drawOffer">
-                                <div id="drawOfferedButton" class="myButtonClone dropButton nav-item submenu">Draw
-                                    <ul id="droppedDrawOffer" class="droppedPane">
-                                        <li id="acceptDraw" class="nav-item submenu dropped"><a class="sub-nav-link" href="#">Accept</a></li>
-                                        <li id="declineDraw" class="nav-item submenu dropped"><a class="sub-nav-link" href="#">Decline</a></li>
-                                    </ul>
+                            <div id="drawOffer" class="drawOffer" role="group" aria-label="Draw offer received">
+                                <button type="button" id="drawOfferedButton" class="gameButton myButton drawOfferToggle" aria-haspopup="true" aria-expanded="false" aria-controls="droppedDrawOffer">
+                                    <span class="drawOfferToggleLabel">Draw?</span>
+                                    <span class="drawOfferToggleCaret" aria-hidden="true">&#9662;</span>
+                                </button>
+                                <div id="droppedDrawOffer" class="drawOfferMenu" role="menu" aria-hidden="true">
+                                    <button type="button" id="acceptDraw" class="drawOfferOption drawOfferAccept" role="menuitem">Accept</button>
+                                    <button type="button" id="declineDraw" class="drawOfferOption drawOfferDecline" role="menuitem">Decline</button>
                                 </div>
                             </div>
                             <div id="abortButton" class="gameButton myButton">Abort</div>

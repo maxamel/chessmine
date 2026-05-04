@@ -26,6 +26,13 @@ current_milli_time = lambda: int(round(time.time() * 1000))
 
 lgr = get_logger(prefix="game_server", path="/var/log/server.log")
 
+# Heartbeat protocol constants
+HEARTBEAT_TYPE_SHORT = "short"   # lightweight liveness ping (cheap, frequent)
+HEARTBEAT_TYPE_LONG = "long"     # full game-state sync (initial load / visibility resume)
+# Rival is considered disconnected if we haven't heard from them in this window.
+# Tuned in tandem with the client's 5s heartbeat interval + visibility pause.
+RIVAL_DISCONNECT_THRESHOLD_MS = 15000
+
 
 class GameServer:
 
@@ -151,6 +158,7 @@ class GameServer:
     def rematch(self, payload):
         # Rematch request
         # Return the offeree, offeror color
+        self.bump_last_seen(payload)
         data = payload["data"]
         sid = data["sid"]
         flag = data["flag"]
@@ -174,8 +182,10 @@ class GameServer:
                 if player_info.color == WHITE:
                     sid1 = rival_info.sid
                     sid2 = sid
-                my_thread = threading.Thread(target=force_players_match, args=(sid1, sid2, session.preferences['time_control']))
-                my_thread.start()
+                # Synchronous so the new game exists before we return — the
+                # /api/rematch handler can then push "game" to both players
+                # directly instead of forcing the client to re-pull.
+                force_players_match(sid1, sid2, session.preferences['time_control'])
                 res = ServerResponse(dst_sid=rival_info.sid, src_sid=sid, src_color=player_info.color, dst_color=rival_info.color,
                                      game_status_detail=GameStatusDetail.REMATCH_AGREED)
                 lgr.info("Rematch agreed between players {},{}".format(sid1, sid2))
@@ -203,6 +213,7 @@ class GameServer:
     def draw(self, payload):
         # Draw offer or Draw response
         # Return the Response object
+        self.bump_last_seen(payload)
         data = payload["data"]
         sid = data["sid"]
         flag = data["flag"]
@@ -248,6 +259,7 @@ class GameServer:
         return res
 
     def resign(self, payload):
+        self.bump_last_seen(payload)
         data = payload["data"]
         sid = data["sid"]
         player_info = self.redis.get_player_mapping(sid)
@@ -274,6 +286,7 @@ class GameServer:
 
         :return: ServerResponse with the abort info
         """
+        self.bump_last_seen(payload)
         data = payload["data"]
         sid = data["sid"]
         player_info = self.redis.get_player_mapping(sid)
@@ -301,9 +314,14 @@ class GameServer:
     def move(self, payload: dict[str, dict[str, str]]):
         '''
         :param payload: the move as recorded by user
-        :return: sid of the player to send this move to and the move data slightly changed
+        :return: tuple of (send_to, data) where:
+                  - send_to == <rival sid> : move accepted; broadcast `data` as "move"
+                  - send_to == 'illegal'   : move rejected; return `data` (state dict) to sender
+                                             so client can resync without a heartbeat
+                  - send_to is None        : game already ended / late move; drop silently
         '''
         start = time.time()
+        self.bump_last_seen(payload)
         sid = payload["sid"]
         player_info: PlayerMapping = self.redis.get_player_mapping(sid)
         if self.redis.get_game_status(game_id=player_info.game_id) == GameStatus.ENDED.value:
@@ -330,7 +348,18 @@ class GameServer:
         if move["color"] != player_info.color[0] or get_turn_from_fen(board.fen()) != player_info.color or not board.is_legal(the_move):
             lgr.error("Illegal move {} by player {} in game {}".format(move, player_info.sid, player_info.game_id))
             self._alert(f"[chessmine] Illegal move by player {player_info.sid}")
-            return None, None
+            # Return authoritative state so the client can roll back its
+            # speculative move (typically a premove) without a full resync.
+            rival_info = self.redis.get_player_mapping(player_info.opponent)
+            illegal_state = {
+                "illegal": True,
+                "fen": board.fen(),
+                "turn": get_turn_from_fen(board.fen()),
+                "your_color": player_info.color,
+                "remaining": int(player_info.time_remaining) if player_info.time_remaining != 'None' else None,
+                "other_remaining": int(rival_info.time_remaining) if rival_info and rival_info.time_remaining != 'None' else None,
+            }
+            return 'illegal', illegal_state
         board.push(the_move)
 
         canceled = self.redis.cancel_game_timeout(game_id=game_id)
@@ -498,23 +527,68 @@ class GameServer:
         ser_res = ServerResponse(dst_sid=player.sid, extra_data={'user': player.to_dict()})
         return ser_res
 
+    def bump_last_seen(self, payload: dict) -> None:
+        '''
+        Refresh LAST_SEEN for any /api/* call that carries a player sid.
+        Active play (moves, draws, rematch offers, etc.) thus counts as
+        liveness and we don't have to rely on the periodic short heartbeat
+        while the user is engaged. The sid is extracted defensively from
+        the payload — a missing or malformed payload is silently ignored
+        so this can never break the actual game-action handler that calls
+        it. No-op if the player isn't in a game mapping.
+        '''
+        try:
+            sid = None
+            if isinstance(payload, dict):
+                if isinstance(payload.get("data"), dict):
+                    sid = payload["data"].get("sid")
+                sid = sid or payload.get("sid")
+            if not sid:
+                return
+            if self.redis.is_player_mapping_exists(sid):
+                self.redis.set_player_mapping_value(sid, LAST_SEEN, current_milli_time())
+        except Exception as e:
+            lgr.error(f"Failed to bump LAST_SEEN: {e}")
+
+    def get_player_game_state(self, sid: str) -> Union[ServerResponse, None]:
+        '''
+        Build the full game-state ServerResponse for `sid` so handlers outside
+        the heartbeat path (e.g. the rematch handler) can push the "game"
+        event directly to a client without forcing them to re-pull.
+        '''
+        if not sid:
+            return None
+        player = self.redis.get_player_session(sid)
+        if player is None:
+            return None
+        if not self.redis.is_player_mapping_exists(sid):
+            return None
+        return self._get_player_game(player)
+
     def heartbeat(self, payload: dict[str, dict[str, str]]) -> ServerResponse:
         '''
-        This method is called by client in two cases:
-        1) A periodic keepalive ("checkin")
-        2) A request to pull entire game data
-        If player's sid is unknown
-        :param payload: the cookie as sent by player
-        :return: ServerResponse with sid of recepient player in case of periodic call and full game data in case of full heartbeat request
-        :raises: ValueError if player's sid is unknown
+        Single heartbeat event with two payload variants distinguished by `type`:
+          - "short": lightweight liveness ping. Refreshes LAST_SEEN and reports
+                     rival_connect_status. Sent every 5s while the tab is visible.
+          - "long":  full game-state sync. Sent on initial page load and on
+                     visibility resume to recover any state missed while the tab
+                     was suspended.
+        Both variants only need {sid, type} in the data dict; the server already
+        has the session in Redis from /api/play or /api/invite.
+        :raises: ValueError if the sid is unknown or the player has no game/search in progress
         '''
-        cookie = payload["data"]
-        if not cookie or cookie == 'null' or not self.redis.is_player_session_exists(cookie["sid"]):
-            lgr.error("Unrecognized heartbeat payload: {}".format(cookie))
-            raise ValueError("Unrecognized entity hearbeated us")
+        data = payload["data"]
+        if not data or data == 'null':
+            lgr.error("Empty heartbeat payload")
+            raise ValueError("Empty heartbeat payload")
+        sid = data.get("sid")
+        if not sid or not self.redis.is_player_session_exists(sid):
+            lgr.error("Unrecognized heartbeat payload: {}".format(data))
+            raise ValueError("Unrecognized entity heartbeated us")
+        htype = data.get("type", HEARTBEAT_TYPE_SHORT)
         curr_time = current_milli_time()
-        if "checkin" in cookie:
-            sid = cookie["sid"]
+
+        if htype == HEARTBEAT_TYPE_SHORT:
             rival_connect_status = None
             if self.redis.is_player_mapping_exists(sid):    # There is a game in progress
                 self.redis.set_player_mapping_value(sid, LAST_SEEN, curr_time)
@@ -523,18 +597,25 @@ class GameServer:
                 if rival_last_seen == 'None':   # rival is an engine
                     rival_connect_status = ConnectStatus.CONNECTED.value
                 else:
-                    rival_connect_status = ConnectStatus.CONNECTED.value if curr_time-int(rival_last_seen) < 10000 else ConnectStatus.DISCONNECTED.value
+                    rival_connect_status = (
+                        ConnectStatus.CONNECTED.value
+                        if curr_time - int(rival_last_seen) < RIVAL_DISCONNECT_THRESHOLD_MS
+                        else ConnectStatus.DISCONNECTED.value
+                    )
             return ServerResponse(dst_sid=sid, extra_data={"rival_connect_status": rival_connect_status})
 
-        player = self.get_player_from_cookie(cookie)
-        lgr.debug("Player {} requested full heartbeat".format(player.sid))
-        if self.redis.is_player_mapping_exists(player.sid):
-            self.redis.set_player_mapping_value(player.sid, LAST_SEEN, curr_time)
+        # HEARTBEAT_TYPE_LONG: full game-state sync.
+        player = self.redis.get_player_session(sid)
+        if player is None:
+            raise ValueError("Player session disappeared mid-heartbeat: {}".format(sid))
+        lgr.debug("Player {} requested long heartbeat".format(sid))
+        if self.redis.is_player_mapping_exists(sid):
+            self.redis.set_player_mapping_value(sid, LAST_SEEN, curr_time)
             return self._get_player_game(player)
-        else:       # We don't have a mapping yet. Probably waiting for match (otherwise raise an error)
-            if self.redis.is_player_in_search_pool(player.sid):
-                return ServerResponse(dst_sid=player.sid)
-            raise ValueError("No game in progress and no game search in progress. Should not be heartbeating")
+        search_pool_name = f"search_pool_{player.preferences['time_control'].replace('+', '_')}"
+        if self.redis.is_player_in_search_pool(search_pool_name, sid):
+            return ServerResponse(dst_sid=sid)
+        raise ValueError("No game in progress and no game search in progress. Should not be heartbeating")
 
     def _get_player_game(self, player: Player) -> ServerResponse:
         mapping = self.redis.get_player_mapping(player.sid)

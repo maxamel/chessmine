@@ -667,14 +667,20 @@ $(document).ready(function () {
                 var abort = document.getElementById("abortButton");
                 abort.addEventListener("click", abortAction);
 
-                var offeredDraw = document.getElementById("drawOffer");
+                var offeredDraw = document.getElementById("drawOfferedButton");
                 offeredDraw.addEventListener("click", offeredDrawAction);
 
                 var acceptDraw = document.getElementById("acceptDraw");
-                acceptDraw.addEventListener("click", drawAction);
+                acceptDraw.addEventListener("click", function (ev) {
+                    ev.stopPropagation();
+                    drawAction(ev);
+                });
 
                 var declineDraw = document.getElementById("declineDraw");
-                declineDraw.addEventListener("click", declineDrawAction);
+                declineDraw.addEventListener("click", function (ev) {
+                    ev.stopPropagation();
+                    declineDrawAction(ev);
+                });
                 attached_listeners = true;
             }
 
@@ -1063,10 +1069,16 @@ $(document).ready(function () {
 
         function offeredDrawAction(x) {
             var inner_div = document.getElementById("droppedDrawOffer");
-            if (inner_div.style.display !== "none")
-                inner_div.style.display = "none";
-            else
-                inner_div.style.display = "block"
+            var toggle = document.getElementById("drawOfferedButton");
+            // Treat anything other than an explicit "block" as closed so the
+            // first click after the menu becomes visible always opens it
+            // (the default CSS state is display:none with no inline style).
+            var isOpen = inner_div.style.display === "block";
+            inner_div.style.display = isOpen ? "none" : "block";
+            inner_div.setAttribute("aria-hidden", String(isOpen));
+            if (toggle) {
+                toggle.setAttribute("aria-expanded", String(!isOpen));
+            }
         }
 
         function resignAction(x) {
@@ -1130,19 +1142,17 @@ $(document).ready(function () {
             // Got my own rematch offer back
             if (ans.flag == 4) {    // I offered rematch
                 changeRematchButton('disabled')
-            } else if (ans.flag == 5) {    // Rematch agreed
-                heartbeatOK = false;
-                heartbeat(true);
             }
+            // flag == 5 (agreed): server pushes the new "game" event directly,
+            // no client-side resync needed.
         } else {
             if (ans.flag == 4) {    // Rematch offered to me
                 changeRematchButton('glow');
             } else if (ans.flag == 6) {    // Rematch declined
                 changeRematchButton('disabled');
-            } else if (ans.flag == 5) {    // Rematch agreed
-                heartbeatOK = false;
-                heartbeat(true);
             }
+            // flag == 5 (agreed): server pushes the new "game" event directly,
+            // no client-side resync needed.
         }
     });
 
@@ -1228,9 +1238,24 @@ $(document).ready(function () {
                 };
                 socket.emit("/api/move", json, function (ret) {
                     updateLastCall();
-                    if (ret == null) {      // In case this move is illegal we should abort
+                    if (ret && ret.illegal) {
+                        // Server rejected the premove. Roll back the
+                        // speculative chess.js move and re-render from the
+                        // authoritative FEN — no full heartbeat resync needed.
                         game.undo();
-                        heartbeat(true);
+                        futureMoveData = null;
+                        if (ret.fen) {
+                            try {
+                                game.load(ret.fen);
+                            } catch (e) {
+                                console.warn("Failed to load authoritative fen after illegal move", e);
+                            }
+                            resetBoard(null);
+                        }
+                        return;
+                    }
+                    if (ret == null || ret === false) {  // game already ended / late move
+                        game.undo();
                         futureMoveData = null;
                         return;
                     }
@@ -1256,10 +1281,38 @@ $(document).ready(function () {
         }
     });
 
+    var heartbeatIntervalId = null;
+    var HEARTBEAT_INTERVAL_MS = 5000;
+    var HEARTBEAT_THROTTLE_MS = 5000;
+    var HEARTBEAT_TYPE_SHORT = "short";
+    var HEARTBEAT_TYPE_LONG = "long";
+
     function startHeartbeatLoop() {
         heartbeat();
-        setInterval(heartbeat, 3000, false);
+        stopHeartbeatLoop();
+        heartbeatIntervalId = setInterval(heartbeat, HEARTBEAT_INTERVAL_MS);
     }
+
+    function stopHeartbeatLoop() {
+        if (heartbeatIntervalId !== null) {
+            clearInterval(heartbeatIntervalId);
+            heartbeatIntervalId = null;
+        }
+    }
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "hidden") {
+            // Pause the loop while the tab is backgrounded — the browser may
+            // throttle timers anyway, and we don't want stale checkins on resume.
+            stopHeartbeatLoop();
+            return;
+        }
+        // On resume, the socket may have been suspended and we may have missed
+        // game events. Force a long sync to catch up, then restart the loop.
+        heartbeat(HEARTBEAT_TYPE_LONG);
+        stopHeartbeatLoop();
+        heartbeatIntervalId = setInterval(heartbeat, HEARTBEAT_INTERVAL_MS);
+    });
 
     // For Invite Friend guest (non-host), we must first register via /api/invite with waiting_id
     if (waitingId && inviteRole !== "host") {
@@ -1872,32 +1925,45 @@ $(document).ready(function () {
         }, 120);
     });
 
-    function heartbeat(force) {
-        var d = new Date();
-        console.log("Calling heartbeat at " + d.toLocaleTimeString() + " with hearbeatOK=" + heartbeatOK + " and force=" + force);
-        if (!force) {
-            var now = new Date().getTime();
-            if (now - last_call < 3000) { // In case server has already been contacted in past 3 secs
+    function heartbeat(type) {
+        // Default behavior:
+        //   - first call (heartbeatOK=false) -> "long" to fetch full game state
+        //   - subsequent calls               -> "short" liveness ping
+        // Callers can pass HEARTBEAT_TYPE_LONG explicitly to force a full sync
+        // (e.g. on visibilitychange resume).
+        if (type !== HEARTBEAT_TYPE_SHORT && type !== HEARTBEAT_TYPE_LONG) {
+            type = heartbeatOK ? HEARTBEAT_TYPE_SHORT : HEARTBEAT_TYPE_LONG;
+        }
+
+        // Throttle "short" pings against any recent /api/* traffic — server now
+        // bumps LAST_SEEN on every authenticated call, so an active player
+        // doesn't need a redundant checkin on top.
+        if (type === HEARTBEAT_TYPE_SHORT && last_call != null) {
+            var now = Date.now();
+            if (now - last_call < HEARTBEAT_THROTTLE_MS) {
                 return;
             }
         }
+
         load_cookies();
-        var dict = {}
-        if (last_call == null || force || !heartbeatOK) {
-            console.log("Requesting full heartbeat");
-            dict = {"data": cookie_data};
+        if (player_id == null) {
+            return;
         }
-        else {
-            var json = {
-                "sid": player_id,
-                "checkin": true
-            };
-            dict = {"data": json};
-        }
-        socket.emit("/api/heartbeat", dict, function (ans) {
+
+        var d = new Date();
+        console.log("Calling heartbeat at " + d.toLocaleTimeString() + " type=" + type + " heartbeatOK=" + heartbeatOK);
+
+        var payload = { "data": { "type": type, "sid": player_id } };
+        socket.emit("/api/heartbeat", payload, function (ans) {
             updateLastCall();
+            // NOTE: heartbeatOK is intentionally NOT set here. It's set inside
+            // socket.on("game") once a game has actually been loaded — that's
+            // what flips future default heartbeats from "long" to "short". An
+            // empty {} ack from a player still in the matchmaking pool must
+            // keep us issuing long heartbeats until the game arrives.
             if (ans) {
-                console.log("Got heartbeat response " + JSON.stringify(ans))
+                console.log("Got heartbeat response " + JSON.stringify(ans));
+                emptyHeartbeats = 0;
                 document.getElementById("gameBox").style.display = "flex";
                 var connect_icons = document.getElementsByClassName("dottop");
                 if (ans.rival_connect_status === 2) {
@@ -2028,9 +2094,23 @@ $(document).ready(function () {
     function onPreMoveSet(source, target) {
         if (source !== target) {
             futureMoveData = {from: source, to: target};
-            const moves = game.moves();
-            const movesToTarget = moves.filter(move => move.to === target);
-            moves = movesToTarget.length > 0 ? movesToTarget : moves
+            let moves = game.moves({ verbose: true });
+            // A pawn pushing forward needs the destination square to be empty,
+            // so we must NOT pick an opponent reply that lands on it (which
+            // would falsely flag the push as blocked). On a 2-square push the
+            // pawn also passes through an intermediate square, which must be
+            // empty too. For every other piece we keep the original heuristic
+            // of preferring replies that land on `target`, which lets
+            // capture-style premoves be validated.
+            const sourcePiece = game.get(source);
+            const isPawnForwardPush = sourcePiece && sourcePiece.type === 'p' && source[0] === target[0];
+            const intermediateSquare = isPawnForwardPush && Math.abs(parseInt(source[1]) - parseInt(target[1])) === 2
+                ? source[0] + (parseInt(source[1]) + parseInt(target[1])) / 2
+                : null;
+            const filtered = isPawnForwardPush
+                ? moves.filter(move => move.to !== target && move.to !== intermediateSquare)
+                : moves.filter(move => move.to === target);
+            moves = filtered.length > 0 ? filtered : moves
             const randomMove = moves[Math.floor(Math.random() * moves.length)];
             game.move(randomMove);
             try {
@@ -2090,14 +2170,28 @@ $(document).ready(function () {
 
             socket.emit("/api/move", json, function (ret) {
                 updateLastCall();
+                console.log("Answer from api/move " + JSON.stringify(ret));
+                if (ret && ret.illegal) {
+                    // Server rejected the move. Roll back the speculative
+                    // chess.js move and re-render from authoritative FEN.
+                    game.undo();
+                    if (ret.fen) {
+                        try {
+                            game.load(ret.fen);
+                        } catch (e) {
+                            console.warn("Failed to load authoritative fen after illegal move", e);
+                        }
+                        resetBoard(null);
+                    }
+                    return;
+                }
                 insertMove(move);
                 highlight_check_mate();
-                console.log("Answer from api/move " + ret);
                 if (!game_over) {
                     if (captured){
                         resetBoard(move);
                     }
-                    if (ret.remaining) {
+                    if (ret && ret.remaining) {
                         discardTimeInterval('B');
                         setTime("clockdivB", ret["other_remaining"]);
                         initializeClock("clockdivA", ret["remaining"]);
