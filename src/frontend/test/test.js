@@ -41,7 +41,7 @@ describe('test websocket connectivity', () => {
       socket.emit("/api/play", play, (response) => {
         console.log("play api called " + response)
         setTimeout(() => {
-          const json = { "data": { "sid": response, "checkin": true } };
+          const json = { "data": { "sid": response, "type": "short" } };
           socket.emit("/api/heartbeat", json, (response) => {
             console.log("heartbeat api called " + JSON.stringify(response));
             assert.deepEqual(response, {"rival_connect_status":2});

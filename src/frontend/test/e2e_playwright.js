@@ -9,11 +9,20 @@
  *   4. Verify game board is visible
  *   5. Play 3 moves (e2-e4, e7-e5, d2-d4), measuring server round-trip latency for each
  *   6. Verify all move latencies are within threshold
- *   7. White resigns
- *   8. Verify white sees lose-box and black sees win-box
- *   9. Verify resign message text
- *  10. Both players accept a rematch
- *  11. Verify the rematched board is fresh, replay the same flow, and verify endgame again
+ *   7. Verify the resign button shows the gold-gradient hover effect
+ *   8. White resigns
+ *   9. Verify white sees lose-box and black sees win-box
+ *  10. Verify resign message text
+ *  11. Both players accept a rematch (rematch button glow asserted in waitForRematchOffer)
+ *  12. Game 2 (rematched): play 3 moves
+ *  13. White hovers its own #drawButton → gold-gradient hover
+ *  14. White offers draw → its draw button goes "disabled"
+ *  15. Black sees #drawOffer toggle pulsing → assert pulse animation + hover gold gradient
+ *  16. Black opens the menu → assert Accept hover and Decline hover (both gold gradient)
+ *  17. Black clicks Decline → both clients re-enable their own draw button
+ *  18. Black offers draw → black's draw button goes "disabled", white sees pulsing toggle
+ *  19. White opens the menu, clicks Accept
+ *  20. Both pages show #conty with #draw-box visible and "Draw by agreement" text
  *
  * Exit 0 on pass, exit 1 on any failure.
  * Screenshots are saved to SCREENSHOT_DIR on any error step.
@@ -48,13 +57,12 @@ async function screenshot(page, label) {
 /**
  * Seed localStorage with default user preferences before any page script runs.
  *
- * The frontend's load_cookies() reads localStorage.user_prefs and copies it into
- * the cookie_data.preferences sent on every full heartbeat. With an empty
- * localStorage (default for fresh Playwright contexts) the server's session is
- * repeatedly overwritten with empty preferences, which then crashes the
- * server-side rematch-agreed branch when it dereferences
- * session.preferences['time_control']. Real users always have these prefs set,
- * so we replicate that here.
+ * The frontend's header startQuickGame()/startInvite() flows read
+ * localStorage.user_prefs and pass them in the /api/play and /api/invite
+ * payloads, which the server then persists onto the player session. The
+ * rematch-agreed branch later dereferences session.preferences['time_control'],
+ * so a fresh Playwright context with empty localStorage would crash that
+ * branch. Real users always have these prefs set, so we replicate that here.
  */
 async function seedUserPrefs(context) {
   await context.addInitScript(() => {
@@ -320,6 +328,200 @@ async function waitForFreshGameAfterRematch(page, label) {
   console.log(`  [ok]   rematched game ready on ${label}`);
 }
 
+// ─── draw-flow helpers ────────────────────────────────────────────────────────
+
+// CSS variable values from mobile.css. The hover state on .myButton (and on the
+// drawOffer toggle / accept / decline) swaps the navy gradient for this gold
+// gradient, so we verify by looking for both gold rgb values in the computed
+// background-image string.
+const GOLD_RGB        = 'rgb(200, 169, 107)';
+const GOLD_STRONG_RGB = 'rgb(215, 185, 124)';
+
+/**
+ * Hover `selector`, return its computed background-image, then move the mouse
+ * away so other elements aren't accidentally hovered. We park the mouse over
+ * the page top-left (well outside any button hit zone).
+ */
+async function getHoverBackgroundImage(page, selector) {
+  const locator = page.locator(selector);
+  await locator.waitFor({ state: 'visible', timeout: 5000 });
+  await locator.hover({ force: true });
+  // Tiny settle delay so any CSS transition resolves before we read styles.
+  await sleep(150);
+  const bg = await page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    return el ? window.getComputedStyle(el).backgroundImage : '';
+  }, selector);
+  // Park the mouse far from anything interactive.
+  await page.mouse.move(2, 2);
+  await sleep(50);
+  return bg;
+}
+
+async function assertGoldHover(page, selector, label, errors) {
+  const bg = await getHoverBackgroundImage(page, selector);
+  const ok = bg.includes(GOLD_RGB) && bg.includes(GOLD_STRONG_RGB);
+  if (!ok) {
+    errors.push(`${label}: ${selector} hover did not show gold gradient (got "${bg}")`);
+  } else {
+    console.log(`  [ok]   ${label}: ${selector} hover gold gradient ✓`);
+  }
+}
+
+async function waitForDrawButtonActive(page, label) {
+  console.log(`[${label}] Waiting for draw button to be active…`);
+  await page.waitForFunction(
+    () => {
+      const btn = document.getElementById('drawButton');
+      return btn
+        && btn.style.display !== 'none'
+        && parseFloat(btn.style.opacity || '1') >= 1
+        && btn.style.pointerEvents !== 'none';
+    },
+    { timeout: 10000 },
+  );
+}
+
+async function waitForOwnDrawButtonDisabled(page, label) {
+  console.log(`  [wait] own draw button disabled on ${label}…`);
+  await page.waitForFunction(
+    () => {
+      const btn = document.getElementById('drawButton');
+      return btn
+        && btn.style.display !== 'none'
+        && parseFloat(btn.style.opacity || '1') < 1
+        && btn.style.pointerEvents === 'none';
+    },
+    { timeout: 5000 },
+  );
+  console.log(`  [ok]   own draw button disabled on ${label}`);
+}
+
+async function offerDraw(page, label) {
+  await waitForDrawButtonActive(page, label);
+  console.log(`[${label}] Offering draw…`);
+  await page.click('#drawButton');
+  await waitForOwnDrawButtonDisabled(page, label);
+}
+
+/**
+ * Wait until this page receives a draw offer from the rival:
+ *   - #drawButton hidden
+ *   - #drawOffer wrapper visible
+ *   - #drawOfferedButton has the drawOfferPulse animation running
+ */
+async function waitForDrawOfferReceived(page, label) {
+  console.log(`  [wait] draw offer received on ${label}…`);
+  await page.waitForFunction(
+    () => {
+      const wrapper = document.getElementById('drawOffer');
+      const ownBtn  = document.getElementById('drawButton');
+      const toggle  = document.getElementById('drawOfferedButton');
+      if (!wrapper || !toggle) return false;
+      const wrapperVisible = wrapper.style.display !== 'none' && wrapper.style.display !== '';
+      const ownHidden      = !ownBtn || ownBtn.style.display === 'none';
+      const animName       = window.getComputedStyle(toggle).animationName || '';
+      return wrapperVisible && ownHidden && animName.includes('drawOfferPulse');
+    },
+    { timeout: 10000 },
+  );
+  console.log(`  [ok]   draw offer received on ${label} (toggle pulsing)`);
+}
+
+async function verifyDrawToggleHover(page, label, errors) {
+  await assertGoldHover(page, '#drawOfferedButton', `${label} drawOfferedButton`, errors);
+}
+
+/**
+ * Open the draw-offer dropdown, verify Accept and Decline both light up with
+ * the shared gold-gradient hover, then click `action` ("accept" or "decline").
+ */
+async function openDrawMenuAndAct(page, action, label, errors) {
+  console.log(`[${label}] Opening draw-offer menu…`);
+  await page.click('#drawOfferedButton');
+  await page.waitForFunction(
+    () => {
+      const menu = document.getElementById('droppedDrawOffer');
+      return menu && menu.style.display === 'block';
+    },
+    { timeout: 5000 },
+  );
+
+  await assertGoldHover(page, '#acceptDraw', `${label} acceptDraw`, errors);
+  await assertGoldHover(page, '#declineDraw', `${label} declineDraw`, errors);
+
+  const target = action === 'accept' ? '#acceptDraw' : '#declineDraw';
+  console.log(`[${label}] Clicking ${action}…`);
+  await page.click(target);
+}
+
+async function verifyDrawAgreedEndgame(p1, p2, label, errors) {
+  console.log(`[${label}] Verifying draw-agreed endgame on both pages…`);
+
+  for (const [page, who] of [[p1, 'p1'], [p2, 'p2']]) {
+    await page.waitForSelector('#conty', { state: 'visible', timeout: 12000 })
+      .catch(() => { throw new Error(`${label}: endgame overlay (#conty) never appeared on ${who}`); });
+
+    const state = await page.evaluate(() => {
+      const drawBox = document.getElementById('draw-box');
+      const winBox  = document.getElementById('win-box');
+      const loseBox = document.getElementById('lose-box');
+      const title   = document.querySelector('#draw-box .message h1');
+      const message = document.querySelector('#draw-box .message p');
+      return {
+        drawVisible: !!drawBox && drawBox.style.display !== 'none' && drawBox.style.display !== '',
+        winVisible:  !!winBox  && winBox.style.display  !== 'none' && winBox.style.display  !== '',
+        loseVisible: !!loseBox && loseBox.style.display !== 'none' && loseBox.style.display !== '',
+        title:   title   ? title.textContent.trim()   : '',
+        message: message ? message.textContent.trim() : '',
+      };
+    });
+
+    if (!state.drawVisible || state.winVisible || state.loseVisible) {
+      await screenshot(page, `${label}-${who}-draw-endgame-unexpected`);
+      throw new Error(`${label}: ${who} should see only draw-box after agreement (got drawVisible=${state.drawVisible}, winVisible=${state.winVisible}, loseVisible=${state.loseVisible})`);
+    }
+    if (!state.title.toLowerCase().includes('draw')) {
+      errors.push(`${label}: ${who} expected draw-box title to mention "draw", got: "${state.title}"`);
+    }
+    if (!state.message.toLowerCase().includes('agreement')) {
+      errors.push(`${label}: ${who} expected draw-box message to mention "agreement", got: "${state.message}"`);
+    }
+  }
+
+  console.log(`[${label}] Draw-agreed endgame verified ✓`);
+}
+
+async function playDrawFlow(whitePage, blackPage, label, errors) {
+  // 1. White offers; verify white's draw button hover before clicking.
+  await waitForDrawButtonActive(whitePage, `${label} white`);
+  await assertGoldHover(whitePage, '#drawButton', `${label} white drawButton`, errors);
+  await offerDraw(whitePage, `${label} white`);
+
+  // 2. Black sees the offer; verify the toggle pulses and has the gold hover.
+  await waitForDrawOfferReceived(blackPage, `${label} black`);
+  await verifyDrawToggleHover(blackPage, `${label} black`, errors);
+
+  // 3. Black opens the menu and declines. Both Accept/Decline hovers asserted.
+  await openDrawMenuAndAct(blackPage, 'decline', `${label} black`, errors);
+
+  // 4. Both sides return to "draw button active" state. White's offer was
+  //    declined → server sends "draw" event with flag=DRAW_DECLINED to white,
+  //    which calls changeDrawButton('enabled'). On black, the toggle wrapper
+  //    hides and #drawButton becomes available again.
+  await waitForDrawButtonActive(whitePage, `${label} white (after decline)`);
+  await waitForDrawButtonActive(blackPage, `${label} black (after decline)`);
+
+  // 5. Now black offers draw; white sees the offer.
+  await offerDraw(blackPage, `${label} black`);
+  await waitForDrawOfferReceived(whitePage, `${label} white`);
+  await verifyDrawToggleHover(whitePage, `${label} white`, errors);
+
+  // 6. White opens the menu and accepts. End-game overlay should follow.
+  await openDrawMenuAndAct(whitePage, 'accept', `${label} white`, errors);
+  await verifyDrawAgreedEndgame(whitePage, blackPage, label, errors);
+}
+
 // ─── main test ────────────────────────────────────────────────────────────────
 
 async function run() {
@@ -379,10 +581,12 @@ async function run() {
     // Extra breathing room for Chessground to render fully
     await sleep(800);
 
-    // ── 4. First game ─────────────────────────────────────────────────────
+    // ── 4. First game: play, hover-check resign, resign, verify endgame ──
     let colors = await getPagesByColor(page1, page2);
     console.log(`[4] host is ${colors.p1IsWhite ? 'WHITE' : 'BLACK'}`);
     await playOpeningWithLatency(colors.whitePage, colors.blackPage, 'game 1', errors);
+    await waitForResignButtonActive(colors.whitePage, 'game 1 white');
+    await assertGoldHover(colors.whitePage, '#resignButton', 'game 1 white resignButton', errors);
     await resignAndVerifyEndgame(colors.whitePage, colors.blackPage, 'game 1', errors);
 
     // ── 5. Rematch ────────────────────────────────────────────────────────
@@ -400,9 +604,9 @@ async function run() {
     colors = await getPagesByColor(page1, page2);
     console.log(`[5] after rematch host is ${colors.p1IsWhite ? 'WHITE' : 'BLACK'}`);
 
-    // ── 6. Rematched game ─────────────────────────────────────────────────
+    // ── 6. Rematched game: play, then drive the full draw flow ────────────
     await playOpeningWithLatency(colors.whitePage, colors.blackPage, 'game 2 rematch', errors);
-    await resignAndVerifyEndgame(colors.whitePage, colors.blackPage, 'game 2 rematch', errors);
+    await playDrawFlow(colors.whitePage, colors.blackPage, 'game 2 rematch draw', errors);
 
   } catch (err) {
     errors.push(err.message);

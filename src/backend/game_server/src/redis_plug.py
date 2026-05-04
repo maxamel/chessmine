@@ -31,12 +31,6 @@ class RedisPlug:
     def add_players_to_search_pool(self, name: str, player_sids_to_ratings: dict[str, int]):
         return self.get_redis().zadd(name, player_sids_to_ratings)
 
-    def draw_player_from_search_pool(self) -> str:
-        '''
-        :return: sid of a random player
-        '''
-        return self.get_redis().srandmember(self.search_pool)
-
     def remove_players_from_search_pool(self, name, *player_sids):
         '''
         :param player_sids: the players to remove from search pool
@@ -45,8 +39,14 @@ class RedisPlug:
         '''
         return self.get_redis().zrem(name, *player_sids)
 
-    def is_player_in_search_pool(self, player_sid):
-        return self.get_redis().sismember(self.search_pool, player_sid)
+    def is_player_in_search_pool(self, name, player_sid):
+        '''
+        :param name: per-time-control pool key (e.g. "search_pool_5_0"), built
+                     the same way as in add_players_to_search_pool.
+        :param player_sid: the player to check
+        :return: True if player_sid is registered in the given pool
+        '''
+        return self.get_redis().zscore(name, player_sid) is not None
 
     def get_game_status(self, game_id) -> str:
         key = self.game + game_id
